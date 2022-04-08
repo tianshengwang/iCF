@@ -259,39 +259,30 @@ if(mean( round(  HTE_P_iCF_D432$rawP) )<0.001){
 #-------------------------------
 # Variable Importance
 #-------------------------------
-GG_VI <- function(varimp_df, truth_description, legend_para){
-VarImp <- ggplot(varimp_df, aes(y=vars_f, x=impValue))+
-  geom_point(#aes(color = varimp_cf), 
-    size=5) +
-  #scale_color_viridis(name = "value", option = "D",  begin = 0, end = 1,limits=c(0,1))+
-  ylab("Importance Value") + xlab("Variables") +
-  ggtitle( paste(truth_description) , subtitle = #"Variable Importance" 
-  ) + 
-  theme(plot.title    = element_text(color = "black", size=18, face="bold", #hjust = 0.5, 
-                                     vjust=5, margin =ggplot2:: margin(1, 0, 0, 0, "cm")),
-        plot.subtitle = element_text(color = "black", size=16, face="bold" ),
-        axis.title.x  = element_text(color = "black", size=14, face="plain",  hjust=0.5),
-        axis.title.y  = element_text(color = "black", size=14, face="plain",  hjust=0.5),
-        plot.caption  = element_text(color = "black", size=12, face="plain"),
-        axis.text.x   = element_text(color = "black", size=14, face="plain", angle = 0),
-        axis.text.y   = element_text(color = "black", size=14, face="plain", angle = 0)) +
-  theme(legend.position = legend_para) +
+GG_VI <- function(varimp_df, title){
+  VarImp <- varimp_df %>%
+    ggplot() +
+    geom_bar(aes(y=reorder(vars_f, impValue),x=impValue, fill = impValue), stat = 'identity') + 
+    scale_fill_viridis_c(name = "value") +
+    theme_minimal() + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+    labs(
+      title = title,
+      x = 'Importance Value',
+      y= "Variables") +
+    theme(plot.title    = element_text(color = "black", size=18, face="bold", #hjust = 0.5, 
+                                       vjust=5, margin =ggplot2:: margin(0.5, 0, 0, 0, "cm")),
+          plot.subtitle = element_text(color = "black", size=16, face="bold" ),
+          axis.title.x  = element_text(color = "black", size=14, face="plain",  hjust=0.5),
+          axis.title.y  = element_text(color = "black", size=14, face="plain",  hjust=0.5),
+          plot.caption  = element_text(color = "black", size=12, face="plain"),
+          axis.text.x   = element_text(color = "black", size=11, face="plain", angle = 0),
+          axis.text.y   = element_text(color = "black", size=11, face="plain", angle = 0)) 
   
-  geom_text(aes(label=round(varimp_df$impValue, 2)),
-            hjust = -0.5,
-            vjust = -0.5,
-            size = 5
-            )#+
-#highlisght selected important variable in X-axis
-#scale_x_discrete(labels=c("X1" =expression(bold(X1)), 
-#"X3" =expression(bold(X3)),
-#"X8"=expression(bold(X8)),
-#"X2" =expression(bold(X2)), 
-#"X4" =expression(bold(X4)),
-#"X10"=expression(bold(X10)),
-#parse=TRUE))
+  
 return(VarImp)
 }
+
 
 #' Function that shows subgroup Delta Y by subgrooup decisions obtained from each depth of forest (oneCF, iCF, or iCFv) 
 #' @param model_df the df of coefficient (i.e. Delta Y) and its CI  
