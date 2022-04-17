@@ -1,4 +1,9 @@
-
+#############################################################################################
+# Prepare data for 3 prediction models
+# Author: Tiansheng Wang  
+# Last update date:12/6/2021
+# Version: 0.1         
+#############################################################################################\
 #' Function that prepare training or testing data for model selection based on D4,D3,and D2 subgroup decisions 
 #' @param dat the dataset 
 #' @param V_D4_subgroup subgroup decision from depth 4 CF
