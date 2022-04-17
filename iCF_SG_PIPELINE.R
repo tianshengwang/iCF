@@ -1,3 +1,9 @@
+#############################################################################################
+# iCF CV for entire process
+# Author: Tiansheng Wang  
+# Last update date:3/1/2022
+# Version: 0.1         
+#############################################################################################
 iCFCV <- function(K, treeNo, iterationNo, SigLevel){
   s_iCF_CV=Sys.time()
   if (round(HTE_P_cf.raw,1) <= SigLevel){
