@@ -1,3 +1,9 @@
+#############################################################################################
+# subgroup analysis: CATE
+# Author: Tiansheng Wang  
+# Last update date:12/6/2021
+# Version: 0.1         
+#############################################################################################
 library(tidyverse)
 library(broom)
 
@@ -17,7 +23,7 @@ prop.func <- function(x, trt)
 #-----------------------
 #subsetting first!
 #-----------------------
-#' Function that statify pop8AD90EFF|ulation and saved stratified population (subgroup) in a list. 
+#' Function that statify population and saved stratified population (subgroup) in a list. 
 #' If decision is from D4, D3, or D2 tree, then it will always split.
 #' If decision is from truth, then it could be "NA", i.e. no HTE. In such scenario, set condition_F  = "W<100", i.e. ONE "group" for all observations.  
 #' @param decision the final decision obtained from the decision path
