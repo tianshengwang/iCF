@@ -1,5 +1,5 @@
 #############################################################################################
-# MAJORITY VOTEBC6CE50|
+# MAJORITY VOTE
 # Author: Tiansheng Wang  
 # Last update date:12/6/2020
 # Version: 0.1         
