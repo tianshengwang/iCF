@@ -64,10 +64,8 @@ iCFCV <- function(K, treeNo, iterationNo, SigLevel){
 
     set.seed(20160413)
     tt_indicies <- caret::createFolds(y=Train[,1], k= K)
-    #leafsize <<- LEAFSIZE_tune(round(Ntrain/K*(K-1),0), treeNo, iterationNo)
-    leafsize = list(D4=140, 
-                    D3=70,
-                    D2=35)
+    leafsize <<- LEAFSIZE_tune(round(Ntrain/K*(K-1),0), treeNo, iterationNo)
+    #leafsize = list(D4=140, D3=70, D2=35)
     for(f in 1:length(tt_indicies)){
       
       Train_cf <- Train[-tt_indicies[[f]],]
