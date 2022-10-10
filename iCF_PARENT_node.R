@@ -9,10 +9,11 @@
 ########                      III. prepare subpopulation-based majority vote. PART I.
 ######################################################################################################----------------------------------------------
 ######################################################################################################-----------------------------------------------
+# The key idea of this function is backward stagewise method to obtain parent nodes of a upper level (shallower level) until reach node-01 
 #' @param Child_node children nodes of upper level nodes (nodes at a shallower depth)
 #' @param tree_original the list of best trees from iCF (iCF_D4_BT, iCF_D3_BT, iCF_D2_BT)
 #' @param tree the ouput of previous parent level, if parent_level=1 then tree=tree_original 
-#' @param parent_level the level of parent node. The key idea of this function is backward stagewise method to obtain parent nodes of a upper level (shallower level) until reach node-01 
+#' @param parent_level the level of parent node. 
 #' #' #---------------------------------------------------------------------------------------------------------------
 # III. "PARENT" function must run independently, recursivley to get the parent node, so that we can get subgroup decision
 # this is the most imporant and complicated part of the program: subgroup identification based on trees
