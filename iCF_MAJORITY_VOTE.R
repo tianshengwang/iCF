@@ -11,8 +11,9 @@
 #################################################----------------------------------------------
 #
 #' This function count the occurence of each unique element in the reference list 
-#' @param list_ref list of unique trees, tree relaxed (only splitting variables, no splitting values), or subgroups, etc.
-#' @param list_all prepared list (duplicate elements) of trees, tree relaxed, or subgroups, etc.
+#' @param list_ref list of unique trees, 
+(with only splitting variables, no splitting values), or subgroups, etc.
+#' @param list_all prepared list (duplicate elements) of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups, etc.
 #' 
 #' @return The occurency of each element in the reference list
 #'
@@ -66,7 +67,7 @@ MAJORITY_PICK_LEAF <- function (inputlist, leaf_para) {
 }
 
 #' This function check the probability of each unique subgroup in a list 
-#' @param list1 prepared list of trees, tree relaxed, or subgroups
+#' @param list1 prepared list of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups
 #' 
 #' @return The subsetted list that all are identical to reference list.
 #'
@@ -83,7 +84,7 @@ SG_PROBABILITY <- function( list1){
 
 #' This function performs majority vote among best trees from iterative CF 
 #' @param list0 original list of trees
-#' @param list1 prepared list of trees, tree relaxed, or subgroups
+#' @param list1 prepared list of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups
 #' @param list2 only useful for prepared list if by subgroup, then remove node column to count for majority.tree
 #' @param list3 original list of split frequency!
 #' @param truth truth 
@@ -107,7 +108,7 @@ SG_PROBABILITY <- function( list1){
 #split_val_round_posi=split_val_round_posi
 
 MAJORITY_VOTE <- function(list0, #original list of trees
-                          list1, #prepared list of trees, tree relaxed, or subgroups
+                          list1, #prepared list of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups
                           list2, #only useful for prepared list if by subgroup, then remove node column to count for majority.tree
                           list3, #original list of split frequency!
                           truth, 
@@ -153,7 +154,7 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   majority.tree.3rd <- list1_u[[   match(Rfast::nth(N_occur_majority, 3, descending = T), N_occur_majority  )]]  
   #make truth a list (tree_true or tree_true_r)
   truth_list      <- list(truth)
-  #get number of occurrence of truth in list1 (the prepared list of trees, tree relaxed, or subgroups)
+  #get number of occurrence of truth in list1 (the prepared list of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups)
   #N_occur_truth could be 0, e.g. truth = D4 tree, majority is D3 tree.
   N_occur_truth   <-  MAJORITY_COUNT(truth_list, list1)
   #make the top (root) node a list
