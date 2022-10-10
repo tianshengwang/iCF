@@ -343,7 +343,7 @@ MAJORITY_VOTE <- function(list0, #original list of trees
 
 
 
-#' This function finds the majority voted subgroup decision across CV, only apply to vote_D_subgroup!!! not any other list!!! be implemented in iCFCV.
+#' This function finds the majority voted subgroup decision across CV, only apply to vote_D_subgroup!!! not any other list!!! be implemented in iCF_SG_PIPELINE.
 #' @param vote_D_subgroup.L list of vote_D_subgroup across CV
 #' 
 #' @return The majority voted subgroup decision across CV
@@ -372,7 +372,7 @@ CV_SG_MAJORITY <- function(vote_D_subgroup.L){
   return(majority.SG)
 }
 
-#' This function returns the mean bias, i.e., MSE/accuracy value, of those majority voted subgroup decisions across CV
+#' This function returns the mean bias, i.e., MSE/accuracy value, of those majority voted subgroup decisions across CV; Implemented in iCF_SG_PIPELINE.
 #' @param vote_D_subgroup.L list of voted subgroup decisions, of those not majorityed, their MSE will be ignored
 #' @param metric list of metric including RMSE, Rsquared, MAE for continuous variables
 #' @param measure "MSE" or "accuracy"
@@ -453,7 +453,7 @@ CVBIAS_D_MAJORITY <- function(vote_D_subgroup.L, metric, measure){
 
 }
 
-#' This function returns the mean bias measurement (MSE value for continuous or accuracy value for binary) across CV
+#' This function returns the mean bias measurement (MSE value for continuous or accuracy value for binary) across CV; Implemented in iCF_SG_PIPELINE
 #' @param metric list of metric including RMSE, Rsquared, MAE for continuous variables, or 
 #' @param measure "MSE" or "accuracy"
 #' 
