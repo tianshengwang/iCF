@@ -11,7 +11,7 @@
 #################################################----------------------------------------------
 #
 #' This function count the occurence of each unique element in the reference list 
-#' @param list_ref list of unique trees, tree relaxed, or subgroups, etc.
+#' @param list_ref list of unique trees, tree relaxed (only splitting variables, no splitting values), or subgroups, etc.
 #' @param list_all prepared list (duplicate elements) of trees, tree relaxed, or subgroups, etc.
 #' 
 #' @return The occurency of each element in the reference list
@@ -32,7 +32,7 @@ MAJORITY_COUNT <- function(list_ref, list_all){
   return(n_occurence)
 }
 
-#' This function connects if identical or not label to a list and subsetting the list to exclude those not identical to reference list
+#' This function connects if "identical or not" label to a list and subsetting the list to exclude those not identical to reference list
 #' if_ID means if Identical to MAJORITY VOTED or TRUTH
 #' @param standardLIST a label list of being identical or not 
 #' @param inputLIST the list need to be labeled and subsetted 
