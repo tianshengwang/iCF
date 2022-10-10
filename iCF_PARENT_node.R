@@ -103,7 +103,7 @@ if (parent_level==1){
 leaf_node_freq      <- lapply(leaf_node_list,     function(df) as.data.frame( table(df ) ) )                     
 #EXCLUDE "node-01" as it cannot appear in left_child/right child column (making the same row # as )
 leaf_node_freq_woN1 <- lapply(leaf_node_freq,    function(df) df [which(df$df!="node-01" & df$df!="node-00001"),] )    
-#EXCLUDE "node-01" as it cannot appear in left_child/right child column (making the same row # as )
+
 N_freq_woN1_nrow  <- lapply(leaf_node_freq_woN1,    function(df)  nrow(df)  )   
 #Extract node number
 leaf_node_No_L    <- lapply(leaf_node_list,     function(df) df$node_No <- sub('.*-', '', df$node))                                                                    # 
