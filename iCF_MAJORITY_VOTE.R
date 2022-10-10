@@ -133,19 +133,7 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   N_occur_majority <- MAJORITY_COUNT(list1_u, list1)
   #get majority tree structure
   majority.tree <- list1_u[[which.max(N_occur_majority)]]
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+   
   #get majority tree structure, same as above
   majority.tree.1st <- list1_u[[  match(Rfast::nth(N_occur_majority, 1, descending = T), N_occur_majority  )]]
   #get 2nd popular tree structure 
@@ -355,7 +343,7 @@ MAJORITY_VOTE <- function(list0, #original list of trees
 
 
 
-#' This function finds the majority voted subgroup decision across CV, only apply to vote_D_subgroup!!! not any other list!!!
+#' This function finds the majority voted subgroup decision across CV, only apply to vote_D_subgroup!!! not any other list!!! be implemented in iCFCV.
 #' @param vote_D_subgroup.L list of vote_D_subgroup across CV
 #' 
 #' @return The majority voted subgroup decision across CV
