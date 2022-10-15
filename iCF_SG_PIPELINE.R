@@ -4,7 +4,210 @@
 # Last update date:3/1/2022
 # Version: 0.1         
 #############################################################################################
-iCFCV <- function(K, treeNo, iterationNo, SigLevel){
+
+SUBGROUP_PIPLINE<- function(leafsize, treeNo, iterationNo, Ntrain, Train_ID, Test_ID ){
+  
+  s_iCF=Sys.time()
+  
+  if (iterationNo>1){
+    iCF_D4<- iCF(leafsize$D4,  treeNo, iterationNo, Ntrain, "D4",  split_val_round_posi)
+    iCF_D3<- iCF(leafsize$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi) 
+    #when leaf size too small, D2 has this error "Error in aggregate.data.frame(lhs, mf[-1L], FUN = FUN, ...) : no rows to aggregate"
+    #thus to make it auto run, if iCF_D2 has error, then make it equal to iCF_D3 temparily.
+    if ( is.null( tryCatch( iCF(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi), error=function(e){}) ) == TRUE ) {
+      warning("The minimum leaf size is too small for Depth 2 causal forest, need to increase it!")
+      iCF_D2 = iCF_D3
+    } else {
+      iCF_D2 = iCF(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
+    }
+    
+    #best tree dataframe	
+    iCF_D4_BT <<- GET_TREE_L(iCF_D4, 1) 
+    iCF_D3_BT <<- GET_TREE_L(iCF_D3, 1)
+    iCF_D2_BT <<- GET_TREE_L(iCF_D2, 1) 
+    
+    #mean number of node from a causal tree dataframe
+    mean_node_D4 <-round(mean( do.call("rbind" , lapply(iCF_D4_BT, function(df) nrow(df))) ), 0)
+    mean_node_D3 <-round(mean( do.call("rbind" , lapply(iCF_D3_BT, function(df) nrow(df))) ), 0)
+    mean_node_D2 <-round(mean( do.call("rbind" , lapply(iCF_D2_BT, function(df) nrow(df))) ), 0)
+    
+    
+    #best tree list format
+    iCF_D4_BT_L <- GET_TREE_L(iCF_D4, 2) 
+    iCF_D3_BT_L <- GET_TREE_L(iCF_D3, 2)
+    iCF_D2_BT_L <- GET_TREE_L(iCF_D2, 2)
+    
+    
+    #for split frequency, doesn't consider split values		
+    iCF_D4_SF <- GET_TREE_L(iCF_D4, 3)
+    iCF_D3_SF <- GET_TREE_L(iCF_D3, 3)
+    iCF_D2_SF <- GET_TREE_L(iCF_D2, 3)
+    
+    #HTE P value for ALL iteractions of CF
+    HTE_P_iCF_D4 <- HTE_P_extract(iCF_D4_BT, "D4")
+    HTE_P_iCF_D3 <- HTE_P_extract(iCF_D3_BT, "D3")
+    HTE_P_iCF_D2 <- HTE_P_extract(iCF_D2_BT, "D2")
+    
+    HTE_P_D4_median <- 	median(HTE_P_iCF_D4$HTE_P_cf)
+    HTE_P_D3_median <- 	median(HTE_P_iCF_D3$HTE_P_cf)
+    HTE_P_D2_median <- 	median(HTE_P_iCF_D2$HTE_P_cf)
+    
+  } else if (iterationNo==1){
+    
+    iCF_D4 <- oneCF(leafsize$D4,  treeNo, "none", "D4", split_val_round_posi) 
+    iCF_D3 <- oneCF(leafsize$D3,  treeNo, "none", "D3", split_val_round_posi) 
+    iCF_D2 <- oneCF(leafsize$D2,  treeNo, "none", "D2", split_val_round_posi)  
+    
+    #tree b dataframe	
+    iCF_D4_BT <- iCF_D4$besttreelist              
+    iCF_D3_BT <- iCF_D3$besttreelist              
+    iCF_D2_BT <- iCF_D2$besttreelist 
+    #for split frequency		
+    iCF_D4_SF <- list(iCF_D4$d)          
+    iCF_D3_SF <- list(iCF_D3$d)           
+    iCF_D2_SF <- list(iCF_D2$d)
+    
+  }
+  
+  
+  iCF_D4_t  <-PRE_MAJORITY_TREE  (iCF_D4_BT)
+  iCF_D3_t  <-PRE_MAJORITY_TREE  (iCF_D3_BT)
+  iCF_D2_t  <-PRE_MAJORITY_TREE  (iCF_D2_BT)
+  
+  iCF_D4_t_r<-PRE_MAJORITY_TREE_R(iCF_D4_BT)
+  iCF_D3_t_r<-PRE_MAJORITY_TREE_R(iCF_D3_BT)
+  iCF_D2_t_r<-PRE_MAJORITY_TREE_R(iCF_D2_BT)
+  
+  vote_D4_tree       <-MAJORITY_VOTE(iCF_D4_BT,         iCF_D4_t,        iCF_D4_t,        iCF_D4_SF,      tree_true,          tree_true_N1,   tree_true_N123, split_val_round_posi)
+  vote_D3_tree       <-MAJORITY_VOTE(iCF_D3_BT,         iCF_D3_t,        iCF_D3_t,        iCF_D3_SF,      tree_true,          tree_true_N1,   tree_true_N123, split_val_round_posi)
+  vote_D2_tree       <-MAJORITY_VOTE(iCF_D2_BT,         iCF_D2_t,        iCF_D2_t,        iCF_D2_SF,      tree_true,          tree_true_N1,   tree_true_N123, split_val_round_posi)
+  
+  vote_D4_tree_R  <-MAJORITY_VOTE(iCF_D4_BT,      iCF_D4_t_r,   iCF_D4_t_r,   iCF_D4_SF,   tree_true_r,        tree_true_N1_r, tree_true_N123_r, split_val_round_posi)
+  vote_D3_tree_R  <-MAJORITY_VOTE(iCF_D3_BT,      iCF_D3_t_r,   iCF_D3_t_r,   iCF_D3_SF,   tree_true_r,        tree_true_N1_r, tree_true_N123_r, split_val_round_posi)
+  vote_D2_tree_R  <-MAJORITY_VOTE(iCF_D2_BT,      iCF_D2_t_r,   iCF_D2_t_r,   iCF_D2_SF,   tree_true_r,        tree_true_N1_r, tree_true_N123_r, split_val_round_posi)
+  
+  vote_D4_tree.syn     = vote_D4_tree_R$majority.syn
+  vote_D3_tree.syn.ori = vote_D3_tree_R$majority.syn
+  vote_D2_tree.syn.ori = vote_D2_tree_R$majority.syn
+  
+  HTE_P_D4_M_median <- vote_D4_tree$HTE_P_cf_M_median
+  HTE_P_D3_M_median <- vote_D3_tree$HTE_P_cf_M_median
+  HTE_P_D2_M_median <- vote_D2_tree$HTE_P_cf_M_median
+  
+  ###############################################
+  # original split value without imputation
+  ###############################################
+  vote_D4_subgroup <- TREE2SUBGROUP(vote_D4_tree.syn )
+  vote_D3_subgroup <- TREE2SUBGROUP(vote_D3_tree.syn.ori )
+  vote_D2_subgroup <- TREE2SUBGROUP(vote_D2_tree.syn.ori )
+  
+  
+  
+  
+  s_SGdeci=Sys.time()
+  
+  DATA4grplasso_iCF_tr     <- DATA4grplasso(vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup, Train_ID)
+  DATA4grplasso_iCF_te     <- DATA4grplasso(vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup, Test_ID)
+  
+  Train_ID_SG_iCF       <- DATA4grplasso_iCF_tr$Dat_ID_SG
+  Test_ID_SG_iCF        <- DATA4grplasso_iCF_te$Dat_ID_SG
+  
+  #the following formulas work for both binary and continuous outcome
+  #actually, formula_gl = formula_g234; and iCF and oneCF can use the same formula, thus did not distinguish the name
+  formula_basic<<-  as.formula(  paste0("Y ~ W +", paste0(colnames(X), collapse = " + ") )   )
+  formula_gl   <<- DATA4grplasso_iCF_tr$formula_gl
+  formula_g2   <<- DATA4grplasso_iCF_tr$formula_g2
+  formula_g3   <<- DATA4grplasso_iCF_tr$formula_g3
+  formula_g4   <<- DATA4grplasso_iCF_tr$formula_g4
+  formula_g23  <<- DATA4grplasso_iCF_tr$formula_g23
+  #_________________________________________________
+  
+  
+  Deci_Final_iCF.act.tr        <- CF_GROUP_DECISION(HTE_P_cf.raw, Train_ID_SG_iCF, "iCF", "actual", vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup)
+  Deci_Final_iCF.tran.tr       <- CF_GROUP_DECISION(HTE_P_cf.raw, Train_ID_SG_iCF, "iCF", "transform", vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup)
+  Deci_Final_iCF.act.te        <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "actual", vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup)
+  Deci_Final_iCF.tran.te       <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "transform", vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup)
+  
+  
+  
+  e_iCF=Sys.time()
+  
+  
+  
+  return(list ( vote_D4_tree.syn = vote_D4_tree.syn,
+                vote_D3_tree.syn = vote_D3_tree.syn.ori,
+                vote_D2_tree.syn =  vote_D2_tree.syn.ori,
+                vote_D4_subgroup=vote_D4_subgroup,
+                vote_D3_subgroup=vote_D3_subgroup,
+                vote_D2_subgroup=vote_D2_subgroup,
+                time_iCF_AIC =  difftime(e_iCF, s_iCF, units="secs"), 
+   
+           
+                stability_D4_T       = unlist(vote_D4_tree$stability),        
+                stability_D4_T_r     = unlist(vote_D4_tree_R$stability),      
+                stability_D3_T       = unlist(vote_D3_tree$stability),        
+                stability_D3_T_r     = unlist(vote_D3_tree_R$stability),       
+                stability_D2_T       = unlist(vote_D2_tree$stability),   
+                stability_D2_T_r     = unlist(vote_D2_tree_R$stability),
+                Deci_Final_iCF.act.tr   = Deci_Final_iCF.act.tr,
+                Deci_Final_iCF.tran.tr  = Deci_Final_iCF.tran.tr ,
+                Deci_Final_iCF.act.te  = Deci_Final_iCF.act.te,
+                Deci_Final_iCF.tran.te  = Deci_Final_iCF.tran.te ,
+                grp_AIC_pick_D_iCF.act.tr     = Deci_Final_iCF.act.tr$grp_AIC_pick_D,
+                grp_AIC_pick_D_iCF.tran.tr    = Deci_Final_iCF.tran.tr$grp_AIC_pick_D,
+                grp_AIC_pick_D_iCF.act.te     = Deci_Final_iCF.act.te$grp_AIC_pick_D,
+                grp_AIC_pick_D_iCF.tran.te    = Deci_Final_iCF.tran.te$grp_AIC_pick_D,
+                Deci_AIC_iCF.act.tr     = Deci_Final_iCF.act.tr$Deci_Final_CF_AIC,
+                Deci_AIC_iCF.tran.tr    = Deci_Final_iCF.tran.tr$Deci_Final_CF_AIC,
+                Deci_AIC_iCF.act.te     = Deci_Final_iCF.act.te$Deci_Final_CF_AIC,
+                Deci_AIC_iCF.tran.te    = Deci_Final_iCF.tran.te$Deci_Final_CF_AIC,
+                #Train_ID_SG_iCF      = Train_ID_SG_iCF,
+                Test_ID_SG_iCF       = Test_ID_SG_iCF 
+                
+  )
+  )  
+}
+
+
+
+
+TREE_PERFORMANCE <- function(Deci_SG, iterationNo){
+  #performance 
+  DltY_iCF_te      = DltY_DATA(Deci_SG,       Test_ID, "predict" )
+  MSE_iCF_te       <- MSE_DltY(DltY_true_te, DltY_iCF_te)
+  MSE_ate_iCF_te   <- as.numeric(MSE_iCF_te$MSE_ate)
+  MSE_att_iCF_te   <- as.numeric(MSE_iCF_te$MSE_att)
+  
+  #DISCOVERYRATE function take care of the "NA" decision
+  if(iterationNo >1){
+    disco_SG_iCF       = DISCOVERYRATE(Deci_SG ,                 truth_description, tree_true_subgroup, truth_INT, "iCF", "subgroup")$value
+    disco_INT_iCF      = DISCOVERYRATE(SG2INT(Deci_SG),          truth_description, tree_true_subgroup, truth_INT, "iCF", "interaction")$value
+    #disco_SG_iCF.act.aa    = DISCOVERYRATE(Deci_SG,                  truth_description, tree_true_subgroup, truth_INT, "iCF", "subgroup")$sg_Nacc_Nall
+    #disco_SG_iCF.act.aat   = DISCOVERYRATE(Deci_SG,                  truth_description, tree_true_subgroup, truth_INT, "iCF", "subgroup")$sg_Nacc_NallT
+    disco_CATEmax_iCF      = DISCOVERYRATE(CATE_MAX_SG(DltY_iCF_te), truth_description, tree_true_subgroup, CATE_max_true_te, "iCF", "CATEmax")$value
+    
+  } else if (iterationNo==1) {
+    disco_SG_iCF       = DISCOVERYRATE(Deci_SG ,                  truth_description, tree_true_subgroup, truth_INT, "oneCFb", "subgroup")$value
+    disco_INT_iCF      = DISCOVERYRATE(SG2INT(Deci_SG),           truth_description, tree_true_subgroup, truth_INT, "oneCFb", "interaction")$value
+    #disco_SG_iCF.act.aa    = DISCOVERYRATE(Deci_SG,                   truth_description, tree_true_subgroup, truth_INT, "oneCFb", "subgroup")$sg_Nacc_Nall
+    #disco_SG_iCF.act.aat   = DISCOVERYRATE(Deci_SG,                   truth_description, tree_true_subgroup, truth_INT, "oneCFb", "subgroup")$sg_Nacc_NallT
+    disco_CATEmax_iCF      = DISCOVERYRATE(CATE_MAX_SG(DltY_iCF_te),  truth_description, tree_true_subgroup, CATE_max_true_te, "oneCFb", "CATEmax")$value
+    
+  }  
+  return(list(disco_SG_iCF   = disco_SG_iCF ,
+              disco_INT_iCF  = disco_INT_iCF, 
+              #disco_SG_AIC_iCF.act.aa = disco_SG_AIC_iCF.act.aa,
+              #disco_SG_AIC_iCF.act.aat  = disco_SG_AIC_iCF.act.aat,
+              #DltY_iCF_te       = DltY_iCF_te,
+              disco_CATEmax_iCF = disco_CATEmax_iCF,
+              MSE_ate_iCF_te    = MSE_ate_iCF_te,
+              MSE_att_iCF_te    = MSE_att_iCF_te)
+  )  
+  
+}
+                                                        
+                                                        
+iCFCV <- function(K, treeNo, SigLevel){
   s_iCF_CV=Sys.time()
   if (round(HTE_P_cf.raw,1) <= SigLevel){
     model.g2.act <- list()
