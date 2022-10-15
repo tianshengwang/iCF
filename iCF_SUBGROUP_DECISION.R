@@ -67,6 +67,7 @@ FL_Model_Selection <- function(P_basicvsg2, P_g2vsg23, P_g23vsg234, siglevel){
 
 SGMODEL_DATA<-function(dat, outcome_type){
   if (intTRUE != "Unknown" & intTRUE != "Medicare"){
+    #drop subgroup defintion
     dat_ID_SG_pre <- dat %>%  dplyr::select(-contains( c("G4_define", "G3_define", "G2_define" ,"ID" ) ) ) 
   } else {
     #for Medicare, don't use contains Fx as it delete more columns than expected!!!
