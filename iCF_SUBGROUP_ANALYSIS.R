@@ -741,7 +741,7 @@ CATE_MAX_SG <- function(DltY.data){
     summarise(dltY_ate = mean(dltY_ate), n=n()) %>%
     dplyr::mutate(Dlt_ATEvsCATE = (dltY_ate - ATE_all_te) ) %>%
     dplyr::mutate(Dlt_ATEvsCATE_abs = abs(dltY_ate - ATE_all_te) ) %>%
-    dplyr::arrange(Dlt_ATEvsCATE_abs)
+    dplyr::arrange(desc(Dlt_ATEvsCATE_abs))
   
   CATE_largestSG_true_te <- CATE_L_true_te$Definition[1]
   
