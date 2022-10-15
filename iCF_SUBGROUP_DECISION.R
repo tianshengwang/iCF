@@ -94,7 +94,7 @@ SGMODEL_DATA<-function(dat, outcome_type){
   } 
   
   #predict PS
-  dat_ID_SG_pre$ps <- prop.func(as.matrix( dat_ID_SG_pre %>% dplyr::select (-contains( c("W", "Y", "G4", "G3", "G2")))), #matrix of covariates
+  dat_ID_SG_pre$ps <- prop.func(as.matrix( dat_ID_SG_pre %>% dplyr::select (-contains( c("W", "Y", "G4", "G3", "G2")))), #matrix of covariates only
                                 dat_ID_SG_pre$W #outcome for glmnet
                                 )
   
