@@ -1,7 +1,7 @@
 ####################################################################
 # SUBGROUP DECISION 
 # Author: Tiansheng Wang
-# Last update date: 12/8/2020
+# Last update date: 10/15/2022
 # Version: 0.1      
 ####################################################################
 
@@ -58,7 +58,7 @@ FL_Model_Selection <- function(P_basicvsg2, P_g2vsg23, P_g23vsg234, siglevel){
 
 
 #' Function that does prepare data ready to apply the formulas including interacting terms between treatment and factor subgroup deicision variable
-#' @param dat P-value for raw full CF
+#' @param dat dataset
 #' @param outcome_type "actual" or "transform" 
 #'  
 #' @return the prepared data and "contr"
