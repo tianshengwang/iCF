@@ -205,6 +205,17 @@ TREE_PERFORMANCE <- function(Deci_SG, iterationNo){
   )  
   
 }
+
+                                                        
+#' Function that run the iCF algorithm with CV on the whole data
+#' @param K fold #
+#' @param treeNo Tree # of iCF
+#' @SigLevel significance level, because iCF will only be intiated when HTE P-value <0.1, thus we set significance level=1 to run iCF anyway 
+#'  
+#' @return subgroup decision
+#' 
+#' @export
+  
                                                         
                                                         
 iCFCV <- function(K, treeNo, SigLevel){
