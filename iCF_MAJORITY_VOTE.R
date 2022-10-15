@@ -11,8 +11,7 @@
 #################################################----------------------------------------------
 #
 #' This function count the occurence of each unique element in the reference list 
-#' @param list_ref list of unique trees, 
-(with only splitting variables, no splitting values), or subgroups, etc.
+#' @param list_ref list of unique trees, (with only splitting variables, no splitting values), or subgroups, etc.
 #' @param list_all prepared list (duplicate elements) of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups, etc.
 #' 
 #' @return The occurency of each element in the reference list
