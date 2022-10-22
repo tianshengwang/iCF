@@ -1,7 +1,7 @@
 ####################################################################
 # SUBGROUP DECISION 
 # Author: Tiansheng Wang
-# Last update date: 10/15/2022
+# Last update date: 12/8/2020
 # Version: 0.1      
 ####################################################################
 
@@ -58,7 +58,7 @@ FL_Model_Selection <- function(P_basicvsg2, P_g2vsg23, P_g23vsg234, siglevel){
 
 
 #' Function that does prepare data ready to apply the formulas including interacting terms between treatment and factor subgroup deicision variable
-#' @param dat dataset
+#' @param dat P-value for raw full CF
 #' @param outcome_type "actual" or "transform" 
 #'  
 #' @return the prepared data and "contr"
@@ -67,34 +67,15 @@ FL_Model_Selection <- function(P_basicvsg2, P_g2vsg23, P_g23vsg234, siglevel){
 
 SGMODEL_DATA<-function(dat, outcome_type){
   if (intTRUE != "Unknown" & intTRUE != "Medicare"){
-    #drop subgroup defintion
     dat_ID_SG_pre <- dat %>%  dplyr::select(-contains( c("G4_define", "G3_define", "G2_define" ,"ID" ) ) ) 
   } else {
     #for Medicare, don't use contains Fx as it delete more columns than expected!!!
-    #scenario 1: G4, G3, G2 all exist
-    if ("G4" %in% colnames(dat) & "G3" %in% colnames(dat) & "G2" %in% colnames(dat)){
-    
-    dat_ID_SG_pre <- dat %>%  dplyr::select(-G4_define, -G3_define, -G2_define ,-ID  ) 
-    #scenario 2: one depth of G is missing
-    } else if ("G4" %in% colnames(dat) & "G2" %in% colnames(dat)) {
-    dat_ID_SG_pre <- dat %>%  dplyr::select(-G4_define, -G2_define ,-ID  ) 
-    } else if ("G3" %in% colnames(dat) & "G2" %in% colnames(dat)) {
-      dat_ID_SG_pre <- dat %>%  dplyr::select(-G3_define, -G2_define ,-ID  ) 
-    } else if ("G4" %in% colnames(dat) & "G3" %in% colnames(dat)) {
-      dat_ID_SG_pre <- dat %>%  dplyr::select(-G4_define, -G3_define ,-ID  ) 
-    #scenario 3: 2 depths of G are missing
-    } else if ("G4" %in% colnames(dat) ) {
-      dat_ID_SG_pre <- dat %>%  dplyr::select(-G4_define,-ID  ) 
-    } else if ("G3" %in% colnames(dat) ) {
-      dat_ID_SG_pre <- dat %>%  dplyr::select(-G3_define,-ID  ) 
-    } else if ("G2" %in% colnames(dat) ) {
-      dat_ID_SG_pre <- dat %>%  dplyr::select(-G2_define,-ID  ) 
-    }
-
+    dat_ID_SG_pre <- dat %>%  # dplyr::select(-contains( c("G4_define", "G3_define", "G2_define" ,"ID" ) ) ) #%>% 
+      dplyr::select(-G4_define, -G3_define, -G2_define ,-ID  ) 
   } 
   
   #predict PS
-  dat_ID_SG_pre$ps <- prop.func(as.matrix( dat_ID_SG_pre %>% dplyr::select (-contains( c("W", "Y", "G4", "G3", "G2")))), #matrix of covariates only
+  dat_ID_SG_pre$ps <- prop.func(as.matrix( dat_ID_SG_pre %>% dplyr::select (-contains( c("W", "Y", "G4", "G3", "G2")))), #matrix of covariates
                                 dat_ID_SG_pre$W #outcome for glmnet
                                 )
   
@@ -140,16 +121,14 @@ SGMODEL_DATA<-function(dat, outcome_type){
 #' @export
 
 PICK_m234 <- function(HTE_P_value, m, g2, g3, g4){
- # if (round(HTE_P_value,1) > 0.1){#may be false negative, i.e. HTE may exist, use AIC/CV MSE
-#    grp_pick_D=  paste0("W:G",  which.min(c(m, g2, g3, g4)), "x" )
-    
-  
- #   grp_pick_D = ifelse(grp_pick_D=="W:G1x", "NA",  grp_pick_D)
-#  } else {#if HTE P-value <0.1, then we know for sure HTE exist, then no need to consider basic model without interaction terms of subgroup decision
+  if (round(HTE_P_value,1) > 0.1){#may be false negative, i.e. HTE may exist, use AIC/CV MSE
+    grp_pick_D=  paste0("W:G",  which.min(c(m, g2, g3, g4)), "x" )
+    grp_pick_D = ifelse("W:1G", "NA",  grp_pick_D)
+  } else {#if HTE P-value <0.1, then we know for sure HTE exist, then no need to consider basic model without interaction terms of subgroup decision
     #then we use BIC to place a heavier penalty on models with many variables,
     #i.e. to reduce subgroup number and number of covariates define a subgroup
     grp_pick_D= paste0("W:G",  which.min(c(g2, g3, g4)) + 1 , "x" )
- # }
+  }
   return(grp_pick_D)
 }
 
@@ -193,10 +172,9 @@ FINALDECI<- function(grp_pick, V_D4_subgroup,  V_D3_subgroup, V_D2_subgroup){
 #' 
 #' @export
 
-#Deci_Final_iCF.act.tr[[f]]  <- CF_GROUP_DECISION(1, HTE_P_cf.raw, Train_ID_SG_iCF[[f]], "iCF", "actual",    vote_D4_subgroup.L[[f]], vote_D3_subgroup.L[[f]],  vote_D2_subgroup.L[[f]])
 
-CF_GROUP_DECISION <- function(SignificantLevel, HTE_P_value, dat, method_CF, outcome_type, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup){
- if ( round(HTE_P_value,1) > SignificantLevel #| is.na( stringr::str_sub(grplasso_shrink_pick_D,4,4) ) 
+CF_GROUP_DECISION <- function(HTE_P_value, dat, method_CF, outcome_type, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup){
+ if ( round(HTE_P_value,1) > 0.1 #| is.na( stringr::str_sub(grplasso_shrink_pick_D,4,4) ) 
   ){
    AIC_g4 = "NA"
    AIC_g3 = "NA"
@@ -243,139 +221,117 @@ CF_GROUP_DECISION <- function(SignificantLevel, HTE_P_value, dat, method_CF, out
 #AIC the smaller the better, model.g2,3,4 works for both continous or binary outcome, stepAIC default setting is "backward".
 #continious outcome
 if (length(unique(dat_ID_SG_df$Y)) >=8 ){
-  model.basic <<- lm(formula_basic, data = dat_ID_SG_df) 
-  if ("G2" %in% names(contr)) {model.g2    <<- lm(formula_g2,    data = dat_ID_SG_df)}
-  if ("G3" %in% names(contr)) {model.g3    <<- lm(formula_g3,    data = dat_ID_SG_df)}
-  if ("G4" %in% names(contr)) {model.g4    <<- lm(formula_g4,    data = dat_ID_SG_df)}
-  
-  AIC_basic <<- ( MASS::stepAIC(#model.basic, 
-                            lm(formula_basic, data = dat_ID_SG_df) ,
-                            steps=0, 
-                            k=2                       ) ) $anova$AIC
-  BIC_basic <<-( MASS::stepAIC(#model.basic, 
-                            lm(formula_basic, data = dat_ID_SG_df) ,
-                            steps=0, 
-                            k=log(nrow(dat_ID_SG_df)) ) ) $anova$AIC
-  
-  
-  if ("G2" %in% names(contr)) { 
-    BIC_g2    <<-( MASS::stepAIC(#model.g2, 
-      lm(formula_g2,    data = dat_ID_SG_df),
-      steps=0,  
-      k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
-  } else { BIC_g2 <<- Inf }
-  if ("G3" %in% names(contr)) { 
-    BIC_g3    <<-( MASS::stepAIC(#model.g3,    
-      lm(formula_g3,    data = dat_ID_SG_df),
-      steps=0,  
-      k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
-  } else { BIC_g3 <<- Inf}
-  if ("G4" %in% names(contr)) { 
-    BIC_g4    <<-( MASS::stepAIC(#model.g4,    
-      lm(formula_g4,    data = dat_ID_SG_df),
-      steps=0, 
-      k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
-  } else { BIC_g4 <<- Inf}
-  
-  if ("G2" %in% names(contr)) { 
-    AIC_g2    <<-( MASS::stepAIC(#model.g2,    
-      lm(formula_g2,    data = dat_ID_SG_df),
-      steps=0,  
-      k=2 )) $anova$AIC 
-  } else { AIC_g2 <<- Inf }
-  if ("G3" %in% names(contr)) { 
-    AIC_g3    <<-( MASS::stepAIC(#model.g3,    
-      lm(formula_g3,    data = dat_ID_SG_df),
-      steps=0,  
-      k=2 )) $anova$AIC 
-  } else { AIC_g3 <<- Inf}
-  if ("G4" %in% names(contr)) { 
-    AIC_g4    <<-( MASS::stepAIC(#model.g4,    
-      lm(formula_g4,    data = dat_ID_SG_df),
-      steps=0,  
-      k=2 )) $anova$AIC 
-  } else { AIC_g4 <<- Inf}
-  
-  
+  model.basic = lm(formula_basic, data = dat_ID_SG_df) 
+  if ("G2" %in% names(contr)) {model.g2    = lm(formula_g2,    data = dat_ID_SG_df)}
+  if ("G3" %in% names(contr)) {model.g3    = lm(formula_g3,    data = dat_ID_SG_df)}
+  if ("G4" %in% names(contr)) {model.g4    = lm(formula_g4,    data = dat_ID_SG_df)}
 } else if (length(unique(dat_ID_SG_df$Y)) ==2) { #if using tranformed outcome, then the Y_star will always be continuous!!!
   #binary outcome
-  model.basic <<- glm(formula_basic, data = dat_ID_SG_df, family="binomial")
-  if ("G2" %in% names(contr)) {model.g2    <<- glm(formula_g2,    data = dat_ID_SG_df, family="binomial")}
-  if ("G3" %in% names(contr)) {model.g3    <<- glm(formula_g3,    data = dat_ID_SG_df, family="binomial")}
-  if ("G4" %in% names(contr)) {model.g4    <<- glm(formula_g4,    data = dat_ID_SG_df, family="binomial")}
-  
-  AIC_basic <<- ( MASS::stepAIC(#model.basic, 
-                              glm(formula_basic, data = dat_ID_SG_df, family="binomial"),
-                              steps=0, 
-                              k=2                       ) ) $anova$AIC
-  BIC_basic <<- ( MASS::stepAIC(#model.basic, 
-                              glm(formula_basic, data = dat_ID_SG_df, family="binomial"),
-                              steps=0, 
-                              k=log(nrow(dat_ID_SG_df)) ) ) $anova$AIC
-  
-  
-  
-  if ("G2" %in% names(contr)) { 
-    BIC_g2    <<-( MASS::stepAIC(#model.g2, 
-                               glm(formula_g2,    data = dat_ID_SG_df, family="binomial"),
-                               steps=0,  
-                               k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
-  } else { BIC_g2 <<- Inf }
-  if ("G3" %in% names(contr)) { 
-    BIC_g3    <<-( MASS::stepAIC(#model.g3,    
-                              glm(formula_g3,    data = dat_ID_SG_df, family="binomial"),
-                              steps=0,  
-                               k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
-  } else { BIC_g3 <<- Inf}
-  if ("G4" %in% names(contr)) { 
-    BIC_g4    <<-( MASS::stepAIC(#model.g4,    
-                              glm(formula_g4,    data = dat_ID_SG_df, family="binomial"),
-                              steps=0, 
-                               k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
-  } else { BIC_g4 <<- Inf}
-  
-  if ("G2" %in% names(contr)) { 
-    AIC_g2    <<- ( MASS::stepAIC(#model.g2,    
-                              glm(formula_g2,    data = dat_ID_SG_df, family="binomial"),
-                              steps=0,  
-                               k=2 )) $anova$AIC 
-  } else { AIC_g2 <<- Inf }
-  if ("G3" %in% names(contr)) { 
-    AIC_g3    <<-( MASS::stepAIC(#model.g3,    
-                              glm(formula_g3,    data = dat_ID_SG_df, family="binomial"),
-                               steps=0,  
-                               k=2 )) $anova$AIC 
-  } else { AIC_g3 <<- Inf}
-  if ("G4" %in% names(contr)) { 
-    AIC_g4    <<-( MASS::stepAIC(#model.g4,    
-                              glm(formula_g4,    data = dat_ID_SG_df, family="binomial"),
-                              steps=0,  
-                               k=2 )) $anova$AIC 
-  } else { AIC_g4 <<- Inf}
-  
-                            
+  model.basic = glm(formula_basic, data = dat_ID_SG_df, family=binomial)
+  if ("G2" %in% names(contr)) {model.g2    = glm(formula_g2,    data = dat_ID_SG_df, family=binomial)}
+  if ("G3" %in% names(contr)) {model.g3    = glm(formula_g3,    data = dat_ID_SG_df, family=binomial)}
+  if ("G4" %in% names(contr)) {model.g4    = glm(formula_g4,    data = dat_ID_SG_df, family=binomial)}
+}
+
+AIC_basic =( MASS::stepAIC(model.basic, steps=0,k=2                          ) ) $anova$AIC
+BIC_basic =( MASS::stepAIC(model.basic, steps=0, k=log(nrow(dat_ID_SG_df)) ) ) $anova$AIC
+
+if ("G2" %in% names(contr)) { 
+  BIC_g2    =( MASS::stepAIC(model.g2,    steps=0,  k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
+  } else { BIC_g2 = Inf }
+if ("G3" %in% names(contr)) { 
+  BIC_g3    =( MASS::stepAIC(model.g3,    steps=0,  k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
+  } else { BIC_g3 = Inf}
+if ("G4" %in% names(contr)) { 
+  BIC_g4    =( MASS::stepAIC(model.g4,    steps=0,  k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
+} else { BIC_g4 = Inf}
+
+if ("G2" %in% names(contr)) { 
+  AIC_g2    =( MASS::stepAIC(model.g2,    steps=0,  k=2 )) $anova$AIC 
+} else { AIC_g2 = Inf }
+if ("G3" %in% names(contr)) { 
+  AIC_g3    =( MASS::stepAIC(model.g3,    steps=0,  k=2 )) $anova$AIC 
+} else { AIC_g3 = Inf}
+if ("G4" %in% names(contr)) { 
+  AIC_g4    =( MASS::stepAIC(model.g4,    steps=0,  k=2 )) $anova$AIC 
+} else { AIC_g4 = Inf}
+
+
+
+
+grp_AIC_pick_D <- PICK_m234(HTE_P_value, AIC_basic, AIC_g2, AIC_g3, AIC_g4)
+grp_BIC_pick_D <- PICK_m234(HTE_P_value, BIC_basic, BIC_g2, BIC_g3, BIC_g4)
+
+
+
+    #-----------------------------------------------------------------------------------------------------
+    #Method 4: ANOVA for nested model including at least one of the following: G2 & W:G2, G3 & W:G3, or G4 & W: G4
+    #-----------------------------------------------------------------------------------------------------
+if (length(unique(dat_ID_SG_df$Y)) >=8 ){
+model.g234  = lm(formula_gl,     data = dat_ID_SG_df)
+model.g23   = lm(formula_g23,    data = dat_ID_SG_df)
+} else if (length(unique(dat_ID_SG_df$Y)) ==2){
+model.g234  = glm(formula_gl,     data = dat_ID_SG_df, family = "binomial")
+model.g23   = glm(formula_g23,    data = dat_ID_SG_df, family = "binomial") 
+}
+#don't use forward selection! because if the main model is wrong, other models may not be correct
+
+if (length(unique(dat_ID_SG_df$Y)) >=8 ){
+F_backward <- anova(model.g234,   #Model 4, may be equal to Model 3
+                   model.g23,   #Model 3, may be equal to Model 2
+                   model.g2,    #Model 2
+                   model.basic #Model 1
+                  )
+if ( is.na(F_backward$`Pr(>F)`[2]) ) {
+  Pval_g23vsg234 = Inf } else {Pval_g23vsg234 = F_backward$`Pr(>F)`[2] } 
+#if D3 decision = D2 decision then model.g23=model.2, thus P-value for Model 3 = NA
+if ( is.na(F_backward$`Pr(>F)`[3]) ) {
+  Pval_g2vsg23   = Inf } else { Pval_g2vsg23   = F_backward$`Pr(>F)`[3] }
+#if D3 decision = D4 decision then model.g234=model.23, thus P-value for Model 4 = NA
+if ( is.na( F_backward$`Pr(>F)`[4] )) {
+  Pval_basicvsg2 = Inf } else { Pval_basicvsg2 = F_backward$`Pr(>F)`[4] }
+
+
+} else if ( length(unique(dat_ID_SG_df$Y)) ==2 )  {
+  F_backward <- anova(model.g234,   #Model 4, may be equal to Model 3
+                      model.g23,   #Model 3, may be equal to Model 2
+                      model.g2,    #Model 2
+                      model.basic, #Model 1
+                      test="LRT"
+                     ) 
+  if ( is.na(F_backward$`Pr(>Chi)`[2]) ) {
+    Pval_g23vsg234 = Inf } else { Pval_g23vsg234 = F_backward$`Pr(>Chi)`[2] } 
+  #if D3 decision = D2 decision then model.g23=model.2, thus P-value for Model 3 = NA
+  if ( is.na(F_backward$`Pr(>Chi)`[3]) ) {
+    Pval_g2vsg23   = Inf } else { Pval_g2vsg23   = F_backward$`Pr(>Chi)`[3] }
+  #if D3 decision = D4 decision then model.g234=model.23, thus P-value for Model 4 = NA
+  if ( is.na( F_backward$`Pr(>Chi)`[4] )) {
+    Pval_basicvsg2 = Inf } else { Pval_basicvsg2 = F_backward$`Pr(>Chi)`[4] }
   
 }
 
 
-#grp_AIC_pick_D <- PICK_m234(HTE_P_value, AIC_basic,   AIC_g2,  AIC_g3,  AIC_g4)
-#grp_BIC_pick_D <- PICK_m234(HTE_P_value, BIC_basic,   BIC_g2,  BIC_g3,  BIC_g4)
-    #-----------------------------------------------------------------------------------------------------
-    #Method 4: ANOVA for nested model including at least one of the following: G2 & W:G2, G3 & W:G3, or G4 & W: G4
-    #-----------------------------------------------------------------------------------------------------
+
+grp_FL_pick_D_05 <- FL_Model_Selection(Pval_basicvsg2, Pval_g2vsg23, Pval_g23vsg234, 0.05)
+
+grp_FL_pick_D_10 <- FL_Model_Selection(Pval_basicvsg2, Pval_g2vsg23, Pval_g23vsg234, 0.10)
+
 #################################
 ##  OBTAIN GROUP DECISION      ##
 #################################
+
 #______________________________________________________________
 #group lasso CV or shrink won't obtain "NA", thus straightford:
 
-Deci_Final_CF_AIC     <-# FINALDECI(grp_AIC_pick_D, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup)
-                           eval(parse(text =  paste0("V_D",  which.min(c(AIC_g2,  AIC_g3,  AIC_g4)) + 1, "_subgroup" )))$majority 
-#Deci_Final_CF_BIC     <- FINALDECI(grp_BIC_pick_D, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup)
+#Deci_Final_CF_cv      <-  FINALDECI(grplasso_cv_pick_D)
+#Deci_Final_CF_shrink  <- FINALDECI(grplasso_shrink_pick_D)
+Deci_Final_CF_AIC     <- FINALDECI(grp_AIC_pick_D, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup)
+Deci_Final_CF_BIC     <- FINALDECI(grp_BIC_pick_D, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup)
+Deci_Final_CF_FL_sl05 <- FINALDECI(grp_FL_pick_D_05, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup)
+Deci_Final_CF_FL_sl10 <- FINALDECI(grp_FL_pick_D_10, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup)
 #the program below can be removed since using the FINALDECI function
 
 #to make sure g4 has a model, otherwise it shows error 'model.g4' not found, check DATA4grplasso functn for different scenarios details 
-  #scenario 1: D4=D3=D2
 if( identical(V_D4_subgroup$majority, V_D3_subgroup$majority) & identical(V_D4_subgroup$majority, V_D2_subgroup$majority) & 
     ("G4" %in% names(contr) == F ) &  ("G3" %in% names(contr) == F ) 
     ){
@@ -397,13 +353,25 @@ if( identical(V_D4_subgroup$majority, V_D3_subgroup$majority) & identical(V_D4_s
 
 
 
-  return(list(AIC_g4 = AIC_g4,
+  return(list(#lambda.max.gp          = lambda_max,
+              #lambda.min.gp          = lambda.min.gp,
+              #grplasso_cv_pick_D     = grplasso_cv_pick_D,
+              #grplasso_shrink_pick_D = grplasso_shrink_pick_D,
+              #grplasso_SHRINK_vs_CV  = grplasso_SHRINK_vs_CV,
+              AIC_g4 = AIC_g4,
               AIC_g3 = AIC_g3,
               AIC_g2 = AIC_g2,
               AIC_basic = AIC_basic,
-             # grp_AIC_pick_D         = grp_AIC_pick_D,
-            #  grp_BIC_pick_D         = grp_BIC_pick_D,
+              grp_AIC_pick_D         = grp_AIC_pick_D,
+              grp_BIC_pick_D         = grp_BIC_pick_D,
+              grp_FL_pick_D_05       = grp_FL_pick_D_05,
+              grp_FL_pick_D_10       = grp_FL_pick_D_10,
+              #Deci_Final_CF_cv       = Deci_Final_CF_cv,
+              #Deci_Final_CF_shrink   = Deci_Final_CF_shrink,
               Deci_Final_CF_AIC      = Deci_Final_CF_AIC,     
+              #Deci_Final_CF_BIC      = Deci_Final_CF_BIC,     
+              #Deci_Final_CF_FL_sl05   = Deci_Final_CF_FL_sl05,   
+              #Deci_Final_CF_FL_sl10   = Deci_Final_CF_FL_sl10,
               model.basic=model.basic,
               model.g2=model.g2,
               model.g3=model.g3,
@@ -494,14 +462,7 @@ TorF <- function(v_D4_tree, v_D4_tree_R, Desc_v_D4, v_D3_tree, v_D3_tree_R, Desc
   )
 }
 
-#' This function count the # of subgroup or interaction
-#' @param deci decision of subgroups or interactions 
-#' @param method_L tree-based subgroup o
-#' 
-#' @return #numbr of subgroups
-#'
-#' @export
-#'
+
 N_SUBGROUP <- function(deci, method_L) {
   
           if (is.null (nrow(deci))==TRUE  & method_L == "tree_sg" ) {
@@ -951,43 +912,4 @@ SG2INT_str_uniq <- paste(unique(unlist(Deci_SG_INT)), collapse = ' ')
 SG2INT_vec <- strsplit(SG2INT_str_uniq, "\\s+")[[1]]
 }
 return(SG2INT_vec)
-}
-
-
-
-
-
-TREE_PERFORMANCE <- function(Deci_SG, iterationNo){
-  #performance 
-  DltY_iCF_te      = DltY_DATA(Deci_SG,       Test_ID, "predict" )
-  MSE_iCF_te       <- MSE_DltY(DltY_true_te, DltY_iCF_te)
-  MSE_ate_iCF_te   <- as.numeric(MSE_iCF_te$MSE_ate)
-  MSE_att_iCF_te   <- as.numeric(MSE_iCF_te$MSE_att)
-  
-  #DISCOVERYRATE function take care of the "NA" decision
-  if(iterationNo >1){
-    disco_SG_iCF       = DISCOVERYRATE(Deci_SG ,                 truth_description, tree_true_subgroup, truth_INT, "iCF", "subgroup")$value
-    disco_INT_iCF      = DISCOVERYRATE(SG2INT(Deci_SG),          truth_description, tree_true_subgroup, truth_INT, "iCF", "interaction")$value
-    #disco_SG_iCF.act.aa    = DISCOVERYRATE(Deci_SG,                  truth_description, tree_true_subgroup, truth_INT, "iCF", "subgroup")$sg_Nacc_Nall
-    #disco_SG_iCF.act.aat   = DISCOVERYRATE(Deci_SG,                  truth_description, tree_true_subgroup, truth_INT, "iCF", "subgroup")$sg_Nacc_NallT
-    disco_CATEmax_iCF      = DISCOVERYRATE(CATE_MAX_SG(DltY_iCF_te), truth_description, tree_true_subgroup, CATE_max_true_te, "iCF", "CATEmax")$value
-    
-  } else if (iterationNo==1) {
-    disco_SG_iCF       = DISCOVERYRATE(Deci_SG ,                  truth_description, tree_true_subgroup, truth_INT, "oneCFb", "subgroup")$value
-    disco_INT_iCF      = DISCOVERYRATE(SG2INT(Deci_SG),           truth_description, tree_true_subgroup, truth_INT, "oneCFb", "interaction")$value
-    #disco_SG_iCF.act.aa    = DISCOVERYRATE(Deci_SG,                   truth_description, tree_true_subgroup, truth_INT, "oneCFb", "subgroup")$sg_Nacc_Nall
-    #disco_SG_iCF.act.aat   = DISCOVERYRATE(Deci_SG,                   truth_description, tree_true_subgroup, truth_INT, "oneCFb", "subgroup")$sg_Nacc_NallT
-    disco_CATEmax_iCF      = DISCOVERYRATE(CATE_MAX_SG(DltY_iCF_te),  truth_description, tree_true_subgroup, CATE_max_true_te, "oneCFb", "CATEmax")$value
-    
-  }  
-  return(list(disco_SG_iCF   = disco_SG_iCF ,
-              disco_INT_iCF  = disco_INT_iCF, 
-              #disco_SG_AIC_iCF.act.aa = disco_SG_AIC_iCF.act.aa,
-              #disco_SG_AIC_iCF.act.aat  = disco_SG_AIC_iCF.act.aat,
-              #DltY_iCF_te       = DltY_iCF_te,
-              disco_CATEmax_iCF = disco_CATEmax_iCF,
-              MSE_ate_iCF_te    = MSE_ate_iCF_te,
-              MSE_att_iCF_te    = MSE_att_iCF_te)
-  )  
-  
 }
