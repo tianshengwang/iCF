@@ -1,20 +1,22 @@
 #############################################################################################
-# MAJORITY VOTE
+# MAJORITY VOTEBC6CE50|
 # Author: Tiansheng Wang  
-# Last update date:12/6/2021
+# Last update date:12/6/2020
 # Version: 0.1         
 #############################################################################################
 
+#-------------------------666CD631|---------------------
+###################666CD631|##############################----------------------------------------------
 #################################################----------------------------------------------
 # IV. majority vote
 #################################################----------------------------------------------
 #################################################----------------------------------------------
 #
-#' This function count the occurence of each unique element in the reference list 
-#' @param list_ref list of unique trees, (with only splitting variables, no splitting values), or subgroups, etc.
-#' @param list_all prepared list (duplicate elements) of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups, etc.
+#' This function count the occurence of majority 
+#' @param list_ref list of unique trees, tree relaxed, or subgroups
+#' @param list_all prepared list of trees, tree relaxed, or subgroups
 #' 
-#' @return The occurency of each element in the reference list
+#' @return The occurency of majority
 #'
 #' @export
 #'
@@ -32,7 +34,7 @@ MAJORITY_COUNT <- function(list_ref, list_all){
   return(n_occurence)
 }
 
-#' This function connects if "identical or not" label to a list and subsetting the list to exclude those not identical to reference list
+#' This function connects if identical or not label to a list and subsetting the list to exclude those not identical to reference list
 #' if_ID means if Identical to MAJORITY VOTED or TRUTH
 #' @param standardLIST a label list of being identical or not 
 #' @param inputLIST the list need to be labeled and subsetted 
@@ -65,8 +67,8 @@ MAJORITY_PICK_LEAF <- function (inputlist, leaf_para) {
   return(all_identical_LorN)
 }
 
-#' This function check the probability of each unique subgroup in a list 
-#' @param list1 prepared list of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups
+#' This function check the probability of subgroups from iCF 
+#' @param list1 prepared list of trees, tree relaxed, or subgroups
 #' 
 #' @return The subsetted list that all are identical to reference list.
 #'
@@ -83,7 +85,7 @@ SG_PROBABILITY <- function( list1){
 
 #' This function performs majority vote among best trees from iterative CF 
 #' @param list0 original list of trees
-#' @param list1 prepared list of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups
+#' @param list1 prepared list of trees, tree relaxed, or subgroups
 #' @param list2 only useful for prepared list if by subgroup, then remove node column to count for majority.tree
 #' @param list3 original list of split frequency!
 #' @param truth truth 
@@ -107,7 +109,7 @@ SG_PROBABILITY <- function( list1){
 #split_val_round_posi=split_val_round_posi
 
 MAJORITY_VOTE <- function(list0, #original list of trees
-                          list1, #prepared list of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups
+                          list1, #prepared list of trees, tree relaxed, or subgroups
                           list2, #only useful for prepared list if by subgroup, then remove node column to count for majority.tree
                           list3, #original list of split frequency!
                           truth, 
@@ -132,7 +134,6 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   N_occur_majority <- MAJORITY_COUNT(list1_u, list1)
   #get majority tree structure
   majority.tree <- list1_u[[which.max(N_occur_majority)]]
-   
   #get majority tree structure, same as above
   majority.tree.1st <- list1_u[[  match(Rfast::nth(N_occur_majority, 1, descending = T), N_occur_majority  )]]
   #get 2nd popular tree structure 
@@ -141,7 +142,7 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   majority.tree.3rd <- list1_u[[   match(Rfast::nth(N_occur_majority, 3, descending = T), N_occur_majority  )]]  
   #make truth a list (tree_true or tree_true_r)
   truth_list      <- list(truth)
-  #get number of occurrence of truth in list1 (the prepared list of trees, tree relaxed (with only splitting variables, no splitting values), or subgroups)
+  #get number of occurrence of truth in list1 (the prepared list of trees, tree relaxed, or subgroups)
   #N_occur_truth could be 0, e.g. truth = D4 tree, majority is D3 tree.
   N_occur_truth   <-  MAJORITY_COUNT(truth_list, list1)
   #make the top (root) node a list
@@ -342,7 +343,7 @@ MAJORITY_VOTE <- function(list0, #original list of trees
 
 
 
-#' This function finds the majority voted subgroup decision across CV, only apply to vote_D_subgroup!!! not any other list!!! be implemented in iCF_SG_PIPELINE.
+#' This function finds the majority voted subgroup decision across CV
 #' @param vote_D_subgroup.L list of vote_D_subgroup across CV
 #' 
 #' @return The majority voted subgroup decision across CV
@@ -350,119 +351,49 @@ MAJORITY_VOTE <- function(list0, #original list of trees
 #' @export
 #'
 CV_SG_MAJORITY <- function(vote_D_subgroup.L){
-  if (  length(unique (vote_D_subgroup.L) ) ==1 #1. which means all "subgroup decisions" are identical, or M model (without W:G interaction terms)
-    ){
-    majority.SG = vote_D_subgroup.L[[1]]
-  } else  if (length(unique (vote_D_subgroup.L) ) ==length(vote_D_subgroup.L) #2. which means NONE of "subgroup decisions" are identical, or M model (without W:G interaction terms)
-  ){#number of subgroups in each subgroup decision
-    vote_D_subgroup.L_N <- lapply(vote_D_subgroup.L, function(df) nrow(df$majority) #N_SUBGROUP(df$majority, "tree_sg")
-                                  ) 
-    
-    Index_min_group <- which.min( unlist( vote_D_subgroup.L_N ) ) 
-    
-    #select the decision with smallest number of subgroups
-    majority.SG = vote_D_subgroup.L[[Index_min_group]]
-
-  } else {  
-    #3. if not all subgroup decisions are the same
-    majority_count <- MAJORITY_COUNT(unique(vote_D_subgroup.L),vote_D_subgroup.L)
-    majority.SG <- unique(vote_D_subgroup.L)[[which.max(majority_count)]]
-}
+  majority_count <- MAJORITY_COUNT(unique(vote_D_subgroup.L),vote_D_subgroup.L)
+  majority.SG <- unique(vote_D_subgroup.L)[[which.max(majority_count)]]
   return(majority.SG)
 }
 
-#' This function returns the mean bias, i.e., MSE/accuracy value, of those majority voted subgroup decisions across CV; Implemented in iCF_SG_PIPELINE.
+#' This function returns the mean MSE value of those majority voted subgroup decisions across CV
 #' @param vote_D_subgroup.L list of voted subgroup decisions, of those not majorityed, their MSE will be ignored
 #' @param metric list of metric including RMSE, Rsquared, MAE for continuous variables
-#' @param measure "MSE" or "accuracy"
 #' 
 #' @return The the mean MSE value across CV
 #'
 #' @export
 #'
 #'
-CVBIAS_D_MAJORITY <- function(vote_D_subgroup.L, metric, measure){
-  if (#length(SG_PROBABILITY (vote_D_subgroup.L) ) ==1 #1. which means all "subgroup decisions" are identical, or M model (without W:G interaction terms)
-    length(unique (vote_D_subgroup.L) ) ==1
-    ){
-    majority.SG = vote_D_subgroup.L[[1]]
-    
-    if (measure=="MSE"){
+CVBIAS_D_MAJORITY <- function(vote_D_subgroup.L, metric){
+  if (length(SG_PROBABILITY (vote_D_subgroup.L) ) ==1 ){
     mse_all_folds <- as.data.frame(do.call("rbind", metric))
-    }  else if (measure=="accuracy"){
-    accuracy_all_folds <- as.data.frame(do.call("rbind", metric))
-    }
-
-  } else  if (length(unique (vote_D_subgroup.L) ) ==length(vote_D_subgroup.L) #2. which means NONE of "subgroup decisions" are identical, or M model (without W:G interaction terms)
-     ){
-    #number of subgroups in each subgroup decision
-    vote_D_subgroup.L_N <- lapply(vote_D_subgroup.L, function(df) nrow(df$majority) #N_SUBGROUP(df$majority, "tree_sg")
-                                  ) 
-    
-    Index_min_group <- which.min( vote_D_subgroup.L_N ) 
-    
-    #select the decision with smallest number of subgroups
-    majority.SG = vote_D_subgroup.L[[Index_min_group]]
-    
-    #select the corresponding metric of the selected decision with minimum group number
-    if (measure=="MSE"){
-      mse_all_folds      <- as.data.frame(do.call("rbind", metric[Index_min_group]#keep the element of minimum group number by index number
-                                                  ))
-    }  else if (measure=="accuracy"){
-      accuracy_all_folds <- as.data.frame(do.call("rbind", metric[Index_min_group]#keep the element of minimum group number by index number
-                                                  ))
-    }
-
-  } else {  
-  #3. if not all subgroup decisions are the same
-    #3.1 save majority only
+    majority.SG = vote_D_subgroup.L[[1]]
+  } else {
+  
     if_majority <-lapply(vote_D_subgroup.L, function(df) identical(df, CV_SG_MAJORITY(vote_D_subgroup.L) ))  
-    
-    #3.2 combine all results from each fold for majority only
-    if (measure=="MSE"){
-      mse_per_fold_puremajor <- STANDARD_CHECK(if_majority,metric)
-      mse_all_folds <- as.data.frame(do.call("rbind",mse_per_fold_puremajor))
-    }  else if (measure=="accuracy"){
-      accuracy_per_fold_puremajor <- STANDARD_CHECK(if_majority,metric)
-      accuracy_all_folds <- as.data.frame(do.call("rbind",accuracy_per_fold_puremajor))
-    }
-    
+    mse_per_fold_puremajor <- STANDARD_CHECK(if_majority,metric)
+    mse_all_folds <- as.data.frame(do.call("rbind",mse_per_fold_puremajor))
+  
   }
   
-  #------------------------
-  #output
-  #-------------------------
-    #make a dataframe, extract value
-  if (measure=="MSE"){
-    mse_all_folds <- cbind(mse_all_folds, "MSE"=(mse_all_folds[,"RMSE"])^2) 
-    mse_all_folds <- mse_all_folds %>%
-      dplyr::mutate("CV_MSE"   = mean(mse_all_folds[,"MSE"]),
-                    "CV_MSE_SE"= sd(mse_all_folds[,"MSE"]))
-    
-    return(mse_all_folds$CV_MSE[1])
-    
-  }  else if (measure=="accuracy"){
-    accuracy_all_folds <-  as.data.frame(do.call("rbind", metric))
-    accuracy_all_folds <-  accuracy_all_folds %>%
-      dplyr::mutate("CV_accuracy"=mean(accuracy_all_folds[,"V1"]),
-                    "CV_accuracy_SE"=sd(accuracy_all_folds[,"V1"])) 
-    return(accuracy_all_folds$CV_accuracy[1])
-    
-    }
-
+  mse_all_folds <- cbind(mse_all_folds, "MSE"=(mse_all_folds[,"RMSE"])^2) 
+  mse_all_folds <- mse_all_folds %>%
+                    dplyr::mutate("CV_MSE"=mean(mse_all_folds[,"MSE"]),
+                                 "CV_MSE_SE"=sd(mse_all_folds[,"MSE"]))
+  
+  return(mse_all_folds$CV_MSE[1])
 }
 
-#' This function returns the mean bias measurement (MSE value for continuous or accuracy value for binary) across CV; Implemented in iCF_SG_PIPELINE
-#' @param metric list of metric including RMSE, Rsquared, MAE for continuous variables, or 
-#' @param measure "MSE" or "accuracy"
+#' This function returns the mean MSE value across CV
+#' @param metric list of metric including RMSE, Rsquared, MAE for continuous variables
 #' 
-#' @return The the mean MSE or accuracy value across CV
+#' @return The the mean MSE value across CV
 #'
 #' @export
 #'
 
-CVBIAS_MAIN <- function(metric, measure){
-  if (measure=="MSE"){
+CVBIAS_MAIN <- function(metric){
   mse_all_folds <- as.data.frame(do.call("rbind", metric))
   mse_all_folds <- cbind(mse_all_folds, "MSE"=(mse_all_folds[,"RMSE"])^2) 
   mse_all_folds <- mse_all_folds %>%
@@ -470,12 +401,4 @@ CVBIAS_MAIN <- function(metric, measure){
                   "CV_MSE_SE"=sd(mse_all_folds[,"MSE"]))
   
   return(mse_all_folds$CV_MSE[1]) 
-  } else if (measure=="accuracy") {
-  accuracy_all_folds <-  as.data.frame(do.call("rbind", metric))
-  accuracy_all_folds <-  accuracy_all_folds %>%
-    dplyr::mutate("CV_accuracy"=mean(accuracy_all_folds[,"V1"]),
-                  "CV_accuracy_SE"=sd(accuracy_all_folds[,"V1"])) 
-  return(accuracy_all_folds$CV_accuracy[1])  
-  }
-  
 }
