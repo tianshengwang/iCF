@@ -131,6 +131,7 @@ CF_RAW_key <- function(Train_cf){
   best_tree_info<-find_best_tree(cf.raw, "causal")
   best_tree_info$best_tree
   # Plot trees
+  par(mar=c(1,1,1,1))
   tree.plot = plot(grf::get_tree(cf.raw, best_tree_info$best_tree))
   tree.plot
   
