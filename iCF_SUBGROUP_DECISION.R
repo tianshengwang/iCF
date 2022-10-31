@@ -13,14 +13,14 @@
 #' @export
 
 TREE2SUBGROUP <- function(tree){
-subgroup.ori    <- PRE_MAJORITY_SUBGROUP ( list(tree ) )
-
-subgroup_key.ori   <-lapply(subgroup.ori,   function(df) subset(df, select=c("subgroupID", "subgroup")))
-
-#did not vote for subgroup, use the synthetic voted tree structure to get subgroup decision
-vote_subgroup.ori <- list(majority=subgroup_key.ori[[1]])
-
-return(vote_subgroup.ori )
+  subgroup.ori    <- PRE_MAJORITY_SUBGROUP ( list(tree ) )
+  
+  subgroup_key.ori   <-lapply(subgroup.ori,   function(df) subset(df, select=c("subgroupID", "subgroup")))
+  
+  #did not vote for subgroup, use the synthetic voted tree structure to get subgroup decision
+  vote_subgroup.ori <- list(majority=subgroup_key.ori[[1]])
+  
+  return(vote_subgroup.ori )
 }
 
 
@@ -44,14 +44,14 @@ FL_Model_Selection <- function(P_basicvsg2, P_g2vsg23, P_g23vsg234, siglevel){
     grpFanova_pick_D = "W:G3x"
   } else if (
     #scenario 3: neither G23 vs G4 not nor G2 vs G23 are significant (dropped G3), main vs G2 significant (keep G2)
-   ( P_basicvsg2 < siglevel & min(P_g2vsg23, P_g23vsg234) >= siglevel |
-    #scenario 4: both G23 vs G4 and G2 vs basic are significant but G2 vs G23 not significant (dropped G3)
-     P_basicvsg2 < siglevel & P_g2vsg23 >= siglevel &  P_g23vsg234 < siglevel ) ) {
+    ( P_basicvsg2 < siglevel & min(P_g2vsg23, P_g23vsg234) >= siglevel |
+      #scenario 4: both G23 vs G4 and G2 vs basic are significant but G2 vs G23 not significant (dropped G3)
+      P_basicvsg2 < siglevel & P_g2vsg23 >= siglevel &  P_g23vsg234 < siglevel ) ) {
     grpFanova_pick_D = "W:G2x"
   } else if ( 
     #scenario 5: main vs G2 not significant
     P_basicvsg2 >= siglevel  ) { 
-     grpFanova_pick_D = "NA"
+    grpFanova_pick_D = "NA"
   }
   return(grpFanova_pick_D)
 }
@@ -67,22 +67,22 @@ FL_Model_Selection <- function(P_basicvsg2, P_g2vsg23, P_g23vsg234, siglevel){
 
 SGMODEL_DATA<-function(dat, outcome_type){
   if (intTRUE != "Unknown" & intTRUE != "Medicare"){
-    dat_ID_SG_pre <- dat %>%  dplyr::select(-contains( c("G4_define", "G3_define", "G2_define" ,"ID" ) ) ) 
+    dat_ID_SG_pre <- dat %>%  dplyr::select(-contains( c("G5_define", "G4_define", "G3_define", "G2_define" ,"ID" ) ) ) 
   } else {
     #for Medicare, don't use contains Fx as it delete more columns than expected!!!
     dat_ID_SG_pre <- dat %>%  # dplyr::select(-contains( c("G4_define", "G3_define", "G2_define" ,"ID" ) ) ) #%>% 
-      dplyr::select(-G4_define, -G3_define, -G2_define ,-ID  ) 
+      dplyr::select(-G5_define, -G4_define, -G3_define, -G2_define ,-ID  ) 
   } 
   
   #predict PS
-  dat_ID_SG_pre$ps <- prop.func(as.matrix( dat_ID_SG_pre %>% dplyr::select (-contains( c("W", "Y", "G4", "G3", "G2")))), #matrix of covariates
+  dat_ID_SG_pre$ps <- prop.func(as.matrix( dat_ID_SG_pre %>% dplyr::select (-contains( c("W", "Y", "G5",  "G4", "G3", "G2")))), #matrix of covariates
                                 dat_ID_SG_pre$W #outcome for glmnet
-                                )
+  )
   
   #create transformed outcome
   dat_ID_SG_pre$Y_star <- ifelse(dat_ID_SG_pre$W==1, dat_ID_SG_pre$Y/dat_ID_SG_pre$ps, -dat_ID_SG_pre$Y/(1-dat_ID_SG_pre$ps))
   
-
+  
   
   #create dataset depends on mehtod (actual outcome vs transormed outcome)
   if (outcome_type=="actual"){
@@ -95,13 +95,13 @@ SGMODEL_DATA<-function(dat, outcome_type){
   
   
   if (identical(vars_catover2,NA) ){
-    dat_ID_SG_df <-  dat_ID_SG_pre %>%  mutate_at(vars( contains( c ("G4", "G3", "G2")  )  ), as.factor) 
-    contr <- rep(list("contr.sum"), ncol( dat_ID_SG_df %>% dplyr::select( contains(  c("G4","G3", "G2")) ) ) )
-    names(contr) <-  names( dat_ID_SG_df %>% dplyr::select(contains(c("G4", "G3", "G2"  )) ) )   # grep("_", names(dat_ID_SG %>% select( -contains(c("_define")))), value=TRUE)
+    dat_ID_SG_df <-  dat_ID_SG_pre %>%  mutate_at(vars( contains( c ("G5", "G4", "G3", "G2")  )  ), as.factor) 
+    contr <- rep(list("contr.sum"), ncol( dat_ID_SG_df %>% dplyr::select( contains(  c("G5", "G4","G3", "G2")) ) ) )
+    names(contr) <-  names( dat_ID_SG_df %>% dplyr::select(contains(c("G5", "G4", "G3", "G2"  )) ) )   # grep("_", names(dat_ID_SG %>% select( -contains(c("_define")))), value=TRUE)
   } else {
-    dat_ID_SG_df <-  dat_ID_SG_pre %>%  mutate_at(vars( contains( c ("G4", "G3", "G2", vars_catover2)  )  ), as.factor) 
-    contr <- rep(list("contr.sum"), ncol( dat_ID_SG_df %>% dplyr::select( contains(  c("G4","G3", "G2",vars_catover2 )) ) ) )
-    names(contr) <-  names( dat_ID_SG_df %>% dplyr::select(contains(c("G4", "G3", "G2", vars_catover2  )) ) )   # grep("_", names(dat_ID_SG %>% select( -contains(c("_define")))), value=TRUE)
+    dat_ID_SG_df <-  dat_ID_SG_pre %>%  mutate_at(vars( contains( c ("G5", "G4", "G3", "G2", vars_catover2)  )  ), as.factor) 
+    contr <- rep(list("contr.sum"), ncol( dat_ID_SG_df %>% dplyr::select( contains(  c("G5", "G4","G3", "G2",vars_catover2 )) ) ) )
+    names(contr) <-  names( dat_ID_SG_df %>% dplyr::select(contains(c("G5", "G4", "G3", "G2", vars_catover2  )) ) )   # grep("_", names(dat_ID_SG %>% select( -contains(c("_define")))), value=TRUE)
   } 
   
   return(list(dat_ID_SG_df=dat_ID_SG_df,
@@ -115,19 +115,19 @@ SGMODEL_DATA<-function(dat, outcome_type){
 #' @param g2  metric for g2 model   
 #' @param g3  metric for g3 model 
 #' @param g4  metric for g4 model 
+#' @param g5  metric for g5 model 
 #'  
 #' @return the depth of subgroup selected, e.g. "W:G2x"
 #' 
 #' @export
 
-PICK_m234 <- function(HTE_P_value, m, g2, g3, g4){
-  if (round(HTE_P_value,1) > 0.1){#may be false negative, i.e. HTE may exist, use AIC/CV MSE
-    grp_pick_D=  paste0("W:G",  which.min(c(m, g2, g3, g4)), "x" )
+PICK_m2345 <- function(HTE_P_value, m, g2, g3, g4, g5){
+  if (round(HTE_P_value,1) > 0.1){#may be false negative, i.e. HTE may exist, 
+    grp_pick_D=  paste0("W:G",  which.min(c(m, g2, g3, g4, g5)), "x" )
     grp_pick_D = ifelse("W:1G", "NA",  grp_pick_D)
-  } else {#if HTE P-value <0.1, then we know for sure HTE exist, then no need to consider basic model without interaction terms of subgroup decision
-    #then we use BIC to place a heavier penalty on models with many variables,
+  } else {#if HTE P-value <0.1, then we know for sure HTE exist, 
     #i.e. to reduce subgroup number and number of covariates define a subgroup
-    grp_pick_D= paste0("W:G",  which.min(c(g2, g3, g4)) + 1 , "x" )
+    grp_pick_D= paste0("W:G",  which.min(c(g2, g3, g4, g5)) + 1 , "x" )
   }
   return(grp_pick_D)
 }
@@ -141,8 +141,8 @@ PICK_m234 <- function(HTE_P_value, m, g2, g3, g4){
 #' @export
 FINALDECI<- function(grp_pick, V_D4_subgroup,  V_D3_subgroup, V_D2_subgroup){
   #if (iterationNo > 1){
-    CFmethod_prefix  = "vote_D"
-    CFmethod_postfix = "_subgroup"
+  CFmethod_prefix  = "vote_D"
+  CFmethod_postfix = "_subgroup"
   #} else if (iterationNo ==1 ){
   #  CFmethod_prefix  =  "vote_D" #"vote_1D"
   #  CFmethod_postfix = "_subgroup" #"b_subgroup"
@@ -173,209 +173,90 @@ FINALDECI<- function(grp_pick, V_D4_subgroup,  V_D3_subgroup, V_D2_subgroup){
 #' @export
 
 
-CF_GROUP_DECISION <- function(HTE_P_value, dat, method_CF, outcome_type, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup){
- if ( round(HTE_P_value,1) > 0.1 #| is.na( stringr::str_sub(grplasso_shrink_pick_D,4,4) ) 
+CF_GROUP_DECISION <- function(HTE_P_value, dat, method_CF, outcome_type, V_D5_subgroup, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup){
+  if ( round(HTE_P_value,1) > 0.1 #| is.na( stringr::str_sub(grplasso_shrink_pick_D,4,4) ) 
   ){
-   AIC_g4 = "NA"
-   AIC_g3 = "NA"
-   AIC_g2 = "NA"
-   AIC_basic = "NA"
-   grp_AIC_pick_D         = "NA"
-   grp_BIC_pick_D         = "NA"
-   grp_FL_pick_D_05       = "NA"
-   grp_FL_pick_D_10       = "NA"
-   Deci_Final_CF_AIC      = "NA"     
-   model.basic="NA"
-   model.g2="NA"
-   model.g3="NA"
-   model.g4="NA"
-    return(list(  AIC_g4 = AIC_g4,
-                  AIC_g3 = AIC_g3,
-                  AIC_g2 = AIC_g2,
-                  AIC_basic = AIC_basic,
-                  grp_AIC_pick_D         = grp_AIC_pick_D,
-                  grp_BIC_pick_D         = grp_BIC_pick_D,
-                  grp_FL_pick_D_05       = grp_FL_pick_D_05,
-                  grp_FL_pick_D_10       = grp_FL_pick_D_10,
-                  Deci_Final_CF_AIC      = Deci_Final_CF_AIC,     
+    #AIC_g4 = "NA"
+    #AIC_g3 = "NA"
+    #AIC_g2 = "NA"
+    #AIC_basic = "NA"
+    #grp_AIC_pick_D         = "NA"
+    #grp_BIC_pick_D         = "NA"
+    #grp_FL_pick_D_05       = "NA"
+    #grp_FL_pick_D_10       = "NA"
+    #Deci_Final_CF_AIC      = "NA"     
+    model.basic="NA"
+    model.g2="NA"
+    model.g3="NA"
+    model.g4="NA"
+    model.g5="NA"
+    return(list(  #AIC_g4 = AIC_g4,
+                  #AIC_g3 = AIC_g3,
+                  #AIC_g2 = AIC_g2,
+                  #AIC_basic = AIC_basic,
+                  #grp_AIC_pick_D         = grp_AIC_pick_D,
+                  #grp_BIC_pick_D         = grp_BIC_pick_D,
+                  #grp_FL_pick_D_05       = grp_FL_pick_D_05,
+                  #grp_FL_pick_D_10       = grp_FL_pick_D_10,
+                  #Deci_Final_CF_AIC      = Deci_Final_CF_AIC,     
                   model.basic=model.basic,
                   model.g2=model.g2,
                   model.g3=model.g3,
-                  model.g4=model.g4))
+                  model.g4=model.g4,
+                  model.g5=model.g5))
   } else {
-  #################################
-  ##      PREPARATION            ##
-  #################################
- 
-  SGmodel_dat <-  SGMODEL_DATA (dat,outcome_type)
-  
-  dat_ID_SG_df = SGmodel_dat$dat_ID_SG_df
-  contr = SGmodel_dat$contr
- 
-#################################
-##     AIC or BIC              ##
-#################################
+    #################################
+    ##      PREPARATION            ##
+    #################################
+    
+    SGmodel_dat <-  SGMODEL_DATA (dat,outcome_type)
+    
+    dat_ID_SG_df = SGmodel_dat$dat_ID_SG_df
+    contr = SGmodel_dat$contr
+    
+    #################################
+    ##     AIC or BIC              ##
+    #################################
     #-----------------------------------------------------------------------------------------------------
     #group selection method 3: AIC for unnested model including ONLY one of the following: G2 & W:G2, G3 & W:G3, or G4 & W: G4
     #-----------------------------------------------------------------------------------------------------
-#AIC the smaller the better, model.g2,3,4 works for both continous or binary outcome, stepAIC default setting is "backward".
-#continious outcome
-if (length(unique(dat_ID_SG_df$Y)) >=8 ){
-  model.basic = lm(formula_basic, data = dat_ID_SG_df) 
-  if ("G2" %in% names(contr)) {model.g2    = lm(formula_g2,    data = dat_ID_SG_df)}
-  if ("G3" %in% names(contr)) {model.g3    = lm(formula_g3,    data = dat_ID_SG_df)}
-  if ("G4" %in% names(contr)) {model.g4    = lm(formula_g4,    data = dat_ID_SG_df)}
-} else if (length(unique(dat_ID_SG_df$Y)) ==2) { #if using tranformed outcome, then the Y_star will always be continuous!!!
-  #binary outcome
-  model.basic = glm(formula_basic, data = dat_ID_SG_df, family=binomial)
-  if ("G2" %in% names(contr)) {model.g2    = glm(formula_g2,    data = dat_ID_SG_df, family=binomial)}
-  if ("G3" %in% names(contr)) {model.g3    = glm(formula_g3,    data = dat_ID_SG_df, family=binomial)}
-  if ("G4" %in% names(contr)) {model.g4    = glm(formula_g4,    data = dat_ID_SG_df, family=binomial)}
-}
+    #AIC the smaller the better, model.g2,3,4 works for both continous or binary outcome, stepAIC default setting is "backward".
+    #continious outcome
+    if (length(unique(dat_ID_SG_df$Y)) >=8 ){
+      model.basic = lm(formula_basic, data = dat_ID_SG_df) 
+      if ("G2" %in% names(contr)) {model.g2    = lm(formula_g2,    data = dat_ID_SG_df)}
+      if ("G3" %in% names(contr)) {model.g3    = lm(formula_g3,    data = dat_ID_SG_df)}
+      if ("G4" %in% names(contr)) {model.g4    = lm(formula_g4,    data = dat_ID_SG_df)}
+      if ("G5" %in% names(contr)) {model.g5    = lm(formula_g5,    data = dat_ID_SG_df)}
+    } else if (length(unique(dat_ID_SG_df$Y)) ==2) { #if using tranformed outcome, then the Y_star will always be continuous!!!
+      #binary outcome
+      model.basic = glm(formula_basic, data = dat_ID_SG_df, family=binomial)
+      if ("G2" %in% names(contr)) {model.g2    = glm(formula_g2,    data = dat_ID_SG_df, family=binomial)}
+      if ("G3" %in% names(contr)) {model.g3    = glm(formula_g3,    data = dat_ID_SG_df, family=binomial)}
+      if ("G4" %in% names(contr)) {model.g4    = glm(formula_g4,    data = dat_ID_SG_df, family=binomial)}
+      if ("G5" %in% names(contr)) {model.g5    = glm(formula_g5,    data = dat_ID_SG_df, family=binomial)}
+    }
+    
+   
+    
+    
+    return(list(#lambda.max.gp          = lambda_max,
+      #lambda.min.gp          = lambda.min.gp,
+      #grplasso_cv_pick_D     = grplasso_cv_pick_D,
+      #grplasso_shrink_pick_D = grplasso_shrink_pick_D,
+      #grplasso_SHRINK_vs_CV  = grplasso_SHRINK_vs_CV,
 
-AIC_basic =( MASS::stepAIC(model.basic, steps=0,k=2                          ) ) $anova$AIC
-BIC_basic =( MASS::stepAIC(model.basic, steps=0, k=log(nrow(dat_ID_SG_df)) ) ) $anova$AIC
-
-if ("G2" %in% names(contr)) { 
-  BIC_g2    =( MASS::stepAIC(model.g2,    steps=0,  k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
-  } else { BIC_g2 = Inf }
-if ("G3" %in% names(contr)) { 
-  BIC_g3    =( MASS::stepAIC(model.g3,    steps=0,  k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
-  } else { BIC_g3 = Inf}
-if ("G4" %in% names(contr)) { 
-  BIC_g4    =( MASS::stepAIC(model.g4,    steps=0,  k=log(nrow(dat_ID_SG_df)) )) $anova$AIC 
-} else { BIC_g4 = Inf}
-
-if ("G2" %in% names(contr)) { 
-  AIC_g2    =( MASS::stepAIC(model.g2,    steps=0,  k=2 )) $anova$AIC 
-} else { AIC_g2 = Inf }
-if ("G3" %in% names(contr)) { 
-  AIC_g3    =( MASS::stepAIC(model.g3,    steps=0,  k=2 )) $anova$AIC 
-} else { AIC_g3 = Inf}
-if ("G4" %in% names(contr)) { 
-  AIC_g4    =( MASS::stepAIC(model.g4,    steps=0,  k=2 )) $anova$AIC 
-} else { AIC_g4 = Inf}
-
-
-
-
-grp_AIC_pick_D <- PICK_m234(HTE_P_value, AIC_basic, AIC_g2, AIC_g3, AIC_g4)
-grp_BIC_pick_D <- PICK_m234(HTE_P_value, BIC_basic, BIC_g2, BIC_g3, BIC_g4)
-
-
-
-    #-----------------------------------------------------------------------------------------------------
-    #Method 4: ANOVA for nested model including at least one of the following: G2 & W:G2, G3 & W:G3, or G4 & W: G4
-    #-----------------------------------------------------------------------------------------------------
-if (length(unique(dat_ID_SG_df$Y)) >=8 ){
-model.g234  = lm(formula_gl,     data = dat_ID_SG_df)
-model.g23   = lm(formula_g23,    data = dat_ID_SG_df)
-} else if (length(unique(dat_ID_SG_df$Y)) ==2){
-model.g234  = glm(formula_gl,     data = dat_ID_SG_df, family = "binomial")
-model.g23   = glm(formula_g23,    data = dat_ID_SG_df, family = "binomial") 
-}
-#don't use forward selection! because if the main model is wrong, other models may not be correct
-
-if (length(unique(dat_ID_SG_df$Y)) >=8 ){
-F_backward <- anova(model.g234,   #Model 4, may be equal to Model 3
-                   model.g23,   #Model 3, may be equal to Model 2
-                   model.g2,    #Model 2
-                   model.basic #Model 1
-                  )
-if ( is.na(F_backward$`Pr(>F)`[2]) ) {
-  Pval_g23vsg234 = Inf } else {Pval_g23vsg234 = F_backward$`Pr(>F)`[2] } 
-#if D3 decision = D2 decision then model.g23=model.2, thus P-value for Model 3 = NA
-if ( is.na(F_backward$`Pr(>F)`[3]) ) {
-  Pval_g2vsg23   = Inf } else { Pval_g2vsg23   = F_backward$`Pr(>F)`[3] }
-#if D3 decision = D4 decision then model.g234=model.23, thus P-value for Model 4 = NA
-if ( is.na( F_backward$`Pr(>F)`[4] )) {
-  Pval_basicvsg2 = Inf } else { Pval_basicvsg2 = F_backward$`Pr(>F)`[4] }
-
-
-} else if ( length(unique(dat_ID_SG_df$Y)) ==2 )  {
-  F_backward <- anova(model.g234,   #Model 4, may be equal to Model 3
-                      model.g23,   #Model 3, may be equal to Model 2
-                      model.g2,    #Model 2
-                      model.basic, #Model 1
-                      test="LRT"
-                     ) 
-  if ( is.na(F_backward$`Pr(>Chi)`[2]) ) {
-    Pval_g23vsg234 = Inf } else { Pval_g23vsg234 = F_backward$`Pr(>Chi)`[2] } 
-  #if D3 decision = D2 decision then model.g23=model.2, thus P-value for Model 3 = NA
-  if ( is.na(F_backward$`Pr(>Chi)`[3]) ) {
-    Pval_g2vsg23   = Inf } else { Pval_g2vsg23   = F_backward$`Pr(>Chi)`[3] }
-  #if D3 decision = D4 decision then model.g234=model.23, thus P-value for Model 4 = NA
-  if ( is.na( F_backward$`Pr(>Chi)`[4] )) {
-    Pval_basicvsg2 = Inf } else { Pval_basicvsg2 = F_backward$`Pr(>Chi)`[4] }
-  
-}
-
-
-
-grp_FL_pick_D_05 <- FL_Model_Selection(Pval_basicvsg2, Pval_g2vsg23, Pval_g23vsg234, 0.05)
-
-grp_FL_pick_D_10 <- FL_Model_Selection(Pval_basicvsg2, Pval_g2vsg23, Pval_g23vsg234, 0.10)
-
-#################################
-##  OBTAIN GROUP DECISION      ##
-#################################
-
-#______________________________________________________________
-#group lasso CV or shrink won't obtain "NA", thus straightford:
-
-#Deci_Final_CF_cv      <-  FINALDECI(grplasso_cv_pick_D)
-#Deci_Final_CF_shrink  <- FINALDECI(grplasso_shrink_pick_D)
-Deci_Final_CF_AIC     <- FINALDECI(grp_AIC_pick_D, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup)
-Deci_Final_CF_BIC     <- FINALDECI(grp_BIC_pick_D, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup)
-Deci_Final_CF_FL_sl05 <- FINALDECI(grp_FL_pick_D_05, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup)
-Deci_Final_CF_FL_sl10 <- FINALDECI(grp_FL_pick_D_10, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup)
-#the program below can be removed since using the FINALDECI function
-
-#to make sure g4 has a model, otherwise it shows error 'model.g4' not found, check DATA4grplasso functn for different scenarios details 
-if( identical(V_D4_subgroup$majority, V_D3_subgroup$majority) & identical(V_D4_subgroup$majority, V_D2_subgroup$majority) & 
-    ("G4" %in% names(contr) == F ) &  ("G3" %in% names(contr) == F ) 
-    ){
-  model.g4    = model.g2
-  model.g3    = model.g2
-} else if (
-  #scenario 2: if D4_subgroup = D3_subgroup OR D4_subgroup = D2_subgroup
-  identical(V_D4_subgroup$majority, V_D3_subgroup$majority) &   
-  "G4" %in% names(contr) == F ) {
-  model.g4   =  model.g3
-} else if ( identical(V_D4_subgroup$majority, V_D2_subgroup$majority) &  
-            "G4" %in% names(contr) == F ) {
-  model.g4   = model.g2
-} else if ( 
-  #scenario 3: if D3_subgroup = D2_subgroup
-  identical(V_D3_subgroup$majority, V_D2_subgroup$majority) ) {
-  model.g3   =  model.g2
-}
-
-
-
-  return(list(#lambda.max.gp          = lambda_max,
-              #lambda.min.gp          = lambda.min.gp,
-              #grplasso_cv_pick_D     = grplasso_cv_pick_D,
-              #grplasso_shrink_pick_D = grplasso_shrink_pick_D,
-              #grplasso_SHRINK_vs_CV  = grplasso_SHRINK_vs_CV,
-              AIC_g4 = AIC_g4,
-              AIC_g3 = AIC_g3,
-              AIC_g2 = AIC_g2,
-              AIC_basic = AIC_basic,
-              grp_AIC_pick_D         = grp_AIC_pick_D,
-              grp_BIC_pick_D         = grp_BIC_pick_D,
-              grp_FL_pick_D_05       = grp_FL_pick_D_05,
-              grp_FL_pick_D_10       = grp_FL_pick_D_10,
-              #Deci_Final_CF_cv       = Deci_Final_CF_cv,
-              #Deci_Final_CF_shrink   = Deci_Final_CF_shrink,
-              Deci_Final_CF_AIC      = Deci_Final_CF_AIC,     
-              #Deci_Final_CF_BIC      = Deci_Final_CF_BIC,     
-              #Deci_Final_CF_FL_sl05   = Deci_Final_CF_FL_sl05,   
-              #Deci_Final_CF_FL_sl10   = Deci_Final_CF_FL_sl10,
-              model.basic=model.basic,
-              model.g2=model.g2,
-              model.g3=model.g3,
-              model.g4=model.g4))
+      #Deci_Final_CF_cv       = Deci_Final_CF_cv,
+      #Deci_Final_CF_shrink   = Deci_Final_CF_shrink,
+      #Deci_Final_CF_AIC      = Deci_Final_CF_AIC,     
+      #Deci_Final_CF_BIC      = Deci_Final_CF_BIC,     
+      #Deci_Final_CF_FL_sl05   = Deci_Final_CF_FL_sl05,   
+      #Deci_Final_CF_FL_sl10   = Deci_Final_CF_FL_sl10,
+      model.basic=model.basic,
+      model.g2=model.g2,
+      model.g3=model.g3,
+      model.g4=model.g4,
+      model.g5=model.g5))
   } #use HTE p-value at the begnining
 }
 
@@ -465,7 +346,7 @@ TorF <- function(v_D4_tree, v_D4_tree_R, Desc_v_D4, v_D3_tree, v_D3_tree_R, Desc
 
 N_SUBGROUP <- function(deci, method_L) {
   
-          if (is.null (nrow(deci))==TRUE  & method_L == "tree_sg" ) {
+  if (is.null (nrow(deci))==TRUE  & method_L == "tree_sg" ) {
     n_subgroup = 0
   }  else if (is.null (nrow(deci))==FALSE & method_L == "tree_sg") {
     n_subgroup = nrow(deci)
@@ -527,151 +408,151 @@ DETECT_STRING <- function(your_list, vector_strings){
 #metric="subgroup"
 
 DISCOVERYRATE <- function (decision, truth_description, tree_true_subgroup, truth_INT, method, metric){
-
+  
   #if assessing performance by subgroup identification for tree-based method:
   if ( method %in% c("oneCFv", "oneCFb", "iCF", "iCFv", "IT", "VT")==T & metric=="subgroup"){
-      if (is.null( dim(decision))== F ) {
-        Deci_vec    <- dplyr::pull(decision,           subgroup)#subgroup here is a column's name
-        } else {
-        Deci_vec = "NA"
-        }
-
-      if (is.null( dim(tree_true_subgroup)) == F) {
-        Truth_vec  <- dplyr::pull(tree_true_subgroup, subgroup)
-        } else {
-        Truth_vec = "NA"
-        }
-    #get N to judge false+ or false-
-      N_true   <- N_SUBGROUP (tree_true_subgroup, "tree_sg")
-      N_deci   <- N_SUBGROUP (decision,           "tree_sg")
-    } else if ( metric=="interaction" | metric=="CATEmax") {
-      #if assessing performance by interaction identification for ALL method:
-      
-    
-      Deci_vec       <- decision
-      Truth_vec      <- truth_INT
-      N_true  <- N_SUBGROUP (truth_INT,      "non-tree_int")
-      N_deci  <- N_SUBGROUP (decision,       "non-tree_int")
+    if (is.null( dim(decision))== F ) {
+      Deci_vec    <- dplyr::pull(decision,           subgroup)#subgroup here is a column's name
+    } else {
+      Deci_vec = "NA"
     }
-
-   Deci_vec_L  <- as.list(Deci_vec)  #the same for both TREE and non-TREE method 
-   Truth_vec_L <- as.list(Truth_vec) #the same for both TREE and non-TREE method
-
-value = ifelse (
-###########################--------------------------       
-# I.1 ACCURATE
-###########################--------------------------
-(
-  #----------------------------------------------------                                       
-  #I.1.1. identical for tree-based method
-  #----------------------------------------------------  
-( metric=="subgroup"                           & identical(decision, tree_true_subgroup)  ) |
-((metric=="CATEmax" |  metric=="interaction" ) & identical(decision, truth_INT #when metric=="CATEmax", truth_INT parameter is true subgroup with max CATE rather than overall true interaction
-                                                           )  )  |
-  #----------------------------------------------------                                       
-  #I.1.2. 4-way INT
-  #----------------------------------------------------
-(metric=="interaction" & truth_description == "4-way INT of W, X3, X1, X8" & 
-                                           #I.1.2.1. the same ignoring order
-                                          ( setequal(Deci_vec, truth_INT) == T  | 
-                                           #I.1.2.2. as long as W:X1:X3:X8 is identified:
-                                          ( "W:X1:X3:X8" %in% decision  & 
-                                                        #all inconsistent interactions are one of the following:
-                                            all( decision[is.na(match(decision, truth_INT))] %in% c("W:X1:X3", "W:X1:X8", "W:X3:X8", "W:X1", "W:X3", "W:X8") )  
-                                            )
-                                            )
-                                            )
-                                            |
-(metric=="interaction" & (truth_description == "4-way INT of W, X3, X1, X2(4l)" |  #ordinal splitter 4 levels
-                          truth_description == "4-way INT of W, X3, X1, X2(3l)" |  #ordinal splitter 3 levels
-                          truth_description == "4-way INT of W, X3, X1, X2(l)") &  #cotinuous splitter
-     #I.1.3.1. the same ignoring order
-     ( setequal(Deci_vec, truth_INT) == T | 
-         #I.1.3.2. as long as W:X1:X3 is identified:
-         ("W:X1:X2:X3" %in% decision  & 
-            #all inconsistent interactions are one of the following:
-            all( decision[is.na(match(decision, truth_INT))] %in% c("W:X1:X3", "W:X1:X2", "W:X2:X3", "W:X1", "W:X3", "W:X2") )  
-         ) 
-     )
-  )
-|
- #----------------------------------------------------                                       
- #I.1.3. 3-way INT
- #----------------------------------------------------
-(metric=="interaction" & truth_description == "3-way INT of W, X3, X1"     & #binary splitter
-                                           #I.1.3.1. the same ignoring order
-                                          ( setequal(Deci_vec, truth_INT) == T | 
-                                           #I.1.3.2. as long as W:X1:X3 is identified:
-                                          ("W:X1:X3" %in% decision  & 
-                                                       #all inconsistent interactions are one of the following:
-                                              all( decision[is.na(match(decision, truth_INT))] %in% c("W:X1", "W:X3") )
-                                            ) 
-                                            )
-                                            )
-                                            |
-(metric=="interaction" & (truth_description == "3-way INT of W, X3, X2(4l)" |  #ordinal splitter 4 levels
-                          truth_description == "3-way INT of W, X3, X2(3l)" |  #ordinal splitter 3 levels
-                          truth_description == "3-way INT of W, X3, X2(l)") &  #cotinuous splitter
-     #I.1.3.1. the same ignoring order
-     ( setequal(Deci_vec, truth_INT) == T | 
-         #I.1.3.2. as long as W:X1:X3 is identified:
-         ("W:X2:X3" %in% decision  & 
-            #all inconsistent interactions are one of the following:
-            all( decision[is.na(match(decision, truth_INT))] %in% c("W:X2", "W:X3") )
-         ) 
-     )
-  )
-  |
- #----------------------------------------------------                                       
- #I.1.4. 2-way INT, two or three 2 way INTs
- #----------------------------------------------------
-(metric=="interaction" & (substr(truth_description,1,5) == "2-way" | #2-way INT
-                          truth_description == "Three 2-way INTs of W, X3, X1, X8" | #three 2-way INT
-                          truth_description == "Two 2-way INTs of W, X3, X1") #two 2-way INT
-                        & setequal(Deci_vec, truth_INT) ) 
-), 
-1 
-, 
-############################--------------------------       
-# I.2 "FALSE NEGATIVE" abuse term
-############################--------------------------
-    #SG/INT No. < truth     & at 1st glance, none of defined subgroups are the same as the truth;   & ALL SG/INT in the decision vector are nested in truth list, e.g. X3:X1 in X3:X1:X8   
-    ifelse( N_deci < N_true  & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                        & all( unlist(DETECT_STRING(Truth_vec_L, Deci_vec)) ) == T, 2,  
-    #SG/INT No. < truth     & at 1st glance, none of defined subgroups are the same as the truth;   & some or all of SG/INT in the decision vector are nested in truth list, e.g. X3:X1 in X3:X1:X8   
-    ifelse( N_deci < N_true  & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                        & all( unlist(DETECT_STRING(Truth_vec_L, Deci_vec)) ) == F, 3,  
-    # subgroup No. < truth  & some of defined subgroups are the same as the true subgroups;         & some SG/INT in the truth list not included in the decision vector    
-    ifelse( N_deci < N_true  & length( Deci_vec[Deci_vec %in% Truth_vec]) > 0                        & (length( Truth_vec[Truth_vec  %in% Deci_vec]) < length(Truth_vec) ) , 4, 
-############################--------------------------       
-# I.3 "FALSE POSITIVE" abuse term
-############################--------------------------       
-    # SG/INT No. > truth  & at 1st glance, none of SG/INT are the same as the truths;               & NONE of SG/INT in the truth vector are nested in decision list  (totally wrong)
-    ifelse( N_deci > N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                       & all( unlist(DETECT_STRING(Deci_vec_L, Truth_vec)) ) == F, 5,  
-    #SG/INT No. >= truth  & at 1st glance, none of SG/INT are the same as the truths;                & some or all of SG/INT in the truth vector (eg,"W:X1" "W:X3") are nested in decision list (eg, "W:X1:X10"    "W:X1:X10:X4" "W:X1:X10:X7"), e.g.
-    ifelse( N_deci > N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                       & all( unlist(DETECT_STRING(Deci_vec_L, Truth_vec)) ) == T, 6,  
-    # SG/INT No. >= truth  & some SG/INT are the same as in the true subgroups;                      & some SG/INT in the decision list not included in the truth vector                         
-    ifelse( N_deci > N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) > 0                        & ( length( Deci_vec[Deci_vec %in% Truth_vec]) < length(Deci_vec)  ) , 7, 
-############################--------------------------       
-# I.4 
-############################-------------------------- 
-    # SG/INT No. = truth  & at 1st glance, none of SG/INT are the same as the truths;               & NONE of SG/INT in the truth vector are nested in decision list (totally wrong)
-    ifelse( N_deci == N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                       & all( unlist(DETECT_STRING(Deci_vec_L, Truth_vec)) ) == F, 8,  
-    #SG/INT No. >= truth  & at 1st glance, none of SG/INT are the same as the truths;                & some or all of SG/INT in the truth vector (eg,"W:X1" "W:X3") are nested in decision list (eg, "W:X1:X10"    "W:X1:X10:X4"), e.g.
-    ifelse( N_deci == N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                       & all( unlist(DETECT_STRING(Deci_vec_L, Truth_vec)) ) == T, 9,  
-    # SG/INT No. >= truth  & some SG/INT are the same as in the true subgroups;                      & some SG/INT in the decision list (eg "X3<=0 & X1<=0" "X3>0 & X1<=0" "X7<=-0.2 & X1>0" "X7>-0.2 & X1>0") not included in the truth vector (eg "X3<=0 & X1<=0" "X3<=0 & X1>0"  "X3>0 & X1<=0"  "X3>0 & X1>0" )                          
-    ifelse( N_deci == N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) > 0                        & ( length( Deci_vec[Deci_vec %in% Truth_vec]) < length(Deci_vec)  ) , 10, 
-                              11 )))))))))
-
-)
     
-#the following is for "subgroup" metric!!!
-sgpct_Nacc_Nalldeci <- length( Deci_vec[Deci_vec %in% Truth_vec])/length(Deci_vec)  #% identified true subgroups among identified subgroups
-sgpct_Nacc_Nalltrue <- length( Deci_vec[Deci_vec %in% Truth_vec])/length(Truth_vec) #% identified true subgroups among true subgroups, 
-
-    return( list(value         = value,
-                 sg_Nacc_Nall  = sgpct_Nacc_Nalldeci , 
-                 sg_Nacc_NallT = sgpct_Nacc_Nalltrue))
+    if (is.null( dim(tree_true_subgroup)) == F) {
+      Truth_vec  <- dplyr::pull(tree_true_subgroup, subgroup)
+    } else {
+      Truth_vec = "NA"
+    }
+    #get N to judge false+ or false-
+    N_true   <- N_SUBGROUP (tree_true_subgroup, "tree_sg")
+    N_deci   <- N_SUBGROUP (decision,           "tree_sg")
+  } else if ( metric=="interaction" | metric=="CATEmax") {
+    #if assessing performance by interaction identification for ALL method:
+    
+    
+    Deci_vec       <- decision
+    Truth_vec      <- truth_INT
+    N_true  <- N_SUBGROUP (truth_INT,      "non-tree_int")
+    N_deci  <- N_SUBGROUP (decision,       "non-tree_int")
   }
   
+  Deci_vec_L  <- as.list(Deci_vec)  #the same for both TREE and non-TREE method 
+  Truth_vec_L <- as.list(Truth_vec) #the same for both TREE and non-TREE method
+  
+  value = ifelse (
+    ###########################--------------------------       
+    # I.1 ACCURATE
+    ###########################--------------------------
+    (
+      #----------------------------------------------------                                       
+      #I.1.1. identical for tree-based method
+      #----------------------------------------------------  
+      ( metric=="subgroup"                           & identical(decision, tree_true_subgroup)  ) |
+        ((metric=="CATEmax" |  metric=="interaction" ) & identical(decision, truth_INT #when metric=="CATEmax", truth_INT parameter is true subgroup with max CATE rather than overall true interaction
+        )  )  |
+        #----------------------------------------------------                                       
+      #I.1.2. 4-way INT
+      #----------------------------------------------------
+      (metric=="interaction" & truth_description == "4-way INT of W, X3, X1, X8" & 
+         #I.1.2.1. the same ignoring order
+         ( setequal(Deci_vec, truth_INT) == T  | 
+             #I.1.2.2. as long as W:X1:X3:X8 is identified:
+             ( "W:X1:X3:X8" %in% decision  & 
+                 #all inconsistent interactions are one of the following:
+                 all( decision[is.na(match(decision, truth_INT))] %in% c("W:X1:X3", "W:X1:X8", "W:X3:X8", "W:X1", "W:X3", "W:X8") )  
+             )
+         )
+      )
+      |
+        (metric=="interaction" & (truth_description == "4-way INT of W, X3, X1, X2(4l)" |  #ordinal splitter 4 levels
+                                    truth_description == "4-way INT of W, X3, X1, X2(3l)" |  #ordinal splitter 3 levels
+                                    truth_description == "4-way INT of W, X3, X1, X2(l)") &  #cotinuous splitter
+           #I.1.3.1. the same ignoring order
+           ( setequal(Deci_vec, truth_INT) == T | 
+               #I.1.3.2. as long as W:X1:X3 is identified:
+               ("W:X1:X2:X3" %in% decision  & 
+                  #all inconsistent interactions are one of the following:
+                  all( decision[is.na(match(decision, truth_INT))] %in% c("W:X1:X3", "W:X1:X2", "W:X2:X3", "W:X1", "W:X3", "W:X2") )  
+               ) 
+           )
+        )
+      |
+        #----------------------------------------------------                                       
+      #I.1.3. 3-way INT
+      #----------------------------------------------------
+      (metric=="interaction" & truth_description == "3-way INT of W, X3, X1"     & #binary splitter
+         #I.1.3.1. the same ignoring order
+         ( setequal(Deci_vec, truth_INT) == T | 
+             #I.1.3.2. as long as W:X1:X3 is identified:
+             ("W:X1:X3" %in% decision  & 
+                #all inconsistent interactions are one of the following:
+                all( decision[is.na(match(decision, truth_INT))] %in% c("W:X1", "W:X3") )
+             ) 
+         )
+      )
+      |
+        (metric=="interaction" & (truth_description == "3-way INT of W, X3, X2(4l)" |  #ordinal splitter 4 levels
+                                    truth_description == "3-way INT of W, X3, X2(3l)" |  #ordinal splitter 3 levels
+                                    truth_description == "3-way INT of W, X3, X2(l)") &  #cotinuous splitter
+           #I.1.3.1. the same ignoring order
+           ( setequal(Deci_vec, truth_INT) == T | 
+               #I.1.3.2. as long as W:X1:X3 is identified:
+               ("W:X2:X3" %in% decision  & 
+                  #all inconsistent interactions are one of the following:
+                  all( decision[is.na(match(decision, truth_INT))] %in% c("W:X2", "W:X3") )
+               ) 
+           )
+        )
+      |
+        #----------------------------------------------------                                       
+      #I.1.4. 2-way INT, two or three 2 way INTs
+      #----------------------------------------------------
+      (metric=="interaction" & (substr(truth_description,1,5) == "2-way" | #2-way INT
+                                  truth_description == "Three 2-way INTs of W, X3, X1, X8" | #three 2-way INT
+                                  truth_description == "Two 2-way INTs of W, X3, X1") #two 2-way INT
+       & setequal(Deci_vec, truth_INT) ) 
+    ), 
+    1 
+    , 
+    ############################--------------------------       
+    # I.2 "FALSE NEGATIVE" abuse term
+    ############################--------------------------
+    #SG/INT No. < truth     & at 1st glance, none of defined subgroups are the same as the truth;   & ALL SG/INT in the decision vector are nested in truth list, e.g. X3:X1 in X3:X1:X8   
+    ifelse( N_deci < N_true  & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                        & all( unlist(DETECT_STRING(Truth_vec_L, Deci_vec)) ) == T, 2,  
+            #SG/INT No. < truth     & at 1st glance, none of defined subgroups are the same as the truth;   & some or all of SG/INT in the decision vector are nested in truth list, e.g. X3:X1 in X3:X1:X8   
+            ifelse( N_deci < N_true  & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                        & all( unlist(DETECT_STRING(Truth_vec_L, Deci_vec)) ) == F, 3,  
+                    # subgroup No. < truth  & some of defined subgroups are the same as the true subgroups;         & some SG/INT in the truth list not included in the decision vector    
+                    ifelse( N_deci < N_true  & length( Deci_vec[Deci_vec %in% Truth_vec]) > 0                        & (length( Truth_vec[Truth_vec  %in% Deci_vec]) < length(Truth_vec) ) , 4, 
+                            ############################--------------------------       
+                            # I.3 "FALSE POSITIVE" abuse term
+                            ############################--------------------------       
+                            # SG/INT No. > truth  & at 1st glance, none of SG/INT are the same as the truths;               & NONE of SG/INT in the truth vector are nested in decision list  (totally wrong)
+                            ifelse( N_deci > N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                       & all( unlist(DETECT_STRING(Deci_vec_L, Truth_vec)) ) == F, 5,  
+                                    #SG/INT No. >= truth  & at 1st glance, none of SG/INT are the same as the truths;                & some or all of SG/INT in the truth vector (eg,"W:X1" "W:X3") are nested in decision list (eg, "W:X1:X10"    "W:X1:X10:X4" "W:X1:X10:X7"), e.g.
+                                    ifelse( N_deci > N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                       & all( unlist(DETECT_STRING(Deci_vec_L, Truth_vec)) ) == T, 6,  
+                                            # SG/INT No. >= truth  & some SG/INT are the same as in the true subgroups;                      & some SG/INT in the decision list not included in the truth vector                         
+                                            ifelse( N_deci > N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) > 0                        & ( length( Deci_vec[Deci_vec %in% Truth_vec]) < length(Deci_vec)  ) , 7, 
+                                                    ############################--------------------------       
+                                                    # I.4 
+                                                    ############################-------------------------- 
+                                                    # SG/INT No. = truth  & at 1st glance, none of SG/INT are the same as the truths;               & NONE of SG/INT in the truth vector are nested in decision list (totally wrong)
+                                                    ifelse( N_deci == N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                       & all( unlist(DETECT_STRING(Deci_vec_L, Truth_vec)) ) == F, 8,  
+                                                            #SG/INT No. >= truth  & at 1st glance, none of SG/INT are the same as the truths;                & some or all of SG/INT in the truth vector (eg,"W:X1" "W:X3") are nested in decision list (eg, "W:X1:X10"    "W:X1:X10:X4"), e.g.
+                                                            ifelse( N_deci == N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) == 0                       & all( unlist(DETECT_STRING(Deci_vec_L, Truth_vec)) ) == T, 9,  
+                                                                    # SG/INT No. >= truth  & some SG/INT are the same as in the true subgroups;                      & some SG/INT in the decision list (eg "X3<=0 & X1<=0" "X3>0 & X1<=0" "X7<=-0.2 & X1>0" "X7>-0.2 & X1>0") not included in the truth vector (eg "X3<=0 & X1<=0" "X3<=0 & X1>0"  "X3>0 & X1<=0"  "X3>0 & X1>0" )                          
+                                                                    ifelse( N_deci == N_true & length( Deci_vec[Deci_vec %in% Truth_vec]) > 0                        & ( length( Deci_vec[Deci_vec %in% Truth_vec]) < length(Deci_vec)  ) , 10, 
+                                                                            11 )))))))))
+    
+  )
+  
+  #the following is for "subgroup" metric!!!
+  sgpct_Nacc_Nalldeci <- length( Deci_vec[Deci_vec %in% Truth_vec])/length(Deci_vec)  #% identified true subgroups among identified subgroups
+  sgpct_Nacc_Nalltrue <- length( Deci_vec[Deci_vec %in% Truth_vec])/length(Truth_vec) #% identified true subgroups among true subgroups, 
+  
+  return( list(value         = value,
+               sg_Nacc_Nall  = sgpct_Nacc_Nalldeci , 
+               sg_Nacc_NallT = sgpct_Nacc_Nalltrue))
+}
+
 
 
 #' Function that check if root node of tree structure is accurate  
@@ -700,7 +581,7 @@ sgpct_Nacc_Nalltrue <- length( Deci_vec[Deci_vec %in% Truth_vec])/length(Truth_v
 
 DECI_treeN1_mCF_TF <- function(decision, vote_D4_sg, vote_D3_sg, vote_D2_sg, vote_D4_t, vote_D3_t, vote_D2_t, tree_true){
   #first identify the decision comes from which depth tree 
-         if (identical( decision, vote_D4_sg$majority ) ) {
+  if (identical( decision, vote_D4_sg$majority ) ) {
     DECI_treeN1 <<- vote_D4_t$majority[1, "split_variable"] 
   } else if (identical( decision, vote_D3_sg$majority ) ) {
     DECI_treeN1 <<- vote_D3_t$majority[1, "split_variable"] 
@@ -710,7 +591,7 @@ DECI_treeN1_mCF_TF <- function(decision, vote_D4_sg, vote_D3_sg, vote_D2_sg, vot
     DECI_treeN1 <<- "NA"
   }
   #second check if top node is accurate
-         if (identical(tree_true, "NA")==F) {
+  if (identical(tree_true, "NA")==F) {
     TorF= ifelse (identical(DECI_treeN1, tree_true[1, "split_variable"]), 1, 0)
   } else if (tree_true == "NA") {
     TorF= ifelse (identical(DECI_treeN1, tree_true), 1, 0)
@@ -728,13 +609,13 @@ DECI_treeN1_mCF_TF <- function(decision, vote_D4_sg, vote_D3_sg, vote_D2_sg, vot
 #' 
 #' @export
 DECI_treeN1_TREE_TF <- function(decision, vote_sg, vote_t, tree_true){
-         if ( identical(decision, "NA")==F ) {
+  if ( identical(decision, "NA")==F ) {
     DECI_treeN1 <<- vote_t[1, "split_variable"] 
   } else if (identical( decision, "NA" ) ){
     DECI_treeN1 <<- "NA"
   }
   
-         if ( identical(tree_true, "NA")==F) {
+  if ( identical(tree_true, "NA")==F) {
     TorF= ifelse (identical(DECI_treeN1, tree_true[1, "split_variable"]), 1, 0)
   } else if (tree_true == "NA") {
     TorF= ifelse (identical(DECI_treeN1, tree_true), 1, 0)
@@ -755,7 +636,7 @@ OTHERTREE_DECI <- function(vote_subgroup){
   } else {
     Deci <- vote_subgroup$majority
   }
-return(Deci)
+  return(Deci)
 }
 
 
@@ -823,7 +704,7 @@ SPLITVAR_SIGN_SPLITVAL_LofDf_CT <- function( Deci_CT_con0 ) {
 VT2CF_format <- function(Deci_VT_con0){
   
   Deci_VT_con_split3 <- SPLITVAR_SIGN_SPLITVAL_LofDf_VT(Deci_VT_con0)
-#step3. adjust splitting format: 1) binary/ordinal splitter >= n.5 to >n, < n.5 to <= n; 2) continuous splitter: >= n to > n-0.001, < n to <= n-0.001
+  #step3. adjust splitting format: 1) binary/ordinal splitter >= n.5 to >n, < n.5 to <= n; 2) continuous splitter: >= n to > n-0.001, < n to <= n-0.001
   Deci_VT_con_split4 <- lapply(Deci_VT_con_split3, 
                                function(x) 
                                  if( #scenario 1: binary/ordinal splitter >= 
@@ -854,14 +735,14 @@ VT2CF_format <- function(Deci_VT_con0){
                                  }
   )
   
-
- #step4. combine information from split variable, sign, and split value into one column 
+  
+  #step4. combine information from split variable, sign, and split value into one column 
   Deci_VT_con_split5 <- lapply(Deci_VT_con_split4, function(x) x %>% dplyr::mutate(condition = paste0(parent_split_var_, parent_sign_, parent_split_val_)) %>%
                                  dplyr::select(condition) %>%
                                  `colnames<-`( NULL )
   )
-
- #step5. collapse list of strings into one single string  
+  
+  #step5. collapse list of strings into one single string  
   Deci_VT_con_split6 <-  paste ( as.vector( unlist(Deci_VT_con_split5 ) ), collapse = " & " )
   
   return(Deci_VT_con_split6)
@@ -876,17 +757,17 @@ VT2CF_format <- function(Deci_VT_con0){
 #' @export
 
 SG_CONDITION_2_INT <- function(condition){
-#make subgroup defintion as a list of df, each df representing each condition of this subgroup definition and has 3 key variabs: parent_split_var_, parent_sign_, parent_split_val
-splitvar_sign_splitval_L <-  SPLITVAR_SIGN_SPLITVAL_LofDf_CT(condition) 
-#combine conditions from a list of a subgroup into a dataframe 
-condition_key_var_df <- dplyr::bind_rows(splitvar_sign_splitval_L, .id = "column_label") 
-#extract key covariates in a vector
-condition_key_var_vec <- unique( str_sort( as.vector( dplyr::pull(condition_key_var_df, parent_split_var_)   ) ) )
-#make it into W:X1:X2 format
-condition_INT <- paste("W", paste(condition_key_var_vec, collapse = ":"), sep = ":")
-
-return(condition_INT)
-
+  #make subgroup defintion as a list of df, each df representing each condition of this subgroup definition and has 3 key variabs: parent_split_var_, parent_sign_, parent_split_val
+  splitvar_sign_splitval_L <-  SPLITVAR_SIGN_SPLITVAL_LofDf_CT(condition) 
+  #combine conditions from a list of a subgroup into a dataframe 
+  condition_key_var_df <- dplyr::bind_rows(splitvar_sign_splitval_L, .id = "column_label") 
+  #extract key covariates in a vector
+  condition_key_var_vec <- unique( str_sort( as.vector( dplyr::pull(condition_key_var_df, parent_split_var_)   ) ) )
+  #make it into W:X1:X2 format
+  condition_INT <- paste("W", paste(condition_key_var_vec, collapse = ":"), sep = ":")
+  
+  return(condition_INT)
+  
 }
 
 #' Function that convert overall subgroup decision into interaction expressions (e.g. subgroup decision as 1: X1<=0; 2: X1>0 will be converted into W:X1 interaction expression)
@@ -895,21 +776,21 @@ return(condition_INT)
 #' 
 #' @export
 SG2INT <- function(deci){
-if (identical(deci,"NA" )  ) {
-  SG2INT_vec = "NA"
-} else if (identical(deci,"Unknown") ) {
-  SG2INT_vec = "Unknown"
-} else {
-#extract the subgroup defintion column (e.g. X1<=0, X1>0)
-Deci_col <- deci %>% dplyr::select(subgroup) %>% as.data.frame() %>%  `colnames<-`( NULL ) 
-#make a list containing defintion of each subgroup as each elements of the list
-Deci_col_L <-  split(Deci_col, seq(nrow(Deci_col)))
-#convert each subgroup definition into interaction (e.g. a subgroup defined as X1<=0 & X3<=0 will be converted into W:X1:W3)
-Deci_SG_INT <- lapply(Deci_col_L, SG_CONDITION_2_INT )
-#combine all INT terms into one string, remove duplicate
-SG2INT_str_uniq <- paste(unique(unlist(Deci_SG_INT)), collapse = ' ')
-#turn string into vector
-SG2INT_vec <- strsplit(SG2INT_str_uniq, "\\s+")[[1]]
-}
-return(SG2INT_vec)
+  if (identical(deci,"NA" )  ) {
+    SG2INT_vec = "NA"
+  } else if (identical(deci,"Unknown") ) {
+    SG2INT_vec = "Unknown"
+  } else {
+    #extract the subgroup defintion column (e.g. X1<=0, X1>0)
+    Deci_col <- deci %>% dplyr::select(subgroup) %>% as.data.frame() %>%  `colnames<-`( NULL ) 
+    #make a list containing defintion of each subgroup as each elements of the list
+    Deci_col_L <-  split(Deci_col, seq(nrow(Deci_col)))
+    #convert each subgroup definition into interaction (e.g. a subgroup defined as X1<=0 & X3<=0 will be converted into W:X1:W3)
+    Deci_SG_INT <- lapply(Deci_col_L, SG_CONDITION_2_INT )
+    #combine all INT terms into one string, remove duplicate
+    SG2INT_str_uniq <- paste(unique(unlist(Deci_SG_INT)), collapse = ' ')
+    #turn string into vector
+    SG2INT_vec <- strsplit(SG2INT_str_uniq, "\\s+")[[1]]
+  }
+  return(SG2INT_vec)
 }
