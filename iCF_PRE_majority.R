@@ -44,9 +44,36 @@ PRE_MAJORITY_SUBGROUP <- function(tree_original){
     parent_6 <- PARENT_NODES (tree_original, parent_5,     6)
     parent_7 <- PARENT_NODES (tree_original, parent_6,     7)
     parent_8 <- PARENT_NODES (tree_original, parent_7,     8)
+    parent_9 <- PARENT_NODES (tree_original, parent_8,     9)
+    parent_10 <- PARENT_NODES (tree_original, parent_9,     10)
+    parent_11 <- PARENT_NODES (tree_original, parent_10,     11)
+    parent_12 <- PARENT_NODES (tree_original, parent_11,     12)
+    parent_13 <- PARENT_NODES (tree_original, parent_12,     13)
+    parent_14 <- PARENT_NODES (tree_original, parent_13,     14)
+    parent_15 <- PARENT_NODES (tree_original, parent_14,     15)
+    parent_16 <- PARENT_NODES (tree_original, parent_15,     16)
+    parent_17 <- PARENT_NODES (tree_original, parent_16,     17)
+    parent_18 <- PARENT_NODES (tree_original, parent_17,     18)
+    parent_19 <- PARENT_NODES (tree_original, parent_18,     19)
+    parent_20 <- PARENT_NODES (tree_original, parent_19,     20)
+    
+  # 10/30/2022 I haven't figured out how to do it in a loop like below to run only necessary iteration to a max of nrow(tree_original) times, 
+    #but since it's not computationally expensive, I'll just manually write 20 lines of codes
+  #  for (nr in 1: nrow(tree_original) ){
+  #    if (nr==1) {
+  #      parent_1 <- PARENT_NODES (tree_original, tree_original,1)
+  #    } else {
+  #      eval( parse(paste0("parent_",nr)) )  <- PARENT_NODES (tree_original,     eval( parse(paste0("parent_",nr-1 )) ) , nr)
+  #    }
+  #  }
+    
+
+   
+    
     #combine parent_split_var, parent_sign, and parent_split_val
     
-subgroup_0 <- lapply(parent_8, function(df) df %>% dplyr::select (tidyselect::starts_with( c("LEAF", "condition_", "parent_split_var_", "parent_sign_", "parent_split_val_" ) ) ))	
+subgroup_0 <- lapply( parent_20, 
+                     function(df) df %>% dplyr::select (tidyselect::starts_with( c("LEAF", "condition_", "parent_split_var_", "parent_sign_", "parent_split_val_" ) ) ))	
     
 
 #keep dynamic number of conditons, i.e.. conditon_1 (e.g. x4>1), condition_2 (x4<=0.7), ... condition_i ... for subsetting later
