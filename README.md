@@ -6,8 +6,8 @@ iterative Causal Forest (iCF)
 Wang T, Keil AP, Kim S, Wyss R, Htoo PT, Funk MJ, Buse JB, Kosorok MR, Stürmer T. Iterative Causal Forest: A Novel Algorithm for Subgroup Identification. Am J Epidemiol. 2023 (In Press).
 
 **R packages recommended**
->
-library(MASS)
+
+`library(MASS)
 library("grf")
 library(tidyverse)
 library(rlang)
@@ -26,4 +26,4 @@ library(rstatix)
 library(DMwR)
 library(knitr)
 library(Rfast)
-library(spaMM)
+library(spaMM)`
