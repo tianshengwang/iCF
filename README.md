@@ -29,8 +29,9 @@ Rfast
 spaMM
 ```
 **installation**
-***Install devtools if you don't have it***
+*Install devtools if you don't have it*
 ```{}
 install.packages('devtools')
+devtools::install_github("tianshengwang/iCF")
 ```
 
