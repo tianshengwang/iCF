@@ -28,8 +28,8 @@ knitr
 Rfast
 spaMM
 ```
-##installation
-###Install devtools if you don't have it
+**installation
+***Install devtools if you don't have it
 ```{}
 install.packages('devtools')
 ```
