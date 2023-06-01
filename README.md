@@ -36,6 +36,7 @@ library(iCF)
 ```
 **Data Simulation**
 ```{}
+  nstudy = 10000
   b0 <- 0
   b1 <- 0.8
   b2 <- -0.25
@@ -76,5 +77,15 @@ library(iCF)
   X6 <- ifelse(X6 > mean(X6), 1, 0)
   X8 <- ifelse(X8 > mean(X8), 1, 0)
   X9 <- ifelse(X9 > mean(X9), 1, 0)
+  
+  trueps <- (1 + exp( -(b0 + b1*X1 + b2*X2 + b3*X3 + b4*X4 + b5*X5 + b6*X6 + b7*X7) ))^-1 #true propensity score
+  
+  a<- rbinom(nstudy,1,z.a_trueps) #treatment assignment
+  
+  #2-way interaction
+  Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*a + rnorm(nstudy,0,1) + 0.4*a*X3 
+  
+  dat <<- as.data.frame(cbind(X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10, trueps, a, Y))
+  
 ```
 
