@@ -78,14 +78,62 @@ library(iCF)
   X8 <- ifelse(X8 > mean(X8), 1, 0)
   X9 <- ifelse(X9 > mean(X9), 1, 0)
   
-  trueps <- (1 + exp( -(b0 + b1*X1 + b2*X2 + b3*X3 + b4*X4 + b5*X5 + b6*X6 + b7*X7) ))^-1 #true propensity score
+  PS <- (1 + exp( -(b0 + b1*X1 + b2*X2 + b3*X3 + b4*X4 + b5*X5 + b6*X6 + b7*X7) ))^-1 #true propensity score
   
-  a<- rbinom(nstudy,1,z.a_trueps) #treatment assignment
+  W <- rbinom(nstudy,1,z.a_trueps) #treatment assignment
   
-  #2-way interaction
   Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*a + rnorm(nstudy,0,1) + 0.4*a*X3 
   
-  dat <<- as.data.frame(cbind(X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10, trueps, a, Y))
+  dat <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10))
+  
+ 
+**Run iCF**
+***Prepare data***
+```{}
+ vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
+ intTRUE <- "Unknown"
+ X <- dat[,vars_forest]
+ Y <- as.vector( as.numeric( dat[,"Y"] ) )
+ W <- as.vector( as.numeric( dat[,"W"] ) )
+ 
+ cf_raw_key.tr <- CF_RAW_key(Train, 1, "non-hd", hdpct=0.90) 
+ Y.hat  <<- cf_raw_key.tr$Y.hat                 
+ W.hat  <<- cf_raw_key.tr$W.hat                 
+ HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
+ varimp_cf  <- cf_raw_key.tr$varimp_cf          
+ length(W.hat); 
+ selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx 
+
+ PlotVI(varimp_cf, "Variable importance")
+ GG_VI(varimp_cf, "Variable importance" )
+ 
+ vars_catover2 <<- NA
+ 
+ P_threshold <<- 0.1
   
 ```
 
+***Run iCF***
+```{}
+ vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
+ intTRUE <- "Unknown"
+ X <- dat[,vars_forest]
+ Y <- as.vector( as.numeric( dat[,"Y"] ) )
+ W <- as.vector( as.numeric( dat[,"W"] ) )
+ 
+ cf_raw_key.tr <- CF_RAW_key(Train, 1, "non-hd", hdpct=0.90) 
+ Y.hat  <<- cf_raw_key.tr$Y.hat                 
+ W.hat  <<- cf_raw_key.tr$W.hat                 
+ HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
+ varimp_cf  <- cf_raw_key.tr$varimp_cf          
+ length(W.hat); 
+ selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx 
+
+ PlotVI(varimp_cf, "Variable importance")
+ GG_VI(varimp_cf, "Variable importance" )
+ 
+ vars_catover2 <<- NA
+ 
+ P_threshold <<- 0.1
+  
+```
