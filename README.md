@@ -53,14 +53,12 @@ library(iCF)
   a6 <- -0.19
   a7 <- 0.26
   g1 <- -0.4 
+  
   F.sample.cor <- function(X, rho) {
     Y <- (rho * (X - mean(X)))/sqrt(var(X)) + sqrt(1 - rho^2) * rnorm(length(X))
-    #cat("Sample corr = ", cor(x, y), "\n")
     return(Y)
   }
-  #----------------------------------------
-  #generating covariates (columns)
-  #----------------------------------------
+
   X1 <- rnorm(nstudy, mean=0, sd=1)
   X2 <- rnorm(nstudy, mean=0, sd=1)
   X3 <- rnorm(nstudy, mean=0, sd=1)
@@ -71,7 +69,7 @@ library(iCF)
   X8 <- F.sample.cor(X3, 0.2)
   X9 <- F.sample.cor(X4, 0.9)
   X10 <- rnorm(nstudy, mean=0, sd=1)
-  #~~ dichotomize variables (will attenuate correlations above)
+
   X1 <- ifelse(X1 > mean(X1), 1, 0)
   X3 <- ifelse(X3 > mean(X3), 1, 0)
   X5 <- ifelse(X5 > mean(X5), 1, 0)
