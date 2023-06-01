@@ -7,25 +7,25 @@ Wang T, Keil AP, Kim S, Wyss R, Htoo PT, Funk MJ, Buse JB, Kosorok MR, Stürmer 
 
 **R packages recommended**
 ```{r packages, include=FALSE}
-library(MASS)
-library("grf")
-library(tidyverse)
-library(rlang)
-library(rlist)
-library(plyr)
-library(caret)
-library(caTools)
-library(listdtr)
-library(randomForest)
-library(ggplot2)
-library(ggridges)
-library(data.table)
-library(grid)
-library(broom)
-library(rstatix)
-library(DMwR)
-library(knitr)
-library(Rfast)
-library(spaMM)
+MASS
+grf
+tidyverse
+rlang
+rlist
+plyr
+caret
+caTools
+listdtr
+randomForest
+ggplot2
+ggridges
+data.table
+grid
+broom
+rstatix
+DMwR
+knitr
+Rfast
+spaMM
 ```
 
