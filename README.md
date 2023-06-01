@@ -1,5 +1,4 @@
-# iCF
-iterative Causal Forest (iCF)
+# iCF (iterative Causal Forest)
 
 **Citation**
 
