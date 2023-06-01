@@ -87,8 +87,7 @@ library(iCF)
   dat <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10))
   
 ``` 
-**Run iCF**
-***Prepare data***
+**Prepare data**
 ```{}
  vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
  intTRUE <- "Unknown"
@@ -113,27 +112,34 @@ library(iCF)
   
 ```
 
-***Run iCF***
+**Run iCF**
 ```{}
- vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
- intTRUE <- "Unknown"
- X <- dat[,vars_forest]
- Y <- as.vector( as.numeric( dat[,"Y"] ) )
- W <- as.vector( as.numeric( dat[,"W"] ) )
- 
- cf_raw_key.tr <- CF_RAW_key(Train, 1, "non-hd", hdpct=0.90) 
- Y.hat  <<- cf_raw_key.tr$Y.hat                 
- W.hat  <<- cf_raw_key.tr$W.hat                 
- HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
- varimp_cf  <- cf_raw_key.tr$varimp_cf          
- length(W.hat); 
- selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx 
+D2_MLS=MinLeafSizeTune(denominator=50, treeNo = 1000, iterationNo=100, "D2")
+D2_MLS$depth_mean
+D2_MLS$depth_gg
 
- PlotVI(varimp_cf, "Variable importance")
- GG_VI(varimp_cf, "Variable importance" )
- 
- vars_catover2 <<- NA
- 
- P_threshold <<- 0.1
+D3_MLS=MinLeafSizeTune(denominator=80, treeNo = 1000, iterationNo=100, "D3")
+D3_MLS$depth_mean
+D3_MLS$depth_gg
+
+D4_MLS=MinLeafSizeTune(denominator=110, treeNo = 1000, iterationNo=100, "D4")
+D4_MLS$depth_mean
+D4_MLS$depth_gg
+
+D5_MLS=MinLeafSizeTune(denominator=155, treeNo = 1000, iterationNo=100, "D5")
+D5_MLS$depth_mean
+D5_MLS$depth_gg
+
+leafsize <<- list(D5=155, D4=110, D3=80, D2=50)
+
+iCFCV_lab <- iCFCV(K=5,
+                  treeNo=2000, 
+                  iterationNo=100,
+                  min.split.var=4, 
+                  P_threshold=0.1, 
+                  variable_type = "non-HD",
+                  hdpct= 0.95,
+                  HTE_P_cf.raw = 0.1
+)
   
 ```
