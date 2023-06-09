@@ -231,25 +231,6 @@ iCFCV <- function(K, treeNo, iterationNo, min.split.var,
       mse_all_folds.g3.tran_icvsw <- mse_all_folds.g3.tran/stability_D3_CV
       mse_all_folds.g4.tran_icvsw <- mse_all_folds.g4.tran/stability_D4_CV
       mse_all_folds.g5.tran_icvsw <- mse_all_folds.g5.tran/stability_D5_CV
-      
-      #inverse vote stability score weight
-      mse_all_folds.g2.tran_ivsw <- mse_all_folds.g2.tran/stability_D2_vote
-      mse_all_folds.g3.tran_ivsw <- mse_all_folds.g3.tran/stability_D3_vote
-      mse_all_folds.g4.tran_ivsw <- mse_all_folds.g4.tran/stability_D4_vote
-      mse_all_folds.g5.tran_ivsw <- mse_all_folds.g5.tran/stability_D5_vote
-      
-      #inverse CV & vote stability score weight
-      mse_all_folds.g2.tran_ivcvsw <- mse_all_folds.g2.tran/(stability_D2_vote*stability_D2_CV)
-      mse_all_folds.g3.tran_ivcvsw <- mse_all_folds.g3.tran/(stability_D3_vote*stability_D3_CV)
-      mse_all_folds.g4.tran_ivcvsw <- mse_all_folds.g4.tran/(stability_D4_vote*stability_D4_CV)
-      mse_all_folds.g5.tran_ivcvsw <- mse_all_folds.g5.tran/(stability_D5_vote*stability_D5_CV)
-      
-      #inverse CV & vote stability score weight
-      mse_all_folds.g2.tran_isqrtvcvsw <- mse_all_folds.g2.tran/sqrt(stability_D2_vote*stability_D2_CV)
-      mse_all_folds.g3.tran_isqrtvcvsw <- mse_all_folds.g3.tran/sqrt(stability_D3_vote*stability_D3_CV)
-      mse_all_folds.g4.tran_isqrtvcvsw <- mse_all_folds.g4.tran/sqrt(stability_D4_vote*stability_D4_CV)
-      mse_all_folds.g5.tran_isqrtvcvsw <- mse_all_folds.g5.tran/sqrt(stability_D5_vote*stability_D5_CV)
-
 
       ATE_all <- CATE_SG("NA")
       ATE_kable <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") %>% knitr::kable()
