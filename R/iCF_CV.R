@@ -91,7 +91,7 @@ iCFCV <- function(K, treeNo, iterationNo, min.split.var,
       
       #check the top of this file: SUBGROUP_PIPLINE
       #to get subgroup decisions G_D, and models build from G_D to predict Y*
-      SG_D[[f]]<-SUBGROUP_PIPLINE(X = cf_raw_key[[f]]$X,
+      SG_D[[f]]<-SUBGROUP_PIPELINE(X = cf_raw_key[[f]]$X,
                                   Y = cf_raw_key[[f]]$Y, 
                                   W = cf_raw_key[[f]]$W, 
                                   Y.hat =  cf_raw_key[[f]]$Y.hat, 
