@@ -119,7 +119,7 @@ D2_MLS$depth_gg
 
 ![](images/D2_MLS_tune.png)
 
-<image src="images/D2_MLS_tune.png">
+<img src="images/D2_MLS_tune.png">
 
 D3_MLS=MinLeafSizeTune(denominator=80, treeNo = 1000, iterationNo=100, "D3")
 D3_MLS$depth_mean
