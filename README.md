@@ -116,6 +116,7 @@ library(iCF)
 D2_MLS=MinLeafSizeTune(denominator=50, treeNo = 1000, iterationNo=100, "D2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
+<img width="257" alt="image" src="https://github.com/tianshengwang/iCF/assets/40049497/68c9925b-7d5a-49c7-9562-5db9f0f13061">
 
 D3_MLS=MinLeafSizeTune(denominator=80, treeNo = 1000, iterationNo=100, "D3")
 D3_MLS$depth_mean
