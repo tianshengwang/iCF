@@ -118,20 +118,30 @@ D2_MLS=MinLeafSizeTune(denominator=50, treeNo = 1000, iterationNo=100, "D2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
-![](images/D2_MLS_tune.png width=10)
+<img src = images/D2_MLS_tune.png width=300>
 
+```{}
 D3_MLS=MinLeafSizeTune(denominator=80, treeNo = 1000, iterationNo=100, "D3")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
+```
+<img src = images/D3_MLS_tune.png width=350>
 
+```{}
 D4_MLS=MinLeafSizeTune(denominator=110, treeNo = 1000, iterationNo=100, "D4")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
+```
+<img src = images/D4_MLS_tune.png width=350>
 
+```{}
 D5_MLS=MinLeafSizeTune(denominator=155, treeNo = 1000, iterationNo=100, "D5")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
+```
+<img src = images/D5_MLS_tune.png width=350>
 
+```{}
 leafsize <<- list(D5=155, D4=110, D3=80, D2=50)
 
 iCFCV_lab <- iCFCV(K=5,
