@@ -151,7 +151,6 @@ iCFCV_lab <- iCFCV(K=5,
                   P_threshold=0.1, 
                   variable_type = "non-HD",
                   hdpct= 0.95,
-                  HTE_P_cf.raw = 0.1
-)
-  
+                  HTE_P_cf.raw = 0.1) 
 ```
+If you have further questions or comments, please contact Dr. Tiansheng Wang: tianwang@unc.edu
