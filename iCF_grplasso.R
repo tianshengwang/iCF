@@ -1,9 +1,4 @@
-#############################################################################################
-# Prepare data for 3 prediction models
-# Author: Tiansheng Wang  
-# Last update date:12/6/2021
-# Version: 0.1         
-#############################################################################################\
+
 #' Function that prepare training or testing data for model selection based on D4,D3,and D2 subgroup decisions 
 #' @param dat the dataset 
 #' @param V_D4_subgroup subgroup decision from depth 4 CF
@@ -14,70 +9,48 @@
 #' 
 #' @export
 
-
-DATA4grplasso <- function(V_D4_subgroup, V_D3_subgroup, V_D2_subgroup, dat){
+DATA4grplasso <- function(V_D5_subgroup, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup, dat#, variable_type
+                          ){
   #------------------------------------------
   #solution 1: LASSO for factor variables
   #------------------------------------------
+ # Function that obtain subgroup ID 
+ Dat_ID_SG_D5 <- GET_SUBGROUP_ID(V_D5_subgroup$majority, dat)
  Dat_ID_SG_D4 <- GET_SUBGROUP_ID(V_D4_subgroup$majority, dat)
  Dat_ID_SG_D3 <- GET_SUBGROUP_ID(V_D3_subgroup$majority, dat)
  Dat_ID_SG_D2 <- GET_SUBGROUP_ID(V_D2_subgroup$majority, dat)
-  #scenario 1: if D4_subgroup = D3_subgroup = D2_subgroup
-  if( identical(V_D4_subgroup$majority, V_D3_subgroup$majority) &
-      identical(V_D4_subgroup$majority, V_D2_subgroup$majority) ){
-   Dat_ID_SG <-Dat_ID_SG_D2 %>% 
-      dplyr::rename(G2_define = Definition, 
-                    G2        = SubgroupID)  %>%
-      dplyr::mutate(G2_define = as.factor(G2_define)) 
-    
-    formula_g2 <- formula_g3 <- formula_g4 <- formula_gl  <- formula_g23 <-  as.formula(  paste0("Y ~ W + G2 + W:G2 +", paste0(colnames(X), collapse = " + ") )   )
-  } else if (
-    #scenario 2: if D4_subgroup = D3_subgroup OR D4_subgroup = D2_subgroup
-    identical(V_D4_subgroup$majority, V_D3_subgroup$majority) |  
-    identical(V_D4_subgroup$majority, V_D2_subgroup$majority) ) {
-   Dat_ID_SG <-Dat_ID_SG_D3 %>% 
-      dplyr::rename(G3_define = Definition, 
-                    G3        = SubgroupID)  %>%
-      dplyr::mutate(G2        = Dat_ID_SG_D2$SubgroupID,
-                    G2_define = as.factor(Dat_ID_SG_D2$Definition)) 
-    formula_g23  <- formula_gl <-  as.formula(  paste0("Y ~ W + G2 + G3 +  W:G2 + W:G3 + ", paste0(colnames(X), collapse = " + ") )   )
-                    formula_g2 <-  as.formula(  paste0("Y ~ W + G2 + W:G2 + ",              paste0(colnames(X), collapse = " + ") )   )
-                    formula_g3 <-  as.formula(  paste0("Y ~ W + G3 + W:G3 + ",              paste0(colnames(X), collapse = " + ") )   )
-                    formula_g4 <-  as.formula(  paste0("Y ~ W + G4 + W:G4 + ",              paste0(colnames(X), collapse = " + ") )   )
-    
-    #scenario 3: if D3_subgroup = D2_subgroup
-  } else if ( identical(V_D3_subgroup$majority, V_D2_subgroup$majority) ) {
-   Dat_ID_SG <-Dat_ID_SG_D4 %>% 
-      dplyr::rename(G4_define = Definition, 
-                    G4        = SubgroupID)  %>%
-      dplyr::mutate(G2        = Dat_ID_SG_D2$SubgroupID,
-                    G2_define = as.factor(Dat_ID_SG_D2$Definition)) 
-    formula_gl  <-                                as.formula(  paste0("Y ~ W + G2 + G4 + W:G2 + W:G4 + ", paste0(colnames(X), collapse = " + ") )   )
-    formula_g23 <- formula_g3  <- formula_g2  <-  as.formula(  paste0("Y ~ W + G2 + W:G2 + ",             paste0(colnames(X), collapse = " + ") )   )
-    formula_g4  <-                                as.formula(  paste0("Y ~ W + G4 + W:G4 + ",             paste0(colnames(X), collapse = " + ") )   )
-  } else {
-    #scenario 4: none are the same
-   Dat_ID_SG <-Dat_ID_SG_D4 %>% 
-      dplyr::rename(G4_define = Definition, 
-                    G4        = SubgroupID)  %>%
-      dplyr::mutate(G4_define = as.factor(G4_define),
+ 
+   Dat_ID_SG <-Dat_ID_SG_D5 %>% 
+      dplyr::rename(G5_define = Definition, 
+                    G5        = SubgroupID)  %>%
+      dplyr::mutate(G5_define = as.factor(G5_define),
+                    G4        = Dat_ID_SG_D4$SubgroupID,
+                    G4_define = as.factor(Dat_ID_SG_D4$Definition),
                     G3        = Dat_ID_SG_D3$SubgroupID,
                     G3_define = as.factor(Dat_ID_SG_D3$Definition),
                     G2        = Dat_ID_SG_D2$SubgroupID,
                     G2_define = as.factor(Dat_ID_SG_D2$Definition)) 
-    formula_gl  <-  as.formula(  paste0("Y ~ W + G2 + G3 + G4 +  W:G2 + W:G3 + W:G4 + ", paste0(colnames(X), collapse = " + ") )   )
-    formula_g23 <-  as.formula(  paste0("Y ~ W + G2 + G3 + W:G2 + W:G3  + ",             paste0(colnames(X), collapse = " + ") )   )
+#if (variable_type=="hd"){
+  
+#  formula_g2  <-  as.formula(  paste0("Y ~ W + G2 + W:G2 + ",                          paste0(colnames(X[, selected_cf.idx]), collapse = " + ") )   )
+#  formula_g3  <-  as.formula(  paste0("Y ~ W + G3 + W:G3 + ",                          paste0(colnames(X[, selected_cf.idx]), collapse = " + ") )   )
+#  formula_g4  <-  as.formula(  paste0("Y ~ W + G4 + W:G4 + ",                          paste0(colnames(X[, selected_cf.idx]), collapse = " + ") )   )
+#  formula_g5  <-  as.formula(  paste0("Y ~ W + G5 + W:G5 + ",                          paste0(colnames(X[, selected_cf.idx]), collapse = " + ") )   )
+  
+#} else {
+   
     formula_g2  <-  as.formula(  paste0("Y ~ W + G2 + W:G2 + ",                          paste0(colnames(X), collapse = " + ") )   )
     formula_g3  <-  as.formula(  paste0("Y ~ W + G3 + W:G3 + ",                          paste0(colnames(X), collapse = " + ") )   )
     formula_g4  <-  as.formula(  paste0("Y ~ W + G4 + W:G4 + ",                          paste0(colnames(X), collapse = " + ") )   )
-  }
-  
+    formula_g5  <-  as.formula(  paste0("Y ~ W + G5 + W:G5 + ",                          paste0(colnames(X), collapse = " + ") )   )
+
+#}    
+
   return(list(Dat_ID_SG   = Dat_ID_SG, 
-              formula_gl  = formula_gl,
               formula_g2  = formula_g2,
               formula_g3  = formula_g3,
               formula_g4  = formula_g4,
-              formula_g23 = formula_g23) )
+              formula_g5  = formula_g5) )
 }
 
 

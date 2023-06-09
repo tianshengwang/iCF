@@ -1,18 +1,13 @@
-#############################################################################################
-# Parent Node
-# Author: Tiansheng Wang  
-# Last update date:12/20/2020
-# Version: 0.1         
-#############################################################################################
+
 ######################################################################################################----------------------------------------------
 ######################################################################################################----------------------------------------------
 ########                      III. prepare subpopulation-based majority vote. PART I.
 ######################################################################################################----------------------------------------------
 ######################################################################################################-----------------------------------------------
-# The key idea of this function is backward stagewise method to obtain parent nodes of a upper level (shallower level) until reach node-01 
+#' @param Child_node children nodes of upper level nodes (nodes at a shallower depth)
 #' @param tree_original the list of best trees from iCF (iCF_D4_BT, iCF_D3_BT, iCF_D2_BT)
 #' @param tree the ouput of previous parent level, if parent_level=1 then tree=tree_original 
-#' @param parent_level the level of parent node. 
+#' @param parent_level the level of parent node. The key idea of this function is backward stagewise method to obtain parent nodes of a upper level (shallower level) until reach node-01 
 #' #' #---------------------------------------------------------------------------------------------------------------
 # III. "PARENT" function must run independently, recursivley to get the parent node, so that we can get subgroup decision
 # this is the most imporant and complicated part of the program: subgroup identification based on trees
@@ -103,7 +98,7 @@ if (parent_level==1){
 leaf_node_freq      <- lapply(leaf_node_list,     function(df) as.data.frame( table(df ) ) )                     
 #EXCLUDE "node-01" as it cannot appear in left_child/right child column (making the same row # as )
 leaf_node_freq_woN1 <- lapply(leaf_node_freq,    function(df) df [which(df$df!="node-01" & df$df!="node-00001"),] )    
-
+#EXCLUDE "node-01" as it cannot appear in left_child/right child column (making the same row # as )
 N_freq_woN1_nrow  <- lapply(leaf_node_freq_woN1,    function(df)  nrow(df)  )   
 #Extract node number
 leaf_node_No_L    <- lapply(leaf_node_list,     function(df) df$node_No <- sub('.*-', '', df$node))                                                                    # 

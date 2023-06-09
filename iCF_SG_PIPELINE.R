@@ -10,24 +10,47 @@
 #' 
 #' @export
 #' 
-SUBGROUP_PIPLINE<- function(leafsize, treeNo, iterationNo, Ntrain, Train_ID, Test_ID ){
+SUBGROUP_PIPLINE<- function(X, 
+                            Y, 
+                            W, 
+                            Y.hat,
+                            W.hat,
+                            selected_cf.idx,
+                            leafsize, 
+                            treeNo, 
+                            iterationNo, 
+                            Ntrain, 
+                            Train_ID, 
+                            Test_ID, 
+                            variable_type,
+                            HTE_P_cf.raw ,
+                            P_threshold){
   
   s_iCF=Sys.time()
   
   if (iterationNo>1){
     #Green Column in iCF Algorithm Figure
-    iCF_D5<- iCF(leafsize$D5,  treeNo, iterationNo, Ntrain, "D5",  split_val_round_posi)
-    iCF_D4<- iCF(leafsize$D4,  treeNo, iterationNo, Ntrain, "D4",  split_val_round_posi)
-    iCF_D3<- iCF(leafsize$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi) 
     #when leaf size too small, D2 has this error "Error in aggregate.data.frame(lhs, mf[-1L], FUN = FUN, ...) : no rows to aggregate"
     #thus to make it auto run, if iCF_D2 has error, then make it equal to iCF_D3 temparily.
     #after tuning leaf size, this erorr unlikely to happen
+    #1/27/2023 already tuned leaf size, thus the following code may not be necessary
+
+    #1/29/2023 debug at /local/projects/medicare/DPP4i_HTE/programs/macros/iCF_SG_PIPELINE.R#19: 
+    #iCF_D5 <- iCF(leafsize$D5, treeNo, iterationNo, Ntrain, "D5", split_val_round_posi)
+
+    iCF_D5<- iCF(leafsize$D5,  treeNo, iterationNo, Ntrain, "D5",  split_val_round_posi)
+    
+    iCF_D4<- iCF(leafsize$D4,  treeNo, iterationNo, Ntrain, "D4",  split_val_round_posi)
+    
+    iCF_D3<- iCF(leafsize$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi) 
+    
     if ( is.null( tryCatch( iCF(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi), error=function(e){}) ) == TRUE ) {
       warning("The minimum leaf size is too small for Depth 2 causal forest, need to increase it!")
       iCF_D2 = iCF_D3
     } else {
       iCF_D2 = iCF(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
     }
+   
     
     #best tree dataframe, Blue Column in iCF Algorithm Figure
     iCF_D5_BT <<- GET_TREE_L(iCF_D5, 1) 
@@ -130,12 +153,12 @@ SUBGROUP_PIPLINE<- function(leafsize, treeNo, iterationNo, Ntrain, Train_ID, Tes
   
   s_SGdeci=Sys.time()
   #White column for iCF algorihtm figure B, formular of models to predict Y* at each depth, for training and testing set, respectively.
-  #has nothing to group lasso anymore, 
-  #
+  #has nothing to group lasso anymore, get data and models from G2-G5
+  
   DATA4grplasso_iCF_tr     <- DATA4grplasso(vote_D5_subgroup, vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup, Train_ID)
   
   #according to Algorithm, we get G_D from training set, then buidl model for Y* in testing set!!!
-  DATA4grplasso_iCF_te     <- DATA4grplasso(vote_D5_subgroup, vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup, Test_ID)
+  DATA4grplasso_iCF_te     <- DATA4grplasso(vote_D5_subgroup, vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup, Test_ID )
   
   #extracting training or testing set with g_D, and g_D definition (defined by spliting variable and splitting values!)
   Train_ID_SG_iCF       <- DATA4grplasso_iCF_tr$Dat_ID_SG
@@ -144,7 +167,14 @@ SUBGROUP_PIPLINE<- function(leafsize, treeNo, iterationNo, Ntrain, Train_ID, Tes
   #the following formulas work for both binary and continuous outcome
   #actually, formula_gl = formula_g234; and iCF and oneCF can use the same formula, thus did not distinguish the name
   #main effect only: Y ~ W + X
+
+  #if (variable_type=="hd") {
+  #formula_basic<<-  as.formula(  paste0("Y ~ W +", paste0(colnames(X[, selected_cf.idx]), collapse = " + ") )   )
+    
+  #} else {
   formula_basic<<-  as.formula(  paste0("Y ~ W +", paste0(colnames(X), collapse = " + ") )   )
+  #}
+ 
   #main effect + interactions of W and G
   formula_g2   <<- DATA4grplasso_iCF_tr$formula_g2
   formula_g3   <<- DATA4grplasso_iCF_tr$formula_g3
@@ -155,10 +185,11 @@ SUBGROUP_PIPLINE<- function(leafsize, treeNo, iterationNo, Ntrain, Train_ID, Tes
   #_________________________________________________
   #Models:
   #act=actual outome Y; tran=transformed outocme Y*, tr=training set, te=testing set;
-  Deci_Final_iCF.act.tr        <- CF_GROUP_DECISION(HTE_P_cf.raw, Train_ID_SG_iCF, "iCF", "actual",vote_D5_subgroup, vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup)
-  Deci_Final_iCF.tran.tr       <- CF_GROUP_DECISION(HTE_P_cf.raw, Train_ID_SG_iCF, "iCF", "transform", vote_D5_subgroup, vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup)
-  Deci_Final_iCF.act.te        <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "actual", vote_D5_subgroup, vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup)
-  Deci_Final_iCF.tran.te       <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "transform", vote_D5_subgroup, vote_D4_subgroup, vote_D3_subgroup, vote_D2_subgroup)
+  #Function that obtain MODELS from subgroup decisions at different depths from CF  
+  #Deci_Final_iCF.act.tr        <- CF_GROUP_DECISION(HTE_P_cf.raw, Train_ID_SG_iCF, "iCF", "actual" ,   P_threshold)
+  Deci_Final_iCF.tran.tr       <- CF_GROUP_DECISION(HTE_P_cf.raw, Train_ID_SG_iCF, "iCF", "transform", P_threshold)
+  #Deci_Final_iCF.act.te        <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "actual",     P_threshold)
+  Deci_Final_iCF.tran.te       <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "transform",  P_threshold)
 
   
   e_iCF=Sys.time()
@@ -186,9 +217,9 @@ SUBGROUP_PIPLINE<- function(leafsize, treeNo, iterationNo, Ntrain, Train_ID, Tes
                 stability_D2_T       = unlist(vote_D2_tree$stability),   
                 stability_D2_T_r     = unlist(vote_D2_tree_R$stability),
                 
-                Deci_Final_iCF.act.tr   = Deci_Final_iCF.act.tr,
+                #Deci_Final_iCF.act.tr   = Deci_Final_iCF.act.tr,
                 Deci_Final_iCF.tran.tr  = Deci_Final_iCF.tran.tr ,
-                Deci_Final_iCF.act.te  = Deci_Final_iCF.act.te,
+                #Deci_Final_iCF.act.te  = Deci_Final_iCF.act.te,
                 Deci_Final_iCF.tran.te  = Deci_Final_iCF.tran.te ,
        
                 Train_ID_SG_iCF      = Train_ID_SG_iCF,
@@ -197,336 +228,3 @@ SUBGROUP_PIPLINE<- function(leafsize, treeNo, iterationNo, Ntrain, Train_ID, Tes
   )
   )  
 }
-
-
-
-
-TREE_PERFORMANCE <- function(Deci_SG, iterationNo){
-  #performance 
-  DltY_iCF_te      = DltY_DATA(Deci_SG,       Test_ID, "predict" )
-  MSE_iCF_te       <- MSE_DltY(DltY_true_te, DltY_iCF_te)
-  MSE_ate_iCF_te   <- as.numeric(MSE_iCF_te$MSE_ate)
-  MSE_att_iCF_te   <- as.numeric(MSE_iCF_te$MSE_att)
-  
-  #DISCOVERYRATE function take care of the "NA" decision
-  if(iterationNo >1){
-    disco_SG_iCF       = DISCOVERYRATE(Deci_SG ,                 truth_description, tree_true_subgroup, truth_INT, "iCF", "subgroup")$value
-    disco_INT_iCF      = DISCOVERYRATE(SG2INT(Deci_SG),          truth_description, tree_true_subgroup, truth_INT, "iCF", "interaction")$value
-    #disco_SG_iCF.act.aa    = DISCOVERYRATE(Deci_SG,                  truth_description, tree_true_subgroup, truth_INT, "iCF", "subgroup")$sg_Nacc_Nall
-    #disco_SG_iCF.act.aat   = DISCOVERYRATE(Deci_SG,                  truth_description, tree_true_subgroup, truth_INT, "iCF", "subgroup")$sg_Nacc_NallT
-    disco_CATEmax_iCF      = DISCOVERYRATE(CATE_MAX_SG(DltY_iCF_te), truth_description, tree_true_subgroup, CATE_max_true_te, "iCF", "CATEmax")$value
-    
-  } else if (iterationNo==1) {
-    disco_SG_iCF       = DISCOVERYRATE(Deci_SG ,                  truth_description, tree_true_subgroup, truth_INT, "oneCFb", "subgroup")$value
-    disco_INT_iCF      = DISCOVERYRATE(SG2INT(Deci_SG),           truth_description, tree_true_subgroup, truth_INT, "oneCFb", "interaction")$value
-    #disco_SG_iCF.act.aa    = DISCOVERYRATE(Deci_SG,                   truth_description, tree_true_subgroup, truth_INT, "oneCFb", "subgroup")$sg_Nacc_Nall
-    #disco_SG_iCF.act.aat   = DISCOVERYRATE(Deci_SG,                   truth_description, tree_true_subgroup, truth_INT, "oneCFb", "subgroup")$sg_Nacc_NallT
-    disco_CATEmax_iCF      = DISCOVERYRATE(CATE_MAX_SG(DltY_iCF_te),  truth_description, tree_true_subgroup, CATE_max_true_te, "oneCFb", "CATEmax")$value
-    
-  }  
-  return(list(disco_SG_iCF   = disco_SG_iCF ,
-              disco_INT_iCF  = disco_INT_iCF, 
-              #disco_SG_AIC_iCF.act.aa = disco_SG_AIC_iCF.act.aa,
-              #disco_SG_AIC_iCF.act.aat  = disco_SG_AIC_iCF.act.aat,
-              #DltY_iCF_te       = DltY_iCF_te,
-              disco_CATEmax_iCF = disco_CATEmax_iCF,
-              MSE_ate_iCF_te    = MSE_ate_iCF_te,
-              MSE_att_iCF_te    = MSE_att_iCF_te)
-  )  
-  
-}
-
-#' function to run Cross-Validation on whole dataset (except for external validation set) to get final subgroup decision G_iCF
-#' @param K cross-validation fold 
-#' @treeNo tree No
-#' @iterationNo iteration No (if = 1 then oneCF)
-#'  
-#' @return final subgroup decision G_iCF
-#' 
-#' @export
-#' 
-#' 
-iCFCV <- function(K, treeNo, iterationNo){
-  s_iCF_CV=Sys.time()
-  
-  if (round(HTE_P_cf.raw,1) <= 0.1){
-    
-    model.g2.act <- list()
-    model.g3.act <- list()
-    model.g4.act <- list()
-    model.g5.act <- list()
-    
-    model.m.act  <- list()
-    model.g2.tran <- list()
-    model.g3.tran <- list()
-    model.g4.tran <- list()
-    model.g5.tran <- list()
-    model.m.tran  <- list()
-    
-    cf_raw_key <- list()
-    mse_per_fold.g2.act     <- list()
-    mse_per_fold.g3.act     <- list()
-    mse_per_fold.g4.act     <- list()
-    mse_per_fold.g5.act     <- list()
-    mse_per_fold.m.act      <- list()
-    mse_per_fold.g2.tran    <- list()
-    mse_per_fold.g3.tran    <- list()
-    mse_per_fold.g4.tran    <- list()
-    mse_per_fold.g5.tran    <- list()
-    mse_per_fold.m.tran     <- list()
-    
-    SG_D <- list()
-    vote_D5_tree.syn <- list()
-    vote_D4_tree.syn <- list()
-    vote_D3_tree.syn <- list()
-    vote_D2_tree.syn <- list()
-    
-    vote_D5_subgroup.L <- list()
-    vote_D4_subgroup.L <- list()
-    vote_D3_subgroup.L <- list()
-    vote_D2_subgroup.L <- list()
-    
-    stability_D5_T_r <- list()
-    stability_D4_T_r <- list()
-    stability_D3_T_r <- list()
-    stability_D2_T_r <- list()
-    
-    Deci_Final_iCF.act.tr <- list()
-    Deci_Final_iCF.tran.tr <- list()
-    Deci_Final_iCF.act.te <- list()
-    Deci_Final_iCF.tran.te <- list()
-    
-    test_data.act <- list()
-    test_data.tran <- list()
-    
-
-    
-    Test_ID_SG_iCF <- list()
-    
-    HTE_P_cf.raw.L <- list()
-    selected_cf.idx.L <- list()
-    
-    accuracy_per_fold <- list()
-    
-    
-    set.seed(20160413)
-    tt_indicies <- caret::createFolds(y=Train[,1], k= K)
-    leafsize <<- LEAFSIZE_tune(round(Ntrain/K*(K-1),0), 25, treeNo, iterationNo)
-    
-    for(f in 1:length(tt_indicies)){
-      
-      Train_cf <- Train[-tt_indicies[[f]],]
-      Test_cf  <- Train[tt_indicies[[f]],]
-      ID_cf <-1:nrow(Train)
-      Train_ID_cf <- cbind(Train_cf, as.vector(ID_cf[-tt_indicies[[f]]])) %>% dplyr::rename (ID=`as.vector(ID_cf[-tt_indicies[[f]]])`) 
-      Test_ID_cf  <- cbind(Test_cf,  as.vector(       tt_indicies[[f]]) ) %>% dplyr::rename (ID=`as.vector(tt_indicies[[f]])`)  
-      dplyr::all_equal(Train_ID_cf, Test_ID_cf)
-      #============================== raw full CF for CV training data ==============================
-      cf_raw_key[[f]] <- CF_RAW_key(Train_cf)   
-      X      <- cf_raw_key[[f]]$X
-      Y      <- cf_raw_key[[f]]$Y
-      W      <- cf_raw_key[[f]]$W
-      Y.hat  <- cf_raw_key[[f]]$Y.hat
-      W.hat  <- cf_raw_key[[f]]$W.hat
-      varimp_cf  <- cf_raw_key[[f]]$varimp_cf
-      selected_cf.idx.L[[f]]  <- cf_raw_key[[f]]$selected_cf.idx
-      selected_cf.idx         <- selected_cf.idx.L[[f]] 
-      HTE_P_cf.raw.L[[f]] <- cf_raw_key[[f]]$HTE_P_cf.raw
-      HTE_P_cf.raw <- HTE_P_cf.raw.L[[f]] 
-      #==============================     iCF for CV training data   ==============================
-      
-      #check the top of this file: SUBGROUP_PIPLINE
-      #to get subgroup decisions G_D, and models build from G_D to predict Y*
-      SG_D[[f]]<-SUBGROUP_PIPLINE(leafsize, treeNo, iterationNo, nrow(Train_cf), Train_ID_cf, Test_ID_cf)
-      
-      vote_D5_tree.syn[[f]] <- SG_D[[f]]$vote_D5_tree.syn
-      vote_D4_tree.syn[[f]] <- SG_D[[f]]$vote_D4_tree.syn
-      vote_D3_tree.syn[[f]] <- SG_D[[f]]$vote_D3_tree.syn
-      vote_D2_tree.syn[[f]] <- SG_D[[f]]$vote_D2_tree.syn
-      
-      vote_D5_subgroup.L[[f]] <- (SG_D[[f]]$vote_D5_subgroup)
-      vote_D4_subgroup.L[[f]] <- (SG_D[[f]]$vote_D4_subgroup)
-      vote_D3_subgroup.L[[f]] <- (SG_D[[f]]$vote_D3_subgroup)
-      vote_D2_subgroup.L[[f]] <- (SG_D[[f]]$vote_D2_subgroup)
-      
-      stability_D5_T_r[[f]] <- SG_D[[f]]$stability_D5_T_r
-      stability_D4_T_r[[f]] <- SG_D[[f]]$stability_D4_T_r
-      stability_D3_T_r[[f]] <- SG_D[[f]]$stability_D3_T_r
-      stability_D2_T_r[[f]] <- SG_D[[f]]$stability_D2_T_r
-      
-      Deci_Final_iCF.act.tr[[f]]  <- SG_D[[f]]$Deci_Final_iCF.act.tr
-      Deci_Final_iCF.tran.tr[[f]] <- SG_D[[f]]$Deci_Final_iCF.tran.tr
-      
-      model.g2.act[[f]] =  Deci_Final_iCF.act.tr[[f]]$model.g2
-      model.g3.act[[f]] =  Deci_Final_iCF.act.tr[[f]]$model.g3
-      model.g4.act[[f]] =  Deci_Final_iCF.act.tr[[f]]$model.g4
-      model.g5.act[[f]] =  Deci_Final_iCF.act.tr[[f]]$model.g5
-      model.m.act[[f]] =  Deci_Final_iCF.act.tr[[f]]$model.basic
-      
-      model.g2.tran[[f]] =  Deci_Final_iCF.tran.tr[[f]]$model.g2
-      model.g3.tran[[f]] =  Deci_Final_iCF.tran.tr[[f]]$model.g3
-      model.g4.tran[[f]] =  Deci_Final_iCF.tran.tr[[f]]$model.g4
-      model.g5.tran[[f]] =  Deci_Final_iCF.tran.tr[[f]]$model.g5
-      model.m.tran[[f]] =  Deci_Final_iCF.tran.tr[[f]]$model.basic
-      
-      #Train_ID_SG_iCF[[f]] <- SG_D[[f]]$Train_ID_SG_iCF
-      Test_ID_SG_iCF[[f]] <- SG_D[[f]]$Test_ID_SG_iCF
-      
-      test_data.act[[f]] = SGMODEL_DATA(Test_ID_SG_iCF[[f]], "actual")$dat_ID_SG_df
-      test_data.tran[[f]] =SGMODEL_DATA(Test_ID_SG_iCF[[f]], "transform")$dat_ID_SG_df
-      
-      
-      #====================using AIC value from models on testing data====================
-      Deci_Final_iCF.act.te[[f]]  <- SG_D[[f]]$Deci_Final_iCF.act.te
-      Deci_Final_iCF.tran.te[[f]] <- SG_D[[f]]$Deci_Final_iCF.tran.te
-      
-     # Deci_AIC_test.act[[f]]  <- Deci_Final_iCF.act.te[[f]]$Deci_Final_CF_AIC
-    #  Deci_AIC_test.tran[[f]] <- Deci_Final_iCF.tran.te[[f]]$Deci_Final_CF_AIC
-      
-      if (length(unique(dat$Y)) >=8){
-        Ncol_g2345= ncol(test_data.act[[f]] %>% dplyr::select((contains( c("G5", "G4", "G3", "G2") ) ) ))
-        
-        test_data.act[[f]]$predict.g2.act <- predict(model.g2.act[[f]], newdata=test_data.act[[f]][,1:(2 + ncol(X) + Ncol_g2345)])
-        test_data.act[[f]]$predict.g3.act <- predict(model.g3.act[[f]], newdata=test_data.act[[f]][,1:(2 + ncol(X) + Ncol_g2345)])
-        test_data.act[[f]]$predict.g4.act <- predict(model.g4.act[[f]], newdata=test_data.act[[f]][,1:(2 + ncol(X) + Ncol_g2345)])
-        test_data.act[[f]]$predict.g5.act <- predict(model.g5.act[[f]], newdata=test_data.act[[f]][,1:(2 + ncol(X) + Ncol_g2345)])
-        test_data.act[[f]]$predict.m.act  <- predict(model.m.act[[f]],  newdata=test_data.act[[f]][,1:(2 + ncol(X))])
-        
-        test_data.tran[[f]]$predict.g2.tran <- predict(model.g2.tran[[f]], newdata=test_data.tran[[f]][,1:(2 + ncol(X) + Ncol_g2345)])
-        test_data.tran[[f]]$predict.g3.tran <- predict(model.g3.tran[[f]], newdata=test_data.tran[[f]][,1:(2 + ncol(X) + Ncol_g2345)])
-        test_data.tran[[f]]$predict.g4.tran <- predict(model.g4.tran[[f]], newdata=test_data.tran[[f]][,1:(2 + ncol(X) + Ncol_g2345)])
-        test_data.tran[[f]]$predict.g5.tran <- predict(model.g5.tran[[f]], newdata=test_data.tran[[f]][,1:(2 + ncol(X) + Ncol_g2345)])
-        test_data.tran[[f]]$predict.m.tran  <- predict(model.m.tran[[f]],  newdata=test_data.tran[[f]][,1:(2 + ncol(X))])
-        
-        mse_per_fold.g2.act[[f]] <- caret::postResample(pred = test_data.act[[f]]$predict.g2.act, obs = test_data.act[[f]]$Y)
-        mse_per_fold.g3.act[[f]] <- caret::postResample(pred = test_data.act[[f]]$predict.g3.act, obs = test_data.act[[f]]$Y)
-        mse_per_fold.g4.act[[f]] <- caret::postResample(pred = test_data.act[[f]]$predict.g4.act, obs = test_data.act[[f]]$Y)
-        mse_per_fold.g5.act[[f]] <- caret::postResample(pred = test_data.act[[f]]$predict.g5.act, obs = test_data.act[[f]]$Y)
-        mse_per_fold.m.act[[f]]  <- caret::postResample(pred = test_data.act[[f]]$predict.m.act,  obs = test_data.act[[f]]$Y)
-        
-        mse_per_fold.g2.tran[[f]] <- caret::postResample(pred = test_data.tran[[f]]$predict.g2.tran, obs = test_data.tran[[f]]$Y)
-        mse_per_fold.g3.tran[[f]] <- caret::postResample(pred = test_data.tran[[f]]$predict.g3.tran, obs = test_data.tran[[f]]$Y)
-        mse_per_fold.g4.tran[[f]] <- caret::postResample(pred = test_data.tran[[f]]$predict.g4.tran, obs = test_data.tran[[f]]$Y)
-        mse_per_fold.g5.tran[[f]] <- caret::postResample(pred = test_data.tran[[f]]$predict.g5.tran, obs = test_data.tran[[f]]$Y)
-        mse_per_fold.m.tran[[f]]  <- caret::postResample(pred = test_data.tran[[f]]$predict.m.tran,  obs = test_data.tran[[f]]$Y)
-        
-        
-      } else if (length(unique(dat$Y)) == 2 ){
-        #==================================================
-        # will never use this part since we assess transfomred outcome (the outcome will always be continuous)
-        #==================================================
-        grplasso_fit <-  grplasso::grplasso(formula = formula_grplasso, data =  train_data, contrasts = contrast,  center = TRUE, standardize = TRUE, lambda = lambda_grplasso[j],
-                                            model = grplasso::LogReg()
-        ) 
-        test_data$predict_gl <- as.numeric(predict(grplasso_fit, newdata=test_data, type="response"))
-        hist(test_data$predict_gl)
-        test_data <- test_data %>% dplyr:: mutate(predict_Y = factor(ifelse(predict_gl>0.5, 1, 0) ),
-                                                  Y=factor(Y))
-        
-        table(test_data$predict_Y)
-        
-        ConfusionM <- caret::confusionMatrix(data = test_data$predict_Y,
-                                             reference = test_data$Y,
-                                             positive = "0" #Medicare DPP4i vs SU; 0=event, 1=no event so that larger outcome is better
-        )
-        accuracy_per_fold[[f]] <- cbind("lambda"=lambda_grplasso[j], 
-                                        "Accuracy"=ConfusionM[[3]][1])
-      }
-      
-    } #f loop over
-    
-    #==================================================
-    # Create linear regression model for Group Lasso
-    #==================================================
-    # pred.g2.act <- predict(model.g2.act, newdata =  )
-    
-    ##############################  
-    # f iteration ends
-    ##############################  
-    if (length(unique(dat$Y)) >=8){
-      # Bind together, add MSE
-      
-      P_all_folds <- as.data.frame(do.call("rbind", HTE_P_cf.raw.L))
-      P_all_folds.mean <- mean(P_all_folds$V1)
-      
-      
-      mse_all_folds.m.act  <- CVBIAS_MAIN  (mse_per_fold.m.act)
-      mse_all_folds.m.tran <- CVBIAS_MAIN  (mse_per_fold.m.tran)
-      
-      mse_all_folds.g2.act  <- CVBIAS_D_MAJORITY  (vote_D2_subgroup.L, mse_per_fold.g2.act)
-      mse_all_folds.g3.act  <- CVBIAS_D_MAJORITY  (vote_D3_subgroup.L, mse_per_fold.g3.act)
-      mse_all_folds.g4.act  <- CVBIAS_D_MAJORITY  (vote_D4_subgroup.L, mse_per_fold.g4.act)
-      mse_all_folds.g5.act  <- CVBIAS_D_MAJORITY  (vote_D5_subgroup.L, mse_per_fold.g5.act)
-      
-      mse_all_folds.g2.tran <- CVBIAS_D_MAJORITY  (vote_D2_subgroup.L, mse_per_fold.g2.tran)
-      mse_all_folds.g3.tran <- CVBIAS_D_MAJORITY  (vote_D3_subgroup.L, mse_per_fold.g3.tran)
-      mse_all_folds.g4.tran <- CVBIAS_D_MAJORITY  (vote_D4_subgroup.L, mse_per_fold.g4.tran)
-      mse_all_folds.g5.tran <- CVBIAS_D_MAJORITY  (vote_D5_subgroup.L, mse_per_fold.g5.tran)
-      
-      
-      grp_pick.act =which.min(c(#mse_all_folds.m.act,  
-        mse_all_folds.g2.act,  mse_all_folds.g3.act,  mse_all_folds.g4.act, mse_all_folds.g5.act))
-      grp_pick.tran=which.min(c(#mse_all_folds.m.tran, 
-        mse_all_folds.g2.tran, mse_all_folds.g3.tran, mse_all_folds.g4.tran, mse_all_folds.g5.tran))
-      
-      
-      grp_CV_pick_D.act   <- PICK_m2345(P_all_folds.mean, mse_all_folds.m.act,  mse_all_folds.g2.act,  mse_all_folds.g3.act,  mse_all_folds.g4.act, mse_all_folds.g5.act)
-      grp_CV_pick_D.tran  <- PICK_m2345(P_all_folds.mean, mse_all_folds.m.tran, mse_all_folds.g2.tran, mse_all_folds.g3.tran, mse_all_folds.g4.tran, mse_all_folds.g5.tran)
-      
-      seletedSG_CV.act.bias  <- CV_SG_MAJORITY(  eval(parse(text =  paste0("vote_D",  grp_pick.act  + 1, "_subgroup.L" ))) )
-      seletedSG_CV.tran.bias <- CV_SG_MAJORITY(  eval(parse(text =  paste0("vote_D",  grp_pick.tran + 1, "_subgroup.L" ))) ) 
-      
-      
-      #------------------------------------------
-      
-      #IFM_Deci_AIC_test.act  <-lapply( Deci_AIC_test.act,  function(df) identical(df, CV_SG_MAJORITY( Deci_AIC_test.act) )) 
-      #IFM_Deci_AIC_test.tran <-lapply( Deci_AIC_test.tran, function(df) identical(df, CV_SG_MAJORITY( Deci_AIC_test.tran) ))  
-      
-    #  seletedSG_CV.act.AIC  <- STANDARD_CHECK(IFM_Deci_AIC_test.act,  Deci_AIC_test.act)[[1]]
-    #  seletedSG_CV.tran.AIC <- STANDARD_CHECK(IFM_Deci_AIC_test.tran, Deci_AIC_test.tran)[[1]]
-      
-    #  seletedSG_NCV.act.AIC <- Deci_AIC_test.act[[1]]
-    #  seletedSG_NCV.tran.AIC <- Deci_AIC_test.tran[[1]]
-      
-    } else if (length(unique(dat$Y)) ==2){
-      #==================================================
-      # will revise the following later!!!
-      #==================================================
-      # Bind together, add Accuracy
-      accuracy_all_folds <- as.data.frame(do.call("rbind", accuracy_per_fold))
-      # Get mean accuracy
-      gl_cv_results[[j]] <- data.frame("j"= j , 
-                                       "lambda"=lambda_grplasso[j], 
-                                       CV_Accuracy=mean(accuracy_all_folds$Accuracy)
-      )
-      
-    }
-    
-    
-  } else if (round(HTE_P_cf.raw,1) > 0.1){
-    
-    seletedSG_CV.act.bias  = "NA"
-    seletedSG_CV.tran.bias = "NA"
-    #seletedSG_CV.act.AIC  = "NA"
-    #seletedSG_CV.tran.AIC = "NA"
-    
-    #seletedSG_NCV.act.AIC  = "NA"
-    #seletedSG_NCV.tran.AIC = "NA"
-    
-    
-  }
-  
-  e_iCF_CV=Sys.time()
-  time_iCF_CV = difftime(e_iCF_CV, s_iCF_CV, units="secs")
-  
-  return(list(seletedSG_CV.act.bias  = seletedSG_CV.act.bias ,
-              seletedSG_CV.tran.bias = seletedSG_CV.tran.bias,
-             # seletedSG_CV.act.AIC  = seletedSG_CV.act.AIC ,
-            #  seletedSG_CV.tran.AIC = seletedSG_CV.tran.AIC,
-             # seletedSG_NCV.act.AIC  = seletedSG_NCV.act.AIC ,
-            #  seletedSG_NCV.tran.AIC = seletedSG_NCV.tran.AIC,
-              time_iCFCV = time_iCF_CV))
-  
-}
-
-

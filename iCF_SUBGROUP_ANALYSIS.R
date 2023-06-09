@@ -1,12 +1,10 @@
-#############################################################################################
-# subgroup analysis: CATE
-# Author: Tiansheng Wang  
-# Last update date:10/14/2022
-# Version: 0.1         
-#############################################################################################
-library(tidyverse)
-library(broom)
-
+#' Function that predict PS using LASSO algorithm
+#' @param x covariates
+#' @param trt "treatment" 
+#'  
+#' @return the prediced propensity score
+#' 
+#' @export
 #Personalized package
 prop.func <- function(x, trt)
 {
@@ -24,7 +22,7 @@ prop.func <- function(x, trt)
 #subsetting first!
 #-----------------------
 #' Function that statify population and saved stratified population (subgroup) in a list. 
-#' If decision is from D4, D3, or D2 tree, then it will always split.
+#' If decision is from D5, D4, D3, or D2 tree, then it will always split.
 #' If decision is from truth, then it could be "NA", i.e. no HTE. In such scenario, set condition_F  = "W<100", i.e. ONE "group" for all observations.  
 #' @param decision the final decision obtained from the decision path
 #' @param dataset Train or Test dataset
@@ -33,51 +31,24 @@ prop.func <- function(x, trt)
 #' 
 #' @export
 
-#decision=Deci_D4_oneCFv
-#decision=tree_true_subgroup
-#dataset=Train
-#condition_F= "W <100"
-
 SUBSETTING <- function(decision,  dataset ){
-  
   if ( is.null(dim(decision))==T) {
     condition_F= "W <100" 
   } else {
-  
   #convert the column of subgroup defintion into a vector of characters for subgroup definition
   condition <- unique(unlist(decision$subgroup))
   #make of list of subgroup defintion
   condition_L <- as.list(condition)
-  #replace "& NANANA" condition by empty record to avoid error when subsetting by conditions in the loop step
- # condition_L_noNA <- lapply(condition_L, function(C) ifelse( grepl("& NANANA", C ) , C <- stringr::str_remove(C, " & NANANA"), C) )
-  #converto list into a character
   condition_F <- as.character(condition_L)
 }
-
-  
   subgrouplist = list()
   for (i in 1:length(condition_F)){
    env=global_env() #Advanced R, P477!!!
-    
-  #give up eval Fx because EVAL related environment issues can't be fixed (e.g.,  #Error in eval(rlang::parse_expr(condition[i])) : object 'NANANA' not found):
-  #solution01: subgroup <- subset(dataset, eval(parse(text = condition[1]) )  )            
-  #solution02: subgroup <- subset(dataset, eval(str2lang( condition[1])  )   )                           
-  #solution03: subgroup <- subset(dataset, eval( str2expression( condition[i])  )  )  %>% mutate(SubgroupID=i, Definition=condition[i])  
-  #solution04: dataset[which(  eval(rlang::parse_expr(condition[i]), env )),]                     
-  #other FILTER alternatives:
-  #subgroup <- dataset %>% dplyr::filter (  !!str2lang(condition[1])  )  %>% mutate(SubgroupID=i, Definition=condition[i])  
   subgroup <- dataset %>% dplyr::filter (  !!rlang::parse_expr(condition_F[i])  )   %>% dplyr::mutate(SubgroupID=i, Definition=condition_F[i])  
      
   subgrouplist[[i]] <- subgroup
  }
   return(subgrouplist)
-  #the 2nd METHOD: this method create a list directly, not need to make an empty list	
-# env=global_env() #Advanced R, P477!!!
-#  Subgroup <- condition_F %>% purrr::map(~ dataset %>% dplyr::filter_ (.dots = .x) )
-#  subKEY_D <- setNames( split(decision, seq(nrow(decision))), rownames(decision))
-#  Subgroup_1 = list.zip(subKEY_D, Subgroup)
-#  Subgroup_2 <- lapply(Subgroup_1, function(df) cbind(df$subKEY_D, df$Subgroup) )
-#  return(Subgroup_2)
 }
 
 
