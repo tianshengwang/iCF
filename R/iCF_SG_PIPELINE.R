@@ -127,7 +127,7 @@ SUBGROUP_PIPELINE<- function(X,
   vote_D4_tree_R  <-MAJORITY_VOTE(iCF_D4_BT,      iCF_D4_t_r,   iCF_D4_t_r,   iCF_D4_SF,   tree_true_r,        tree_true_N1_r, tree_true_N123_r, split_val_round_posi)
   vote_D3_tree_R  <-MAJORITY_VOTE(iCF_D3_BT,      iCF_D3_t_r,   iCF_D3_t_r,   iCF_D3_SF,   tree_true_r,        tree_true_N1_r, tree_true_N123_r, split_val_round_posi)
   vote_D2_tree_R  <-MAJORITY_VOTE(iCF_D2_BT,      iCF_D2_t_r,   iCF_D2_t_r,   iCF_D2_SF,   tree_true_r,        tree_true_N1_r, tree_true_N123_r, split_val_round_posi)
-  #obtain the tree structure for subgroup decision
+  #obtain the synthetic (i.e. averaging splitting value among those trees with the most populuar key structure) tree structure for subgroup decision
   vote_D5_tree.syn     = vote_D5_tree_R$majority.syn
   vote_D4_tree.syn     = vote_D4_tree_R$majority.syn
   vote_D3_tree.syn.ori = vote_D3_tree_R$majority.syn
