@@ -118,7 +118,7 @@ D2_MLS$depth_mean
 D2_MLS$depth_gg
 ![alt text](https://github.com/tianshengwang/iCF/image/D2 MLS tune.png)
 <figure>
-    <img src='images/D2 MLS tune.png' alt='missing' width="750"/>
+    <img src='images/D2_MLS_tune.png' alt='missing' width="750"/>
 </figure>
 
 
