@@ -10,7 +10,7 @@
 #' 
 #' @export
 #' 
-SUBGROUP_PIPLINE<- function(X, 
+SUBGROUP_PIPELINE<- function(X, 
                             Y, 
                             W, 
                             Y.hat,
