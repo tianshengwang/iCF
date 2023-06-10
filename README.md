@@ -138,35 +138,35 @@ Third, download the "iCF_0.0.0.9000.tar.gz" file ...
 **Run iCF**
 ```{}
 split_val_round_posi=0
-D2_MLS=MinLeafSizeTune(denominator=50, treeNo = 1000, iterationNo=100, "D2")
+D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, "D2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
 <img src = images/D2_MLS_tune.png width=400>
 
 ```{}
-D3_MLS=MinLeafSizeTune(denominator=80, treeNo = 1000, iterationNo=100, "D3")
+D3_MLS=MinLeafSizeTune(denominator=45, treeNo = 1000, iterationNo=100, "D3")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
 <img src = images/D3_MLS_tune.png width=350>
 
 ```{}
-D4_MLS=MinLeafSizeTune(denominator=110, treeNo = 1000, iterationNo=100, "D4")
+D4_MLS=MinLeafSizeTune(denominator=65, treeNo = 1000, iterationNo=100, "D4")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
 <img src = images/D4_MLS_tune.png width=350>
 
 ```{}
-D5_MLS=MinLeafSizeTune(denominator=155, treeNo = 1000, iterationNo=100, "D5")
+D5_MLS=MinLeafSizeTune(denominator=85, treeNo = 1000, iterationNo=100, "D5")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
 <img src = images/D5_MLS_tune.png width=350>
 
 ```{}
-leafsize <<- list(D5=155, D4=110, D3=80, D2=50)
+leafsize <<- list(D5=85, D4=65, D3=45, D2=25)
 
 iCFCV_B1000_i200 <- iCFCV(K=5,
                           treeNo=1000, 
@@ -175,7 +175,7 @@ iCFCV_B1000_i200 <- iCFCV(K=5,
                           P_threshold=0.1, 
                           variable_type = "non-HD",
                           hdpct= 0.95,
-                          HTE_P_cf.raw = 0.1) 
+                          HTE_P_cf.raw = HTE_P_cf.raw) 
 
 iCFCV_B1000_i200
 ```
