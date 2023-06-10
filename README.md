@@ -115,6 +115,7 @@ library(iCF)
 
 **Run iCF**
 ```{}
+split_val_round_posi=0
 D2_MLS=MinLeafSizeTune(denominator=50, treeNo = 1000, iterationNo=100, "D2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
