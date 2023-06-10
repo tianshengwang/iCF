@@ -185,6 +185,7 @@ iCFCV_B1000_i200_sim
 
 
 **Run iCF on real-world data: on Medicare SGLT2i vs GLP1RA new user cohort**
+
 We compared the two-year risk difference (RD) of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort are available in the mehtod paper (Wang et al.) 
 
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
@@ -201,7 +202,7 @@ We compared the two-year risk difference (RD) of hospitalized heart failure (HHF
  selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx 
  GG_VI(varimp_cf, "Variable importance" )
  ```
- <img src = images/VI_SGLTvGLP_HHF2y.png width=300>
+ <img src = images/VI_SGLTvGLP_HHF2y.jpeg width=800>
  
  ***Step 2. To tune the leaf size, use different values for the minimum leaf size (MLS) to grow forests at various depths (D).***
  ```{}
