@@ -127,7 +127,7 @@ Third, you can download the 'iCF_0.0.0.9000.tar.gz' file (this option is current
  ```
  <img src = images/GG_VI_fig.png width=300>
  
- ***Tune leafsize to grow D2, D3, D4, and D5 causal forest***
+ ***To tune the leaf size, use different values for the minimum leaf size (MLS) to grow forests at various depths (D).***
  ```{}
 #Specify the decimal position for continuous variables in the subgroup definition.
 split_val_round_posi=0
@@ -137,32 +137,34 @@ truth.list <<- TRUTH("Unknown")
 vars_catover2 <<- NA  
 ```
 ```{}
-D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, "D2")
+D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
-<img src = images/D2_MLS_tune.png width=400>
+<img src = images/D2_MLS_tune.png width=350>
 
 ```{}
-D3_MLS=MinLeafSizeTune(denominator=45, treeNo = 1000, iterationNo=100, "D3")
+D3_MLS=MinLeafSizeTune(denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
 <img src = images/D3_MLS_tune.png width=350>
 
 ```{}
-D4_MLS=MinLeafSizeTune(denominator=65, treeNo = 1000, iterationNo=100, "D4")
+D4_MLS=MinLeafSizeTune(denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
 <img src = images/D4_MLS_tune.png width=350>
 
 ```{}
-D5_MLS=MinLeafSizeTune(denominator=85, treeNo = 1000, iterationNo=100, "D5")
+D5_MLS=MinLeafSizeTune(denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
 <img src = images/D5_MLS_tune.png width=350>
+
+Note that despite using a smaller minimum leaf size (MLS), the causal forests do not grow deeper due to the presence of a strong two-way interaction in the simulated data set. 
 
 ***Implement iCF***
 ```{}
@@ -173,6 +175,7 @@ iCFCV_B1000_i200 <- iCFCV(dat=dat,
                           treeNo=1000, 
                           iterationNo=100,
                           min.split.var=4, 
+                          split_val_round_posi=0, 
                           P_threshold=0.1, 
                           variable_type = "non-HD",
                           hdpct= 0.95,
