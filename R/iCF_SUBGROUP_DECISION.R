@@ -17,7 +17,7 @@ TREE2SUBGROUP <- function(tree){
   
   subgroup_key.ori   <-lapply(subgroup.ori,   function(df) subset(df, select=c("subgroupID", "subgroup")))
   
-  #did not vote for subgroup, use the synthetic voted tree structure to get subgroup decision
+  #did not vote for subgroup, use the synthetic voted tree structure (i.e. averaging splitting value) to get subgroup decision
   vote_subgroup.ori <- list(majority=subgroup_key.ori[[1]])
   
   return(vote_subgroup.ori )
@@ -226,32 +226,6 @@ PICK_CV <- function(HTE_P_value, MAF_m,
 }
 
 
-CATE_SG <- function(SGdecision){
-  Delta_Y <- DltY_DATA(SGdecision, Train_ID, "non-test")
-  
-  CATE_table <- Delta_Y %>% dplyr::select(SubgroupID, Definition, W, Y,
-                                          dltY_crude, dltY_crude_low, dltY_crude_up, dltY_ate,dltY_ate_low,dltY_ate_up, dltY_att, dltY_att_low, dltY_att_up) %>%
-    dplyr::group_by(SubgroupID, Definition,W,Y) %>%
-    dplyr::summarise(n= n(),
-                     dltY_crude = mean(dltY_crude),
-                     dltY_crude_low = mean(dltY_crude_low),
-                     dltY_crude_up = mean(dltY_crude_up),
-                     dltY_ate = mean(dltY_ate),
-                     dltY_ate_low = mean(dltY_ate_low),
-                     dltY_ate_up = mean(dltY_ate_up),
-                     dltY_att = mean(dltY_att),
-                     dltY_att_low= mean(dltY_att_low),
-                     dltY_att_up = mean(dltY_att_up))%>%
-    dplyr::arrange(dltY_ate)%>%
-    dplyr::mutate(#Treatment = sum(W)
-      CATE_crude=paste0(dltY_crude,"(",dltY_crude_low,",",dltY_crude_up,")"),
-      CATE_iptw  =paste0(dltY_ate,"(",dltY_ate_low,",",dltY_ate_up,")"),
-      CATE_smr  =paste0(dltY_att,"(",dltY_att_low,",",dltY_att_up,")")) %>%
-    dplyr::select(-c(dltY_crude, dltY_crude_low, dltY_crude_up, dltY_ate, dltY_ate_low, dltY_ate_up, dltY_att, dltY_att_low, dltY_att_up)) 
-  
-  return(CATE_table)
-  
-}
 
 
 

@@ -27,8 +27,8 @@ GET_TREE_L <- function (iCF_D, listindex) {
 #'
 #' @export
 #' 
-MinLeafSizeTune <- function(denominator, treeNo, iterationNo, depth){
-  iCF_D<- iCF(denominator,  treeNo, iterationNo, Train, depth,  split_val_round_posi)
+MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_round_posi, depth ){
+  iCF_D<- iCF(denominator,  treeNo, iterationNo, dat, depth,  split_val_round_posi)
   iCF_D_BT=GET_TREE_L(iCF_D, 1)
   #turn tree into subgroup  
   iCF_D_BT_SG        <- lapply(iCF_D_BT, function(df)   TREE2SUBGROUP(df)$majority)

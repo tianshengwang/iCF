@@ -1,6 +1,7 @@
 
 
 #' function to run Cross-Validation on whole dataset (except for external validation set) to get final subgroup decision G_iCF
+#' @param dat dataset for overall population
 #' @param K cross-validation fold 
 #' @treeNo tree No
 #' @iterationNo iteration No (if = 1 then oneCF)
@@ -11,7 +12,7 @@
 #' 
 #'
 
-iCFCV <- function(K, treeNo, iterationNo, min.split.var,
+iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_posi, 
                   #tune_unit, 
                   P_threshold, variable_type, hdpct, HTE_P_cf.raw){
   
@@ -71,13 +72,13 @@ iCFCV <- function(K, treeNo, iterationNo, min.split.var,
     selected_cf.idx.L <- list()
     accuracy_per_fold <- list()
 
-    set.seed(20160413)
-    tt_indicies <- caret::createFolds(y=Train[,1], k= K)
+    set.seed(1234)
+    tt_indicies <- caret::createFolds(y=dat[,1], k= K)
 
     for(f in 1:length(tt_indicies)){
-      Train_cf <- Train[-tt_indicies[[f]],]
-      Test_cf  <- Train[tt_indicies[[f]],]
-      ID_cf <-1:nrow(Train)
+      Train_cf <- dat[-tt_indicies[[f]],]
+      Test_cf  <- dat[tt_indicies[[f]],]
+      ID_cf <-1:nrow(dat)
       Train_ID_cf <- cbind(Train_cf, as.vector(ID_cf[-tt_indicies[[f]]])) %>% dplyr::rename (ID=`as.vector(ID_cf[-tt_indicies[[f]]])`)
       Test_ID_cf  <- cbind(Test_cf,  as.vector(       tt_indicies[[f]]) ) %>% dplyr::rename (ID=`as.vector(tt_indicies[[f]])`)  
       #dplyr::all_equal(Train_ID_cf, Test_ID_cf)
@@ -231,9 +232,11 @@ iCFCV <- function(K, treeNo, iterationNo, min.split.var,
       mse_all_folds.g3.tran_icvsw <- mse_all_folds.g3.tran/stability_D3_CV
       mse_all_folds.g4.tran_icvsw <- mse_all_folds.g4.tran/stability_D4_CV
       mse_all_folds.g5.tran_icvsw <- mse_all_folds.g5.tran/stability_D5_CV
+      
 
-      ATE_all <- CATE_SG("NA")
-      ATE_kable <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") %>% knitr::kable()
+
+      ATE_all <- CATE_SG(dat, "NA")
+      ATE_kable <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") #%>% knitr::kable()
       #--------------------------------------------------------------------------------------------------------------------------------------------------
       #Original, without any stability weight
       PICK_CV_ori <- PICK_CV(HTE_P_cf.raw, mse_all_folds.m.tran, 
@@ -241,8 +244,8 @@ iCFCV <- function(K, treeNo, iterationNo, min.split.var,
                              vote_D2_subgroup.L, vote_D3_subgroup.L, vote_D4_subgroup.L, vote_D5_subgroup.L,
                              stability_D2_T_r, stability_D3_T_r,  stability_D4_T_r,  stability_D5_T_r,
                               P_threshold, K )
-      CATE_ori <- CATE_SG(PICK_CV_ori$selectedSG$majority)
-      CATE_ori_kable <-  CATE_ori %>% mutate(Wt="NA") %>% knitr::kable()
+      CATE_ori <- CATE_SG(dat, PICK_CV_ori$selectedSG$majority)
+      CATE_ori_kable <-  CATE_ori %>% mutate(Wt="NA") #%>% knitr::kable()
       #--------------------------------------------------------------------------------------------------------------------------------------------------
       #Inverse CV stability weight
       PICK_CV_icvsw <- PICK_CV(HTE_P_cf.raw, mse_all_folds.m.tran, 
@@ -254,16 +257,16 @@ iCFCV <- function(K, treeNo, iterationNo, min.split.var,
             if (identical(PICK_CV_icvsw$selectedSG,PICK_CV_ori$selectedSG)==T ) {
       CATE_icvsw <- CATE_ori 
       } else {
-      CATE_icvsw <- CATE_SG(PICK_CV_icvsw$selectedSG$majority)
+      CATE_icvsw <- CATE_SG(dat, PICK_CV_icvsw$selectedSG$majority)
       }
-      CATE_icvsw_kable <-  CATE_icvsw %>% mutate(Wt="icvsw") %>% knitr::kable()
+      CATE_icvsw_kable <-  CATE_icvsw %>% mutate(Wt="icvsw") #%>% knitr::kable()
  
     
   } else if (round(HTE_P_cf.raw,1) > P_threshold){
     
     time_iCFCV = "NA"
     
-    ATE_all <- CATE_SG("NA")
+    ATE_all <- CATE_SG(dat, "NA")
     ATE_kable <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") %>% knitr::kable()
     
     vote_D2_subgroup.CVmajority = "NA"
