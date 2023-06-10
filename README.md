@@ -104,7 +104,7 @@ Third, you can download the 'iCF_0.0.0.9000.tar.gz' file (this option is current
   
  PS <- (1 + exp( -(b0 + b1*X1 + b2*X2 + b3*X3 + b4*X4 + b5*X5 + b6*X6 + b7*X7) ))^-1 #true propensity score
  W <- rbinom(nstudy,1,PS) 
-#Two way interaction of W, X1, and X3
+#3-way interaction of W, X1, and X3 (W:X1:X3)
  Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*W + rnorm(nstudy,0,1) + 0.4*W*X3 + 0.3*W*X1 + 0.4*W*X1*X3 + 0.2*X1*X3 
  dat <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
 ``` 
