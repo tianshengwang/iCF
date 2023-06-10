@@ -8,7 +8,7 @@ The iCF algorithm identifies important subgroups with heterogeneous treatment ef
 
 Wang T, Keil AP, Kim S, Wyss R, Htoo PT, Funk MJ, Buse JB, Kosorok MR, Stürmer T. Iterative Causal Forest: A Novel Algorithm for Subgroup Identification. Am J Epidemiol. 2023 (In Press).
 
-**R packages recommended**
+**1. R packages recommended**
 ```{r packages, include=FALSE}
 library(MASS)
 library(grf)
@@ -31,7 +31,7 @@ library(knitr)
 library(Rfast)
 library(spaMM)
 ```
-**Installation**
+**2. Installation**
 
 There are three ways to install iCF.
 
@@ -58,7 +58,7 @@ library(iCF)
 ```
 Third, you can download the 'iCF_0.0.0.9000.tar.gz' file (this option is currently being worked on and will be available soon)..."
 
-**Data Simulation**
+**3. Data Simulation**
 ```{}
   nstudy = 10000
   b0 <- 0
@@ -108,7 +108,7 @@ Third, you can download the 'iCF_0.0.0.9000.tar.gz' file (this option is current
  Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*W + rnorm(nstudy,0,1) + 0.4*W*X3 + 0.3*W*X1 + 0.4*W*X1*X3 + 0.2*X1*X3 
  dat <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
 ``` 
-**Run iCF on simulated data**
+**4. Run iCF on simulated data**
 
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 ```{}
@@ -184,7 +184,7 @@ iCFCV_B1000_i200_sim
 ```
 
 
-**Run iCF on real-world data: on Medicare SGLT2i vs GLP1RA new user cohort**
+**5. Run iCF on real-world data**
 
 We compared the two-year risk difference (RD) of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort are available in the mehtod paper (Wang et al.) 
 
