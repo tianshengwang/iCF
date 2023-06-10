@@ -94,7 +94,7 @@ library(iCF)
  Y <- as.vector( as.numeric( dat[,"Y"] ) )
  W <- as.vector( as.numeric( dat[,"W"] ) )
  
- cf_raw_key.tr <- CF_RAW_key(Train, 1, "non-hd", hdpct=0.90) 
+ cf_raw_key.tr <- CF_RAW_key(dat, 1, "non-hd", hdpct=0.90) 
  Y.hat  <<- cf_raw_key.tr$Y.hat                 
  W.hat  <<- cf_raw_key.tr$W.hat                 
  HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
