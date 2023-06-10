@@ -1,4 +1,8 @@
-# iCF (iterative Causal Forest)
+# Iterative Causal Forest (iCF): A Novel Algorithm for Subgroup Identification
+----------------------------------------------------------------------------------
+The iCF algorithm automatically identifies subgroups with heterogeneous treatment effects.
+
+<img src = images/FIG1_19Mar2023.jpg width=1000>
 
 **Citation**
 
