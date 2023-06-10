@@ -46,9 +46,10 @@ source("/local/iCF/iCF_SUBGROUP_DECISION.R")
 source("/local/iCF/iCF_SG_PIPELINE.R")
 source("/local/iCF/iCF_CV.R")
 source("/local/iCF/iCF_SUBGROUP_ANALYSIS.R")
-source("/local/iCF/iCF_SUBGROUP_ANALYSIS.R")
+source("/local/iCF/iCF_iCF_grplasso.R")
+source("/local/iCF/sim_Truth_tree.R")
 source("/local/iCF/GG_toolbox.R")
-source("/local/iCF/sim_Truth_tree.R")#for running simulation only, not necessary 
+
 ```
 
 Second, install by devtools: 
