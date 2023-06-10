@@ -134,17 +134,17 @@ Third, download the "iCF_0.0.0.9000.tar.gz" file ...
  ```
  <img src = images/GG_VI_fig.png width=300>
  
- ```{}
- #define variables categorical variables more than 2 levels
- vars_catover2 <<- NA
- ``` 
+ 
 
 
 
 **Run iCF**
 ```{}
 split_val_round_posi=0
-intTRUE<-"Unknown" 
+intTRUE<-"Unknown"
+truth.list <<- TRUTH(intTRUE)
+
+vars_catover2 <<- NA  #define variables categorical variables more than 2 levels
 
 D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, "D2")
 D2_MLS$depth_mean
