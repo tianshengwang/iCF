@@ -144,7 +144,6 @@ Third, download the "iCF_0.0.0.9000.tar.gz" file ...
 split_val_round_posi=0
 intTRUE<-"Unknown"
 truth.list <<- TRUTH(intTRUE)
-
 vars_catover2 <<- NA  #define variables categorical variables more than 2 levels
 
 D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, "D2")
