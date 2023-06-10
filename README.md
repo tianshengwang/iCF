@@ -52,14 +52,14 @@ source("/local/iCF/GG_toolbox.R")
 
 ```
 
-Second, install by devtools: 
+Second, install by devtools (we are currently working on it, will be available soon): 
 ```{}
 install.packages('devtools')
 devtools::install_github("tianshengwang/iCF")
 library(iCF)
 ```
 
-Third, download the "iCF_0.0.0.9000.tar.gz" file ...
+Third, download the "iCF_0.0.0.9000.tar.gz" file (we are currently working on it, will be available soon)...
 
 
 **Data Simulation**
@@ -117,14 +117,14 @@ Third, download the "iCF_0.0.0.9000.tar.gz" file ...
 ``` 
 **Prepare data**
 ```{}
- Train <- dat
+ 
  vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
  intTRUE <- "Unknown"
- X <- Train[,vars_forest]
+ X <- dat[,vars_forest]
  Y <- as.vector( as.numeric( dat[,"Y"] ) )
  W <- as.vector( as.numeric( dat[,"W"] ) )
  
- cf_raw_key.tr <- CF_RAW_key(Train, 1, "non-hd", hdpct=0.90) 
+ cf_raw_key.tr <- CF_RAW_key(dat, 1, "non-hd", hdpct=0.90) 
  Y.hat  <<- cf_raw_key.tr$Y.hat                 
  W.hat  <<- cf_raw_key.tr$W.hat                 
  HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
@@ -176,7 +176,8 @@ D5_MLS$depth_gg
 ```{}
 leafsize <<- list(D5=85, D4=65, D3=45, D2=25)
 
-iCFCV_B1000_i200 <- iCFCV(K=5,
+iCFCV_B1000_i200 <- iCFCV(dat=dat,
+                          K=5,
                           treeNo=1000, 
                           iterationNo=100,
                           min.split.var=4, 
