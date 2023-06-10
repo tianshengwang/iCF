@@ -1,3 +1,151 @@
+
+###############################################################################################
+# causal forest wrapper function for easy-input of different parameter
+###############################################################################################
+#' This function is the wrapper function to run raw causal forest with predefined min.node.size = round(nrow(Train)/depth, 0), 
+#' @param depth parameter to tune min.node.size = round(nrow(Train)/depth, 0), 
+#' @param treeNo number of trees in each forest
+#' @param tunepara request wihout tuning
+#' 
+#' @return the key results from raw causal forest 
+#'
+#' @export
+#' 
+CF <- function(depth, treeNo, tunepara){
+  CausalForest <-grf::causal_forest(X[, selected_cf.idx],     
+                                    Y, 
+                                    W,  
+                                    Y.hat ,
+                                    W.hat ,
+                                    num.trees = treeNo,
+                                    sample.weights = NULL,
+                                    clusters = NULL,
+                                    equalize.cluster.weights = FALSE,
+                                    sample.fraction = 0.5,
+                                    mtry = min(ceiling(sqrt(ncol(X)) + 20), ncol(X)),
+                                    min.node.size  = round(nrow(Train)/depth, 0), 
+                                    honesty = TRUE,
+                                    honesty.fraction = 0.5,
+                                    honesty.prune.leaves = TRUE,
+                                    alpha = 0.05,
+                                    imbalance.penalty = 0,
+                                    stabilize.splits = TRUE,
+                                    ci.group.size  = 2,
+                                    tune.parameters = tunepara, #only "none" can produce simple forest,
+                                    tune.num.trees = 200,
+                                    tune.num.reps = 50,
+                                    tune.num.draws = 1000,
+                                    compute.oob.predictions = TRUE,
+                                    #orthog.boosting = FALSE,#Deprecated and unused after version 1.0.4.
+                                    num.threads = NULL,
+                                    seed =  runif(1, 0, .Machine$integer.max))
+  return(CausalForest)
+}
+
+###############################################################################################
+#                      Iterative multidepth CF  + Majority Vote                               #
+###############################################################################################
+iCF <- function( depth, treeNo, iterationNo, Ntrain, tree_depth, split_val_round_posi){
+  besttreelist = list() #making an empty list
+  besttreelist_L = list () #for list format (rather than df format) of best trees
+  splitfreqlist = list()
+  treeBlist <- list()
+  #treeBlist_L <- list()
+  mvtreelist = list()
+  # mvtreelist_L = list()
+  for (k in 1:iterationNo) { 
+    cf <- CF(depth, # =as.numeric(sample(leafsize, 1)), 
+             treeNo, "none")
+    #cf <- CF(depth, treeNo, "none")
+    #-----------------------------------------------------------------
+    #get P-value of omnibus test for HTE presence 
+    HTE_P_cf <- grf::test_calibration(cf)[8]
+    #-----------------------------------------------------------------
+    #Prepare for Split Frequency
+    max.depth_para= as.numeric(stringr::str_sub(tree_depth,-1,-1))
+    #split frequency for whole forest, not frequency of the "depth"!
+    freqs <- grf::split_frequencies(cf, max.depth = max.depth_para)
+    d <- data.frame(freqs)
+    real_index <- colnames(X[, selected_cf.idx])
+    #rename with real index 
+    data.table::setnames(d, old = c(colnames(d)), new = c(real_index))
+    d$k <- k
+    splitfreqlist[[k]] <- d # add it to your list
+    #-----------------------------------------------------------------
+    #############################-----------------------------------------------------------------
+    #BEST TREE SELECTION
+    #############################-----------------------------------------------------------------
+    best_tree_info<-find_best_tree(cf, "causal")
+    best_tree_info$best_tree
+    # Plot trees
+    tree.plot = plot(grf::get_tree(cf, best_tree_info$best_tree))
+    tree.plot
+    best.tree <- grf::get_tree(cf, best_tree_info$best_tree)
+    best.tree
+    besttreelist_L[[k]] <- best.tree # add it to your list
+    #-----------------------------------------------------------------
+    besttree <-   GET_TREE_DF(length(best.tree$nodes), best.tree, split_val_round_posi)
+    besttree$k <- k  # maybe you want to keep track of which iteration produced it?
+    besttree$HTE_P_cf <- HTE_P_cf  # record the omnibus HTE test P value
+    besttreelist[[k]] <- besttree # add it to your list
+  }
+  
+  all_list <- rlist::list.zip(besttreelist, besttreelist_L, splitfreqlist)
+  return(all_list) 
+}
+
+
+###############################################################################################
+###############################################################################################
+#         ONLY ONE multidepth CF  + Majority Vote,i.e. without best tree !!!                  #
+###############################################################################################
+###############################################################################################
+
+oneCF <- function(depth, treeNo, tunepara, tree_depth, split_val_round_posi){
+  treeBlist  = list()
+  besttreelist = list() #making an empty list
+  besttreelist_L = list () #for list format (rather than df format) of best trees
+  cf <- CF(depth, treeNo, tunepara)
+  #-----------------------------------------------------------------
+  #get P-value of omnibus test for HTE presence 
+  HTE_P_cf <- grf::test_calibration(cf)[8]
+  #-----------------------------------------------------------------
+  #Prepare for Split Frequency
+  max.depth_para= as.numeric(stringr::str_sub(tree_depth,-1,-1))
+  #split frequency for whole forest, not frequency of the "depth"!
+  freqs <- grf::split_frequencies(cf, max.depth = max.depth_para)
+  d <- data.frame(freqs)
+  real_index <- colnames(X[, selected_cf.idx])
+  #rename with real index 
+  data.table::setnames(d, old = c(colnames(d)), new = c(real_index))
+  #-----------------------------------------------------------------
+  for (b in 1:treeNo) { 
+    tree_b_l <- grf::get_tree(cf, b)
+    tree_b <-   GET_TREE_DF(length(tree_b_l$nodes), tree_b_l, split_val_round_posi)
+    tree_b$b <- b 
+    tree_b$HTE_P_cf <- HTE_P_cf
+    treeBlist[[b]] <- tree_b
+  }
+  #############################-----------------------------------------------------------------
+  #BEST TREE SELECTION
+  #############################-----------------------------------------------------------------
+  best_tree_info<-find_best_tree(cf, "causal")
+  best_tree_info$best_tree
+  # Plot trees
+  tree.plot = plot(grf::get_tree(cf, best_tree_info$best_tree))
+  tree.plot
+  best.tree <- grf::get_tree(cf, best_tree_info$best_tree)
+  best.tree
+  besttreelist_L[[1]] <- best.tree # add it to your list
+  #-----------------------------------------------------------------
+  besttree <-   GET_TREE_DF(length(best.tree$nodes), best.tree, split_val_round_posi)
+  besttree$k <- 1  # maybe you want to keep track of which iteration produced it?
+  besttree$HTE_P_cf <- HTE_P_cf  # record the omnibus HTE test P value
+  besttreelist[[1]] <- besttree # add it to your list
+  #############################-----------------------------------------------------------------
+  return(list(besttreelist=besttreelist, besttreelist_L=besttreelist_L, treeBlist=treeBlist, cf=cf, HTE_P_cf=HTE_P_cf, d=d))
+}
+
 #' function to get subroup decision G_D, get ready for predicting Y (transformed outcome) in testing set,  and models build from G_D to predict Y*
 #' @param leafsize minimum-node-size tuned 
 #' @treeNo tree No
