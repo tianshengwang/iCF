@@ -106,20 +106,15 @@ Third, download the "iCF_0.0.0.9000.tar.gz" file (we are currently working on it
   X8 <- ifelse(X8 > mean(X8), 1, 0)
   X9 <- ifelse(X9 > mean(X9), 1, 0)
   
-  PS <- (1 + exp( -(b0 + b1*X1 + b2*X2 + b3*X3 + b4*X4 + b5*X5 + b6*X6 + b7*X7) ))^-1 #true propensity score
-  
- W <- rbinom(nstudy,1,PS) #treatment assignment
-
- Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*W + rnorm(nstudy,0,1) + 0.4*W*X3 
-
- dat <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10))
-  
+ PS <- (1 + exp( -(b0 + b1*X1 + b2*X2 + b3*X3 + b4*X4 + b5*X5 + b6*X6 + b7*X7) ))^-1 #true propensity score
+ W <- rbinom(nstudy,1,PS) 
+#two way interaction of W, X1, and X3
+ Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*W + rnorm(nstudy,0,1) + 0.4*W*X3 + 0.3*W*X1 + 0.4*W*X1*X3 + 0.2*X1*X3 
+ dat <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
 ``` 
 **Prepare data**
 ```{}
- 
  vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
- intTRUE <- "Unknown"
  X <- dat[,vars_forest]
  Y <- as.vector( as.numeric( dat[,"Y"] ) )
  W <- as.vector( as.numeric( dat[,"W"] ) )
@@ -135,17 +130,17 @@ Third, download the "iCF_0.0.0.9000.tar.gz" file (we are currently working on it
  ```
  <img src = images/GG_VI_fig.png width=300>
  
- 
-
-
+ ```{}
+#set the specific decimal position for continuous variables in subgroup definition
+split_val_round_posi=0
+#For real-world project, set the truth as "Unknown".
+truth.list <<- TRUTH("Unknown")
+#define variables categorical variables more than 2 levels
+vars_catover2 <<- NA  
+```
 
 **Run iCF**
 ```{}
-split_val_round_posi=0
-intTRUE<-"Unknown"
-truth.list <<- TRUTH(intTRUE)
-vars_catover2 <<- NA  #define variables categorical variables more than 2 levels
-
 D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, "D2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
