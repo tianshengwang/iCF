@@ -31,28 +31,29 @@ library(spaMM)
 
 There are 3 ways to install iCF.
 
-First, install by devtools: 
-```{}
-install.packages('devtools')
-devtools::install_github("tianshengwang/iCF")
-library(iCF)
-```
-Second, download all files in the R fold and save them in your local directory (make a new folder, name it as "iCF), then run:
+First, download all files in the R fold and save them in your local directory (make a new folder, name it as "iCF), then run the following R codes each time before running iCF:
 ```{}
 source("/local/iCF/GG_toolbox.R")
-source("/local/iCF/sim_GenSimData.R")
 source("/local/iCF/best_tree_MSegar.R")
 source("/local/iCF/iCF_TREE_build.R")
 source("/local/iCF/iCF_PARENT_node.R")
 source("/local/iCF/iCF_PRE_majority.R")
-source("/local/iCF/sim_Truth_tree.R")
 source("/local/iCF/iCF_MAJORITY_VOTE.R")
 source("/local/iCF/iCF_SUBGROUP_DECISION.R")
 source("/local/iCF/iCF_SG_PIPELINE.R")
 source("/local/iCF/iCF_CV.R")
 source("/local/iCF/iCF_SUBGROUP_ANALYSIS.R")
 ```
+
+Second, install by devtools: 
+```{}
+install.packages('devtools')
+devtools::install_github("tianshengwang/iCF")
+library(iCF)
+```
+
 Third, download the "iCF_0.0.0.9000.tar.gz" file ...
+
 
 **Data Simulation**
 ```{}
@@ -167,13 +168,15 @@ D5_MLS$depth_gg
 ```{}
 leafsize <<- list(D5=155, D4=110, D3=80, D2=50)
 
-iCFCV_lab <- iCFCV(K=5,
-                  treeNo=2000, 
-                  iterationNo=100,
-                  min.split.var=4, 
-                  P_threshold=0.1, 
-                  variable_type = "non-HD",
-                  hdpct= 0.95,
-                  HTE_P_cf.raw = 0.1) 
+iCFCV_B1000_i200 <- iCFCV(K=5,
+                          treeNo=1000, 
+                          iterationNo=100,
+                          min.split.var=4, 
+                          P_threshold=0.1, 
+                          variable_type = "non-HD",
+                          hdpct= 0.95,
+                          HTE_P_cf.raw = 0.1) 
+
+iCFCV_B1000_i200
 ```
 If you have further questions or comments, please contact Dr. Tiansheng Wang: tianwang@unc.edu
