@@ -99,17 +99,17 @@ library(iCF)
  W.hat  <<- cf_raw_key.tr$W.hat                 
  HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
  varimp_cf  <- cf_raw_key.tr$varimp_cf          
- length(W.hat); 
  selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx 
 
- PlotVI(varimp_cf, "Variable importance")
  GG_VI(varimp_cf, "Variable importance" )
+ ```
+ <img src = images/GG_VI_fig.png width=300>
  
+ ```{}
+ #define variables categorical variables more than 2 levels
  vars_catover2 <<- NA
- 
- P_threshold <<- 0.1
-  
-```
+ ``` 
+
 
 
 **Run iCF**
@@ -118,7 +118,7 @@ D2_MLS=MinLeafSizeTune(denominator=50, treeNo = 1000, iterationNo=100, "D2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
-<img src = images/D2_MLS_tune.png width=300>
+<img src = images/D2_MLS_tune.png width=400>
 
 ```{}
 D3_MLS=MinLeafSizeTune(denominator=80, treeNo = 1000, iterationNo=100, "D3")
