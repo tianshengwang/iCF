@@ -164,7 +164,7 @@ D5_MLS$depth_gg
 ```
 <img src = images/D5_MLS_tune.png width=350>
 
-Note that despite using a smaller minimum leaf size (MLS), the causal forests do not grow deeper due to the presence of a strong two-way interaction in the simulated data set. 
+*Note that despite using a smaller minimum leaf size (MLS), the causal forests do not grow deeper due to the presence of a strong two-way interaction in the simulated data set.* 
 
 ***Implement iCF***
 ```{}
