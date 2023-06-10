@@ -37,7 +37,6 @@ There are 3 ways to install iCF.
 
 First, download all files in the R fold and save them in your local directory (make a new folder, name it as "iCF), then run the following R codes each time before running iCF:
 ```{}
-source("/local/iCF/GG_toolbox.R")
 source("/local/iCF/best_tree_MSegar.R")
 source("/local/iCF/iCF_TREE_build.R")
 source("/local/iCF/iCF_PARENT_node.R")
@@ -47,6 +46,9 @@ source("/local/iCF/iCF_SUBGROUP_DECISION.R")
 source("/local/iCF/iCF_SG_PIPELINE.R")
 source("/local/iCF/iCF_CV.R")
 source("/local/iCF/iCF_SUBGROUP_ANALYSIS.R")
+source("/local/iCF/iCF_SUBGROUP_ANALYSIS.R")
+source("/local/iCF/GG_toolbox.R")
+source("/local/iCF/sim_Truth_tree.R")#for running simulation only, not necessary 
 ```
 
 Second, install by devtools: 
@@ -142,6 +144,8 @@ Third, download the "iCF_0.0.0.9000.tar.gz" file ...
 **Run iCF**
 ```{}
 split_val_round_posi=0
+intTRUE<-"Unknown" 
+
 D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, "D2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
