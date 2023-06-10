@@ -1,6 +1,6 @@
 # Iterative Causal Forest (iCF): A Novel Algorithm for Subgroup Identification
 ----------------------------------------------------------------------------------
-The iCF algorithm automatically identifies subgroups with heterogeneous treatment effects.
+The iCF algorithm identifies important subgroups with heterogeneous treatment effects without prior knowledge of treatment-covariate interactions
 
 <img src = images/FIG1_19Mar2023.jpg width=1000>
 
@@ -33,9 +33,9 @@ library(spaMM)
 ```
 **installation**
 
-There are 3 ways to install iCF.
+There are three ways to install iCF.
 
-First, download all files in the R fold and save them in your local directory (make a new folder, name it as "iCF), then run the following R codes each time before running iCF:
+First, download all the files in the 'R' folder and save them in your local directory (create a new folder named 'iCF'). Then, run the following R codes each time before executing iCF:
 ```{}
 source("/local/iCF/best_tree_MSegar.R")
 source("/local/iCF/iCF_TREE_build.R")
@@ -49,18 +49,14 @@ source("/local/iCF/iCF_SUBGROUP_ANALYSIS.R")
 source("/local/iCF/iCF_iCF_grplasso.R")
 source("/local/iCF/sim_Truth_tree.R")
 source("/local/iCF/GG_toolbox.R")
-
 ```
-
-Second, install by devtools (we are currently working on it, will be available soon): 
+Second, you can install it using devtools (this option is currently being worked on and will be available soon):
 ```{}
 install.packages('devtools')
 devtools::install_github("tianshengwang/iCF")
 library(iCF)
 ```
-
-Third, download the "iCF_0.0.0.9000.tar.gz" file (we are currently working on it, will be available soon)...
-
+Third, you can download the 'iCF_0.0.0.9000.tar.gz' file (this option is currently being worked on and will be available soon)..."
 
 **Data Simulation**
 ```{}
@@ -108,11 +104,12 @@ Third, download the "iCF_0.0.0.9000.tar.gz" file (we are currently working on it
   
  PS <- (1 + exp( -(b0 + b1*X1 + b2*X2 + b3*X3 + b4*X4 + b5*X5 + b6*X6 + b7*X7) ))^-1 #true propensity score
  W <- rbinom(nstudy,1,PS) 
-#two way interaction of W, X1, and X3
+#Two way interaction of W, X1, and X3
  Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*W + rnorm(nstudy,0,1) + 0.4*W*X3 + 0.3*W*X1 + 0.4*W*X1*X3 + 0.2*X1*X3 
  dat <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
 ``` 
-**Prepare data**
+**Run iCF**
+***Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 ```{}
  vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
  X <- dat[,vars_forest]
@@ -130,16 +127,15 @@ Third, download the "iCF_0.0.0.9000.tar.gz" file (we are currently working on it
  ```
  <img src = images/GG_VI_fig.png width=300>
  
+ ***Tune leafsize to grow D2, D3, D4, and D5 causal forest***
  ```{}
-#set the specific decimal position for continuous variables in subgroup definition
+#Specify the decimal position for continuous variables in the subgroup definition.
 split_val_round_posi=0
-#For real-world project, set the truth as "Unknown".
+#For real-world projects (not simulations where we know the truth), the truth is set as "Unknown".
 truth.list <<- TRUTH("Unknown")
-#define variables categorical variables more than 2 levels
+#Define categorical variables with more than two levels.
 vars_catover2 <<- NA  
 ```
-
-**Run iCF**
 ```{}
 D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, "D2")
 D2_MLS$depth_mean
@@ -168,6 +164,7 @@ D5_MLS$depth_gg
 ```
 <img src = images/D5_MLS_tune.png width=350>
 
+***Implement iCF***
 ```{}
 leafsize <<- list(D5=85, D4=65, D3=45, D2=25)
 
