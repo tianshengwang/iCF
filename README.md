@@ -31,7 +31,7 @@ library(knitr)
 library(Rfast)
 library(spaMM)
 ```
-**installation**
+**Installation**
 
 There are three ways to install iCF.
 
@@ -108,26 +108,25 @@ Third, you can download the 'iCF_0.0.0.9000.tar.gz' file (this option is current
  Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*W + rnorm(nstudy,0,1) + 0.4*W*X3 + 0.3*W*X1 + 0.4*W*X1*X3 + 0.2*X1*X3 
  dat <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
 ``` 
-**Run iCF**
-***Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
+**Run iCF on simulated data**
+
+***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 ```{}
  vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
  X <- dat[,vars_forest]
  Y <- as.vector( as.numeric( dat[,"Y"] ) )
  W <- as.vector( as.numeric( dat[,"W"] ) )
- 
  cf_raw_key.tr <- CF_RAW_key(dat, 1, "non-hd", hdpct=0.90) 
  Y.hat  <<- cf_raw_key.tr$Y.hat                 
  W.hat  <<- cf_raw_key.tr$W.hat                 
  HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
  varimp_cf  <- cf_raw_key.tr$varimp_cf          
  selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx 
-
  GG_VI(varimp_cf, "Variable importance" )
  ```
  <img src = images/GG_VI_fig.png width=300>
  
- ***To tune the leaf size, use different values for the minimum leaf size (MLS) to grow forests at various depths (D).***
+ ***Step 2. To tune the leaf size, use different values for the minimum leaf size (MLS) to grow forests at various depths (D).***
  ```{}
 #Specify the decimal position for continuous variables in the subgroup definition.
 split_val_round_posi=0
@@ -166,11 +165,11 @@ D5_MLS$depth_gg
 
 *Note that despite using a smaller minimum leaf size (MLS), the causal forests do not grow deeper due to the presence of a strong 3-way interaction (W:X1:X3) in the simulated data set.* 
 
-***Implement iCF***
+***Step 3. Implement iCF on simulated dataset***
 ```{}
 leafsize <<- list(D5=85, D4=65, D3=45, D2=25)
 
-iCFCV_B1000_i200 <- iCFCV(dat=dat,
+iCFCV_B1000_i200_sim <- iCFCV(dat=dat,
                           K=5,
                           treeNo=1000, 
                           iterationNo=100,
@@ -181,6 +180,83 @@ iCFCV_B1000_i200 <- iCFCV(dat=dat,
                           hdpct= 0.95,
                           HTE_P_cf.raw = HTE_P_cf.raw) 
 
-iCFCV_B1000_i200
+iCFCV_B1000_i200_sim
+```
+
+
+**Run iCF on real-world data: on Medicare SGLT2i vs GLP1RA new user cohort**
+We compared the two-year risk difference (RD) of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort are available in the mehtod paper (Wang et al.) 
+
+***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
+```{}
+ vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
+ X <- dat[,vars_forest]
+ Y <- as.vector( as.numeric( dat[,"Y"] ) )
+ W <- as.vector( as.numeric( dat[,"W"] ) )
+ cf_raw_key.tr <- CF_RAW_key(dat, 1, "non-hd", hdpct=0.90) 
+ Y.hat  <<- cf_raw_key.tr$Y.hat                 
+ W.hat  <<- cf_raw_key.tr$W.hat                 
+ HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
+ varimp_cf  <- cf_raw_key.tr$varimp_cf          
+ selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx 
+ GG_VI(varimp_cf, "Variable importance" )
+ ```
+ <img src = images/VI_SGLTvGLP_HHF2y.png width=300>
+ 
+ ***Step 2. To tune the leaf size, use different values for the minimum leaf size (MLS) to grow forests at various depths (D).***
+ ```{}
+#Specify the decimal position for continuous variables in the subgroup definition.
+split_val_round_posi=0
+#For real-world projects (not simulations where we know the truth), the truth is set as "Unknown".
+truth.list <<- TRUTH("Unknown")
+#Define categorical variables with more than two levels.
+vars_catover2 <<- NA  
+```
+```{}
+D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2")
+D2_MLS$depth_mean
+D2_MLS$depth_gg
+```
+<img src = images/D2_MLS_tune.png width=350>
+
+```{}
+D3_MLS=MinLeafSizeTune(denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3")
+D3_MLS$depth_mean
+D3_MLS$depth_gg
+```
+<img src = images/D3_MLS_tune.png width=350>
+
+```{}
+D4_MLS=MinLeafSizeTune(denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4")
+D4_MLS$depth_mean
+D4_MLS$depth_gg
+```
+<img src = images/D4_MLS_tune.png width=350>
+
+```{}
+D5_MLS=MinLeafSizeTune(denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5")
+D5_MLS$depth_mean
+D5_MLS$depth_gg
+```
+<img src = images/D5_MLS_tune.png width=350>
+
+*Note that despite using a smaller minimum leaf size (MLS), the causal forests do not grow deeper due to the presence of a strong 3-way interaction (W:X1:X3) in the simulated data set.* 
+
+***Step 3. Implement iCF on Medicare SGLT2i vs GLP1RA new user cohort***
+```{}
+leafsize <<- list(D5=85, D4=65, D3=45, D2=25)
+
+iCFCV_B1000_i200_rwd <- iCFCV(dat=dat,
+                          K=5,
+                          treeNo=1000, 
+                          iterationNo=100,
+                          min.split.var=4, 
+                          split_val_round_posi=0, 
+                          P_threshold=0.1, 
+                          variable_type = "non-HD",
+                          hdpct= 0.95,
+                          HTE_P_cf.raw = HTE_P_cf.raw) 
+
+iCFCV_B1000_i200_rwd
 ```
 If you have further questions or comments, please contact Dr. Tiansheng Wang: tianwang@unc.edu
