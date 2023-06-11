@@ -137,28 +137,28 @@ truth.list <<- TRUTH("Unknown")
 vars_catover2 <<- NA  
 ```
 ```{}
-D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2")
+D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "steelblue1")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
 <img src = images/D2_MLS_tune.png width=350>
 
 ```{}
-D3_MLS=MinLeafSizeTune(denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3")
+D3_MLS=MinLeafSizeTune(denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3", "steelblue1")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
 <img src = images/D3_MLS_tune.png width=350>
 
 ```{}
-D4_MLS=MinLeafSizeTune(denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4")
+D4_MLS=MinLeafSizeTune(denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4", "steelblue1")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
 <img src = images/D4_MLS_tune.png width=350>
 
 ```{}
-D5_MLS=MinLeafSizeTune(denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5")
+D5_MLS=MinLeafSizeTune(denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5", "steelblue1")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
@@ -184,17 +184,78 @@ We compared the two-year risk difference (RD) of hospitalized heart failure (HHF
 
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 ```{}
- vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
- X <- dat[,vars_forest]
- Y <- as.vector( as.numeric( dat[,"Y"] ) )
- W <- as.vector( as.numeric( dat[,"W"] ) )
- cf_raw_key.tr <- CF_RAW_key(dat, 1, "non-hd", hdpct=0.90) 
- Y.hat  <<- cf_raw_key.tr$Y.hat                 
- W.hat  <<- cf_raw_key.tr$W.hat                 
- HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
- varimp_cf  <- cf_raw_key.tr$varimp_cf          
- selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx 
- GG_VI(varimp_cf, "Variable importance" )
+load("HHF_SGLTvGLP_iCFCV.RData")
+
+dat00 <-  hfp_2yr_all_sgltvglp %>% 
+          dplyr::filter(FillDate2 <= 21184 -365*2 &  #31DEC2017
+                        IndexDate >= 10359# & 1/2/2013) %>%
+          dplyr::mutate(Y = hfp_2yr_2yr, #in 2 year fixed period for risk difference scale
+                        age = as.numeric( cut(age, c(65,70,75,80,85,Inf) ,
+                                              labels=c("65<age<=70 ","70<age<=75","75<age<=80","80<age<=85", "age>85")))
+          ) %>% #defined in the beginning of analysis_MACE SAS macro
+  dplyr::rename(W=SGLT) %>%
+  dplyr::select(BENE_ID, IndexDate, FillDate2, Y, W, age, race2, sex,bl_DIABRETINOPATHY,  bl_NEPHROPATHY,  bl_NEUROPATHY,   
+                bl_DIABCOMPLICATIONS, bl_nodrugs,  bl_HYPERGLYCEMIA, baselinecvd, baselinechf, bl_HYPOGLYCEMIA, bl_FOOTULCER,   
+                bl_angina2, bl_mi2, bl_INTERVENTION, bl_atherosclerosis2, bl_ischemichtdz2, bl_cerebrovasculardz2, 
+                bl_cardiomyopathy2, bl_chf2,  bl_pvdnew, bl_AF, bl_ARRHYTHMIA, bl_CARDIACARREST, bl_DEFIBRILLATOR,
+                bl_ANEMIA, bl_ALCOHOL,bl_ASTHMA, bl_BRAININJ, bl_CANCER, bl_CHRLUNG,bl_CKD, bl_COAGULOPATHY, bl_CONNECTIVE,
+                bl_DEMENTIA, bl_DEFANEMIA, bl_DEPRESSION, bl_DIFFWALK, bl_DYSLIPIDEMIA, bl_hypothyroidism, bl_EDEMA, 
+                bl_ELECTROLYTES, bl_HIV, bl_HEMATOLOGICAL, bl_HYPERTENSION, bl_HYPOTENSION, bl_IMMUNE, bl_METABOLIC, 
+                bl_METASTATICCA, bl_MILDLIVER, bl_MODLIVER, bl_NUTRITIONAL, bl_NERVOUS, bl_PARAPLEGIA, bl_PARKINSON,  
+                bl_PNEUMONIA,bl_PSYCHOSIS, bl_PULCIRC, bl_REHABILITATION, bl_RENAL, bl_RHEUMATIC, bl_smokingfinal, 
+                bl_THROMBOEMBOLISM, bl_VULVULAR, bl_WTLOSS, bl_AMBULANCE, bl_HOSPITALBED, bl_OXYGEN, bl_WHEELCHAIR,  
+                bl_METFORMIN, bl_SAINSULIN, bl_LAI, bl_TZD, bl_MEGLITINIDE, bl_SULF, bl_DPP, 
+                bl_IMMUNOSUPPRESSIVE, bl_STEROIDS, bl_ACEI, bl_ARB, bl_CCB, bl_BB, bl_NSAIDS, bl_ASPIRIN, 
+                bl_ORALCONTRAC, bl_ESTROGEN, bl_LOOP, bl_OTHERDIURETICS, bl_STATIN,
+                bl_HBA1C,  bl_FLUSHOT , bl_LIPIDTEST,  bl_HOSP, bl_HOSPDAYS,bl_ED,bl_ERDM,bl_outpt, bl_outptdm) %>% 
+              as.data.frame.matrix() %>%
+              mutate(sex=as.numeric(sex))
+
+vars_catover2 <- c( "race2",  "age", "bl_HOSP", "bl_HOSPDAYS", "bl_ED",   "bl_ERDM",    "bl_outpt",    "bl_outptdm")
+
+truth.list <<- TRUTH("Unknown")
+
+dat <<- dat00%>%  dplyr::select(-c("BENE_ID", "IndexDate", "FillDate2"))
+
+Ntrain <- nrow(dat)
+ID <-1:nrow(dat)
+vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W"))  ) 
+X <<- dat[,vars_forest]
+Y <<- as.vector( as.numeric( dat[,"Y"] ) )
+W <<- as.vector( as.numeric( dat[,"W"] ) )
+
+cf_raw_key.tr <- CF_RAW_key(dat, min.split.var=4,  variable_type="non-hd", hdpct=0.95)    
+
+Y.hat  <<- cf_raw_key.tr$Y.hat
+W.hat  <<- cf_raw_key.tr$W.hat
+HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw
+varimp_cf  <- cf_raw_key.tr$varimp_cf
+selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx
+time_rawCF <- cf_raw_key.tr$time_rawCF
+
+X[,selected_cf.idx]
+
+VI_label <- c( "age","race","sex","diabetes retinopathy","diabetes nephropathy","diabetes neuropathy",
+                "Diabetes circulatory complications", "N of GLDs", "N of hyperglycemia diagnoses", 
+                "CVD" ,"CHF","Hypoglycemia" ,"Foot ulcers" ,"Angina" ,"MI",
+                "Cardiac revascularization or bypass","Atherosclerosis","Ischemic heart diseases",
+                "Cerebrovascular diseases", "Cardiomyopathy", "Congestive heart failure","PVD","AF","Arrhythmia",
+                "Cardiac arrest","Defibrillator", "Anemia","Alcohol disorders","Asthma","Brain injury","Cancer",
+                "Chronic lung disorders", "CKD","Coagulopathy","Connective tissue disorders","Dementia",
+                "Deficiency anemia","Depression", "Difficulty walking","Dyslipidemia","Hypothyroidism","Edema",
+                "Electrolytes disorders","HIV", "Hematological disorders", "Hypertension","Hypotension", 
+                "Immune disorders","Metabolic disorders","Metastatic cancers", "Mild liver disorders",          
+                "Moderate liver disorders","Nutritional disorders","Nervous system disorders","Paraplegia", 
+                "Parkinsonism", "Pneumonia","Psychosis","Pulmonary circulation disorders","Rehabilitation","Renal disorders", 
+                "Rheumatic disorders","Smoking and smoking cessation","Thromboembolism","Valvular disorders","Weight loss", 
+                "Ambulance", "Hospital beds", "Home oxygen", "Wheelchairs","Metformin","Short-acting insulin","LAI", "TZD",
+                "Meglitinide","Sulfonylurea","DPP4i","Immunosuppressive drugs","Steroids","ACEI", "ARB", "CCB", "BB",
+                "NSAIDS", "Aspirin","Oral contraceptives","Estrogen", "LOOP", "Other diuretics","Statin",
+                "N of HbA1C tests", "N of flu shots", "N of lipid tests", "N of hospital admissions", "Days of hospitalization", 
+                "N of emergency room visits","N of emergency room visits due to DM","N of outpatient visits", 
+                "Outpatient visits due to DM")
+
+GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', VI_label )
  ```
  <img src = images/VI_SGLTvGLP_HHF2y.jpeg width=800>
  
@@ -208,28 +269,28 @@ truth.list <<- TRUTH("Unknown")
 vars_catover2 <<- NA  
 ```
 ```{}
-D2_MLS=MinLeafSizeTune(dat=dat, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2")
+D2_MLS=MinLeafSizeTune(dat=dat, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "#62C6F2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
 <img src = images/D2_MLS_tune_rwd.png width=350>
 
 ```{}
-D3_MLS=MinLeafSizeTune(dat=dat, denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3")
+D3_MLS=MinLeafSizeTune(dat=dat, denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3", "#62C6F2")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
 <img src = images/D3_MLS_tune_rwd.png width=350>
 
 ```{}
-D4_MLS=MinLeafSizeTune(dat=dat, denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4")
+D4_MLS=MinLeafSizeTune(dat=dat, denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4", "#62C6F2")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
 <img src = images/D4_MLS_tune_rwd.png width=350>
 
 ```{}
-D5_MLS=MinLeafSizeTune(dat=dat, denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5")
+D5_MLS=MinLeafSizeTune(dat=dat, denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5", "#62C6F2")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
