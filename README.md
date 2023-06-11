@@ -185,7 +185,7 @@ iCFCV_B1000_i200_sim
 
 **5. Run iCF on real-world data**
 
-We compared the two-year risk difference (RD) of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort are described previously by [Htoo et al.](https://www.ahajournals.org/doi/full/10.1161/JAHA.121.022376) and are available in the mehtod paper (Wang et al.) 
+We compared the **two-year risk difference** of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort are described previously by [Htoo et al.](https://www.ahajournals.org/doi/full/10.1161/JAHA.121.022376) and are available in the mehtod paper (Wang et al.) 
 
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 ```{}
@@ -193,44 +193,37 @@ load("HHF_SGLTvGLP_iCFCV.RData")
 
 dat00 <-  hfp_2yr_all_sgltvglp %>% 
           dplyr::filter(FillDate2 <= 21184 -365*2 &  #31DEC2017
-                        IndexDate >= 10359# & 1/2/2013) %>%
-          dplyr::mutate(Y = hfp_2yr_2yr, #in 2 year fixed period for risk difference scale
-                        age = as.numeric( cut(age, c(65,70,75,80,85,Inf) ,
-                                              labels=c("65<age<=70 ","70<age<=75","75<age<=80","80<age<=85", "age>85")))
-          ) %>% #defined in the beginning of analysis_MACE SAS macro
-  dplyr::rename(W=SGLT) %>%
-  dplyr::select(BENE_ID, IndexDate, FillDate2, Y, W, age, race2, sex,baselinecvd, baselinechf, 
-                dplyr::start_with("bl_")) %>% 
-              as.data.frame.matrix() %>%
-              mutate(sex=as.numeric(sex))
+                        IndexDate >= 19449           #1APR2013
+                        ) %>%
+          dplyr::mutate(Y = hfp_2yr_2yr,
+                        age = as.numeric(cut(age, c(65,70,75,80,85,Inf) ,
+                                             labels=c("65<age<=70 ","70<age<=75","75<age<=80","80<age<=85", "age>85")))) %>% 
+          dplyr::rename(W=SGLT) %>%
+          dplyr::select(BENE_ID, IndexDate, FillDate2, Y, W, age, race2, sex,baselinecvd, baselinechf, 
+                        dplyr::start_with("bl_")) %>% 
+                      as.data.frame.matrix() %>%
+                      mutate(sex=as.numeric(sex))
 
 vars_catover2 <- c("race2", "age", "bl_HOSP", "bl_HOSPDAYS", "bl_ED", "bl_ERDM", "bl_outpt", "bl_outptdm")
-
 truth.list <<- TRUTH("Unknown")
-
 dat <<- dat00%>%  dplyr::select(-c("BENE_ID", "IndexDate", "FillDate2"))
 
-Ntrain <- nrow(dat)
-ID <-1:nrow(dat)
 vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W"))  ) 
 X <<- dat[,vars_forest]
 Y <<- as.vector( as.numeric( dat[,"Y"] ) )
 W <<- as.vector( as.numeric( dat[,"W"] ) )
 
-cf_raw_key.tr <- CF_RAW_key(dat, min.split.var=4,  variable_type="non-hd", hdpct=0.95)    
-
+cf_raw_key.tr <- CF_RAW_key(dat, min.split.var=4, variable_type="non-hd", hdpct=0.95)    
 Y.hat  <<- cf_raw_key.tr$Y.hat
 W.hat  <<- cf_raw_key.tr$W.hat
 HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw
 varimp_cf  <- cf_raw_key.tr$varimp_cf
 selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx
 time_rawCF <- cf_raw_key.tr$time_rawCF
-
 X[,selected_cf.idx]
-
 GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', colnames(X))
  ```
- <img src = images/VI_SGLTvGLP_HHF2y.jpeg width=800>
+ <img src = images/VI_HHF2y_nolabel.png width=600>
  
  ***Step 2: Tune the minimum leaf size (MLS) for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
 
