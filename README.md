@@ -1,6 +1,6 @@
 # Iterative Causal Forest (iCF): A Novel Algorithm for Subgroup Identification
 ----------------------------------------------------------------------------------
-The iCF algorithm identifies important subgroups with heterogeneous treatment effects without prior knowledge of treatment-covariate interactions
+The iCF algorithm (based on [causal forest](https://grf-labs.github.io/grf/articles/diagnostics.html)) identifies important subgroups with heterogeneous treatment effects without prior knowledge of treatment-covariate interactions
 
 <img src = images/FIG1_19Mar2023.jpg width=1000>
 
@@ -59,6 +59,9 @@ library(iCF)
 Third, you can download the 'iCF_0.0.0.9000.tar.gz' file (this option is currently being worked on and will be available soon)..."
 
 **3. Data Simulation**
+
+We used a simulation setup similar to the one initially described by [Setoguchi et al.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2905676/) and we modified it by incorporating treatment-covariate interactions to model heterogeneous treatment effects.
+
 ```{}
   nstudy = 10000
   b0 <- 0
@@ -126,7 +129,7 @@ Third, you can download the 'iCF_0.0.0.9000.tar.gz' file (this option is current
  ```
  <img src = images/GG_VI_fig.png width=300>
  
- ***Step 2. To tune the leaf size, use different values for the minimum leaf size (MLS) to grow forests at various depths (D).***
+ ***Step 2: Tune the minimum leaf size (MLS) for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
  ```{}
 #Specify the decimal position for continuous variables in the subgroup definition.
 split_val_round_posi=0
@@ -164,7 +167,7 @@ D5_MLS$depth_gg
 ```
 <img src = images/D5_MLS_tune.png width=350>
 
-*Note that despite using a smaller minimum leaf size (MLS), the causal forests do not grow deeper due to the presence of a strong 3-way interaction (W:X1:X3) in the simulated data set.* 
+*Note that despite using a smaller minimum leaf size (MLS), the best trees from causal forests do not grow deeper due to the presence of a strong three-way interaction (W:X1:X3) in the simulated data set. In such scenarios, we can proceed with implementing iCF when tuning MLS does not affect the depth of the best tree.* 
 
 ***Step 3. Implement iCF on simulated dataset***
 ```{}
@@ -180,7 +183,7 @@ iCFCV_B1000_i200_sim
 
 **5. Run iCF on real-world data**
 
-We compared the two-year risk difference (RD) of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort are available in the mehtod paper (Wang et al.) 
+We compared the two-year risk difference (RD) of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort are described previously by [Htoo et al.](https://www.ahajournals.org/doi/full/10.1161/JAHA.121.022376) and are available in the mehtod paper (Wang et al.) 
 
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 ```{}
@@ -259,7 +262,7 @@ GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', VI_l
  ```
  <img src = images/VI_SGLTvGLP_HHF2y.jpeg width=800>
  
- ***Step 2. To tune the leaf size, use different values for the minimum leaf size (MLS) to grow forests at various depths (D).***
+ ***Step 2: Tune the minimum leaf size (MLS) for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
 
 ```{}
 D2_MLS=MinLeafSizeTune(dat=dat, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "#62C6F2")
