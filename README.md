@@ -169,7 +169,7 @@ D5_MLS$depth_gg
 ```
 <img src = images/D5_MLS_tune.png width=350>
 
-*Note that despite using a smaller minimum leaf size (MLS), the best trees from causal forests do not grow deeper due to the presence of a strong three-way interaction (W:X1:X3) in the simulated data set. In such scenarios, we can proceed with implementing iCF when tuning MLS does not affect the depth of the best tree.* 
+*Note that despite using a smaller MLS, the best trees from causal forests do not grow deeper due to the presence of a strong three-way interaction (W:X1:X3) in the simulated data set. In such scenarios, we can proceed with implementing iCF when tuning MLS does not affect the depth of the best tree.* 
 
 ***Step 3. Implement iCF on simulated dataset***
 ```{}
@@ -225,7 +225,7 @@ GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', coln
  ```
  <img src = images/VI_HHF2y_nolabel.png width=600>
  
- ***Step 2: Tune the minimum leaf size (MLS) for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
+ ***Step 2: Tune the MLS for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
 
 ```{}
 D2_MLS=MinLeafSizeTune(dat=dat, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "#62C6F2")
