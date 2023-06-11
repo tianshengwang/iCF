@@ -212,28 +212,28 @@ D2_MLS=MinLeafSizeTune(dat=dat, denominator=25, treeNo = 1000, iterationNo=100, 
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
-<img src = images/D2_MLS_tune.png width=350>
+<img src = images/D2_MLS_tune_rwd.png width=350>
 
 ```{}
 D3_MLS=MinLeafSizeTune(dat=dat, denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
-<img src = images/D3_MLS_tune.png width=350>
+<img src = images/D3_MLS_tune_rwd.png width=350>
 
 ```{}
 D4_MLS=MinLeafSizeTune(dat=dat, denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
-<img src = images/D4_MLS_tune.png width=350>
+<img src = images/D4_MLS_tune_rwd.png width=350>
 
 ```{}
 D5_MLS=MinLeafSizeTune(dat=dat, denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
-<img src = images/D5_MLS_tune.png width=350>
+<img src = images/D5_MLS_tune_rwd.png width=350>
 
 *Note that despite using a smaller minimum leaf size (MLS), the causal forests do not grow deeper due to the presence of a strong 3-way interaction (W:X1:X3) in the simulated data set.* 
 
