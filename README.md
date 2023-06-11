@@ -260,14 +260,7 @@ GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', VI_l
  <img src = images/VI_SGLTvGLP_HHF2y.jpeg width=800>
  
  ***Step 2. To tune the leaf size, use different values for the minimum leaf size (MLS) to grow forests at various depths (D).***
- ```{}
-#Specify the decimal position for continuous variables in the subgroup definition.
-split_val_round_posi=0
-#For real-world projects (not simulations where we know the truth), the truth is set as "Unknown".
-truth.list <<- TRUTH("Unknown")
-#Define categorical variables with more than two levels.
-vars_catover2 <<- NA  
-```
+
 ```{}
 D2_MLS=MinLeafSizeTune(dat=dat, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "#62C6F2")
 D2_MLS$depth_mean
@@ -295,8 +288,6 @@ D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
 <img src = images/D5_MLS_tune_rwd.png width=350>
-
-*Note that despite using a smaller minimum leaf size (MLS), the causal forests do not grow deeper due to the presence of a strong 3-way interaction (W:X1:X3) in the simulated data set.* 
 
 ***Step 3. Implement iCF on Medicare SGLT2i vs GLP1RA new user cohort***
 ```{}
