@@ -35,7 +35,7 @@ library(spaMM)
 
 There are three ways to install iCF.
 
-First, download all the files in the ['R' folder](https://github.com/tianshengwang/iCF/tree/iCF/R) and save them in your local directory (create a new folder named 'iCF'). Then, run the following R codes each time before executing iCF:
+First, download all the R programs in the [R folder](https://github.com/tianshengwang/iCF/tree/iCF/R) and save them in your local directory (create a new folder named 'iCF'). Then, run the following R codes each time before executing iCF:
 ```{}
 source("/local/iCF/best_tree_MSegar.R")
 source("/local/iCF/iCF_TREE_build.R")
