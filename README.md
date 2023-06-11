@@ -199,24 +199,12 @@ dat00 <-  hfp_2yr_all_sgltvglp %>%
                                               labels=c("65<age<=70 ","70<age<=75","75<age<=80","80<age<=85", "age>85")))
           ) %>% #defined in the beginning of analysis_MACE SAS macro
   dplyr::rename(W=SGLT) %>%
-  dplyr::select(BENE_ID, IndexDate, FillDate2, Y, W, age, race2, sex,bl_DIABRETINOPATHY,  bl_NEPHROPATHY,  bl_NEUROPATHY,   
-                bl_DIABCOMPLICATIONS, bl_nodrugs,  bl_HYPERGLYCEMIA, baselinecvd, baselinechf, bl_HYPOGLYCEMIA, bl_FOOTULCER,   
-                bl_angina2, bl_mi2, bl_INTERVENTION, bl_atherosclerosis2, bl_ischemichtdz2, bl_cerebrovasculardz2, 
-                bl_cardiomyopathy2, bl_chf2,  bl_pvdnew, bl_AF, bl_ARRHYTHMIA, bl_CARDIACARREST, bl_DEFIBRILLATOR,
-                bl_ANEMIA, bl_ALCOHOL,bl_ASTHMA, bl_BRAININJ, bl_CANCER, bl_CHRLUNG,bl_CKD, bl_COAGULOPATHY, bl_CONNECTIVE,
-                bl_DEMENTIA, bl_DEFANEMIA, bl_DEPRESSION, bl_DIFFWALK, bl_DYSLIPIDEMIA, bl_hypothyroidism, bl_EDEMA, 
-                bl_ELECTROLYTES, bl_HIV, bl_HEMATOLOGICAL, bl_HYPERTENSION, bl_HYPOTENSION, bl_IMMUNE, bl_METABOLIC, 
-                bl_METASTATICCA, bl_MILDLIVER, bl_MODLIVER, bl_NUTRITIONAL, bl_NERVOUS, bl_PARAPLEGIA, bl_PARKINSON,  
-                bl_PNEUMONIA,bl_PSYCHOSIS, bl_PULCIRC, bl_REHABILITATION, bl_RENAL, bl_RHEUMATIC, bl_smokingfinal, 
-                bl_THROMBOEMBOLISM, bl_VULVULAR, bl_WTLOSS, bl_AMBULANCE, bl_HOSPITALBED, bl_OXYGEN, bl_WHEELCHAIR,  
-                bl_METFORMIN, bl_SAINSULIN, bl_LAI, bl_TZD, bl_MEGLITINIDE, bl_SULF, bl_DPP, 
-                bl_IMMUNOSUPPRESSIVE, bl_STEROIDS, bl_ACEI, bl_ARB, bl_CCB, bl_BB, bl_NSAIDS, bl_ASPIRIN, 
-                bl_ORALCONTRAC, bl_ESTROGEN, bl_LOOP, bl_OTHERDIURETICS, bl_STATIN,
-                bl_HBA1C,  bl_FLUSHOT , bl_LIPIDTEST,  bl_HOSP, bl_HOSPDAYS,bl_ED,bl_ERDM,bl_outpt, bl_outptdm) %>% 
+  dplyr::select(BENE_ID, IndexDate, FillDate2, Y, W, age, race2, sex,baselinecvd, baselinechf, 
+                dplyr::start_with("bl_")) %>% 
               as.data.frame.matrix() %>%
               mutate(sex=as.numeric(sex))
 
-vars_catover2 <- c( "race2",  "age", "bl_HOSP", "bl_HOSPDAYS", "bl_ED",   "bl_ERDM",    "bl_outpt",    "bl_outptdm")
+vars_catover2 <- c("race2", "age", "bl_HOSP", "bl_HOSPDAYS", "bl_ED", "bl_ERDM", "bl_outpt", "bl_outptdm")
 
 truth.list <<- TRUTH("Unknown")
 
@@ -240,27 +228,7 @@ time_rawCF <- cf_raw_key.tr$time_rawCF
 
 X[,selected_cf.idx]
 
-VI_label <- c( "age","race","sex","diabetes retinopathy","diabetes nephropathy","diabetes neuropathy",
-                "Diabetes circulatory complications", "N of GLDs", "N of hyperglycemia diagnoses", 
-                "CVD" ,"CHF","Hypoglycemia" ,"Foot ulcers" ,"Angina" ,"MI",
-                "Cardiac revascularization or bypass","Atherosclerosis","Ischemic heart diseases",
-                "Cerebrovascular diseases", "Cardiomyopathy", "Congestive heart failure","PVD","AF","Arrhythmia",
-                "Cardiac arrest","Defibrillator", "Anemia","Alcohol disorders","Asthma","Brain injury","Cancer",
-                "Chronic lung disorders", "CKD","Coagulopathy","Connective tissue disorders","Dementia",
-                "Deficiency anemia","Depression", "Difficulty walking","Dyslipidemia","Hypothyroidism","Edema",
-                "Electrolytes disorders","HIV", "Hematological disorders", "Hypertension","Hypotension", 
-                "Immune disorders","Metabolic disorders","Metastatic cancers", "Mild liver disorders",          
-                "Moderate liver disorders","Nutritional disorders","Nervous system disorders","Paraplegia", 
-                "Parkinsonism", "Pneumonia","Psychosis","Pulmonary circulation disorders","Rehabilitation","Renal disorders", 
-                "Rheumatic disorders","Smoking and smoking cessation","Thromboembolism","Valvular disorders","Weight loss", 
-                "Ambulance", "Hospital beds", "Home oxygen", "Wheelchairs","Metformin","Short-acting insulin","LAI", "TZD",
-                "Meglitinide","Sulfonylurea","DPP4i","Immunosuppressive drugs","Steroids","ACEI", "ARB", "CCB", "BB",
-                "NSAIDS", "Aspirin","Oral contraceptives","Estrogen", "LOOP", "Other diuretics","Statin",
-                "N of HbA1C tests", "N of flu shots", "N of lipid tests", "N of hospital admissions", "Days of hospitalization", 
-                "N of emergency room visits","N of emergency room visits due to DM","N of outpatient visits", 
-                "Outpatient visits due to DM")
-
-GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', VI_label )
+GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', colnames(X))
  ```
  <img src = images/VI_SGLTvGLP_HHF2y.jpeg width=800>
  
