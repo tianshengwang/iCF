@@ -62,7 +62,7 @@ Third, you can download the 'iCF_0.0.0.9000.tar.gz' file (this option is current
 
 **3. Data Simulation**
 
-We used a simulation setup similar to the one initially described by [Setoguchi et al.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2905676/) and we modified it by incorporating treatment-covariate interactions to model heterogeneous treatment effects.
+We used a simulation setup similar to the one initially described by [Setoguchi et al.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2905676/) and modified it by incorporating treatment-covariate interactions to model heterogeneous treatment effects.
 
 ```{}
   nstudy = 10000
