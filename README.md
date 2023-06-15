@@ -22,8 +22,6 @@ library(caret)
 library(caTools)
 library(listdtr)
 library(randomForest)
-library(ggplot2)
-library(ggridges)
 library(data.table)
 library(grid)
 library(broom)
@@ -32,6 +30,8 @@ library(DMwR)
 library(knitr)
 library(Rfast)
 library(spaMM)
+library(ggplot2)
+library(ggridges)
 ```
 **2. Installation**
 
@@ -110,7 +110,10 @@ We used a simulation setup similar to the one initially described by [Setoguchi 
  PS <- (1 + exp( -(b0 + b1*X1 + b2*X2 + b3*X3 + b4*X4 + b5*X5 + b6*X6 + b7*X7) ))^-1 #true propensity score
  W <- rbinom(nstudy,1,PS) 
 #3-way interaction of W, X1, and X3 (W:X1:X3)
- Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*W + rnorm(nstudy,0,1) + 0.4*W*X3 + 0.3*W*X1 + 0.4*W*X1*X3 + 0.2*X1*X3 
+ Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*W + rnorm(nstudy,0,1) + 0.4*W*X3 + 0.3*W*X1 + 0.4*W*X1*X3 + 0.2*X1*X3
+```
+Make a dataset in this format to be run by iCF: the 1st column is treatment **W**, 2nd column is outcome **Y**, and remaining columns features **X**.
+```{}
  dat <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
 ``` 
 **4. Run iCF on simulated data**
@@ -187,11 +190,12 @@ iCFCV_B1000_i200_sim
 
 We compared the **two-year risk difference** of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort were described previously by [Htoo et al.](https://www.ahajournals.org/doi/full/10.1161/JAHA.121.022376) and are available in the mehtod paper (Wang et al.) 
 
-***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
+Make a dataset in this format to be run by iCF: the 1st column is treatment **W**, 2nd column is outcome **Y**, and remaining columns features **X**.
+
 ```{}
 load("HHF_SGLTvGLP_iCFCV.RData")
 
-dat00 <-  hfp_2yr_all_sgltvglp %>% 
+dat <-  hfp_2yr_all_sgltvglp %>% 
           dplyr::filter(FillDate2 <= 21184 -365*2 &  #31DEC2017
                         IndexDate >= 19449           #1APR2013
                         ) %>%
@@ -199,15 +203,16 @@ dat00 <-  hfp_2yr_all_sgltvglp %>%
                         age = as.numeric(cut(age, c(65,70,75,80,85,Inf) ,
                                              labels=c("65<age<=70 ","70<age<=75","75<age<=80","80<age<=85", "age>85")))) %>% 
           dplyr::rename(W=SGLT) %>%
-          dplyr::select(BENE_ID, IndexDate, FillDate2, Y, W, age, race2, sex,baselinecvd, baselinechf, 
+          dplyr::select(Y, W, age, race2, sex,baselinecvd, baselinechf, 
                         dplyr::start_with("bl_")) %>% 
                       as.data.frame.matrix() %>%
                       mutate(sex=as.numeric(sex))
+```
+***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 
+```{}
 vars_catover2 <- c("race2", "age", "bl_HOSP", "bl_HOSPDAYS", "bl_ED", "bl_ERDM", "bl_outpt", "bl_outptdm")
 truth.list <<- TRUTH("Unknown")
-dat <<- dat00%>%  dplyr::select(-c("BENE_ID", "IndexDate", "FillDate2"))
-
 vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W"))  ) 
 X <<- dat[,vars_forest]
 Y <<- as.vector( as.numeric( dat[,"Y"] ) )
