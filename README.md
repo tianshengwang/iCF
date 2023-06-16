@@ -1,14 +1,18 @@
 # Iterative Causal Forest (iCF): A Novel Algorithm for Subgroup Identification
-----------------------------------------------------------------------------------
+
+**Citation**
+
+**Wang T, Keil AP, Kim S, Wyss R, Htoo PT, Funk MJ, Buse JB, Kosorok MR, Stürmer T. Iterative Causal Forest: A Novel Algorithm for Subgroup Identification. _Am J Epidemiol._ 2023 (In Press).**
+
+
+
 The iCF algorithm (based on [causal forest](https://grf-labs.github.io/grf/articles/diagnostics.html)) identifies important subgroups with heterogeneous treatment effects without prior knowledge of treatment-covariate interactions
 
 <img src = images/FIG1_19Mar2023.jpg width=1000>
 
 **Iterative causal forest (iCF) algorithm**. CF, causal forest; RF, random forest; $\hat{Y}$, predicted outcome; $\hat{W}$, predicted propensity score; CV, cross-validation; Y*, predicted transformed outcome; $D_{tr}$, training data; $G_{D}$ subgroup decision; $g_{j}$, individual group of $G_{D}$. A. iCF workflow. If the homogeneity test from a raw casual forest is significant at P-value $\alpha$ = 0.1, then divide the data into 10 groups of equal size. The first group is treated as the testing set, the remaining 9 groups as the training set. Repeat the procedure 10 times. B. Step 3 of iCF workflow (obtain a family of subgroup decisions from a pruned iCF on the training set and a family of transformed outcome models based on subgroup decisions $G_{D}$ on the test stet). With a cross-validation approach, each $G_{D}$ selected will be noted as $G_{D_f}$, where f denotes the fold of cross-validation. If $G_{D_f}$ varies across training sets, then perform plurality vote across f subgroup decisions to select the most popular one and use its corresponding model. Then, average the error across validation sets for each model from $G_{2}$, $G_{3}$, $G_{4}$, and $G_{5}$, individually, and the $G_{D}$ with a corresponding model with the smallest cross-validated error is selected as the final subgroup decision $G_{iCF}$
 
-**Citation**
 
-**Wang T, Keil AP, Kim S, Wyss R, Htoo PT, Funk MJ, Buse JB, Kosorok MR, Stürmer T. Iterative Causal Forest: A Novel Algorithm for Subgroup Identification. _Am J Epidemiol._ 2023 (In Press).**
 
 **1. R packages recommended**
 ```{r packages, include=FALSE}
