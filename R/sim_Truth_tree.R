@@ -269,7 +269,7 @@ TRUTH <- function(intTRUE){
     tree_true_N123_r  <<- "Unknown"  
     truth_description <<- "Unknown" 
     truth_INT         <<- "Unknown"  
-    vars_catover2     <<- "AssignManually"
+    vars_catover2     <<- "Assign vars_catover2 Manually"
   }
 
 
