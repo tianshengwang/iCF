@@ -269,7 +269,7 @@ TRUTH <- function(intTRUE){
     tree_true_N123_r  <<- "Unknown"  
     truth_description <<- "Unknown" 
     truth_INT         <<- "Unknown"  
-    vars_catover2     <<- "Assign vars_catover2 Manually"
+    #vars_catover2     <<- "Assign vars_catover2 Manually"
   }
 
 
@@ -310,7 +310,8 @@ truth.list <- list(tree_true          = tree_true,
                    tree_true_subgroup = tree_true_subgroup,
                    truth_description  = truth_description,
                    truth_INT          = stringr::str_sort( truth_INT),
-                   vars_catover2      = vars_catover2 )
+                   #vars_catover2      = vars_catover2 
+                  )
 return(truth.list)
                    
 }
