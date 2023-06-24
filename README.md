@@ -180,7 +180,7 @@ D5_MLS$depth_gg
 
 ***Step 3. Implement iCF on simulated dataset***
 ```{}
-leafsize <<- list(D5=85, D4=65, D3=45, D2=25)
+leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denominator, D2=D2_MLS$denominator)
 
 iCFCV_B1000_i200_sim <- iCFCV(dat=dat,K=5, treeNo=1000, iterationNo=100, min.split.var=4,
                               split_val_round_posi=0, P_threshold=0.1, variable_type = "non-HD", 
