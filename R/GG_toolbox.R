@@ -56,3 +56,14 @@ return(VarImp)
 #"X10"=expression(bold(X10)),
 #parse=TRUE))
 
+
+GG_DepthDistribution <- function(D2_distribtion,D3_distribtion,D4_distribtion, D5_distribtion, Name){
+  tiff(paste(Name, ncol(X), ".tiff", sep="_"), units="in",width=15, height=25, res=150)
+  g_depth <- cowplot::plot_grid( D2_distribtion,D3_distribtion,D4_distribtion, D5_distribtion, 
+                            ncol  = 2, nrow=2,
+                            labels = "AUTO", label_size = 20
+  )
+  dev.off()
+  return(g_depth)
+}
+
