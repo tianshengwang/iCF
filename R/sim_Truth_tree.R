@@ -309,7 +309,7 @@ truth.list <- list(tree_true          = tree_true,
                    tree_true_r        = tree_true_r,
                    tree_true_subgroup = tree_true_subgroup,
                    truth_description  = truth_description,
-                   truth_INT          = stringr::str_sort( truth_INT),
+                   truth_INT          = stringr::str_sort( truth_INT)
                    #vars_catover2      = vars_catover2 
                   )
 return(truth.list)
