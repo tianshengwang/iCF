@@ -50,7 +50,8 @@ MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_rou
                   
   
 
-  return(list(depth_mean=iCF_D_BT_SG_D_mean,
+  return(list(denominator=denominator,
+              depth_mean=iCF_D_BT_SG_D_mean,
               depth_gg=depth_gg))
 }
 
