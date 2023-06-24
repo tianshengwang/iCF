@@ -142,9 +142,6 @@ Make a dataset in this format to be run by iCF: the 1st column is treatment **W*
  ```{}
 #Specify the decimal position for continuous variables in the subgroup definition.
 split_val_round_posi=0
-#The truth is set as 'Unknown' in this case. (In the simulations described in our method paper, 
-we input scenarios of truth to calculate the accuracy of subgroup decisions). 
-truth.list <<- TRUTH("Unknown")
 #Define categorical variables with more than two levels.
 vars_catover2 <<- NA  
 ```
@@ -216,7 +213,6 @@ dat <-  hfp_2yr_all_sgltvglp %>%
 
 ```{}
 vars_catover2 <- c("race2", "age", "bl_HOSP", "bl_HOSPDAYS", "bl_ED", "bl_ERDM", "bl_outpt", "bl_outptdm")
-truth.list <<- TRUTH("Unknown")
 vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W"))  ) 
 X <<- dat[,vars_forest]
 Y <<- as.vector( as.numeric( dat[,"Y"] ) )
