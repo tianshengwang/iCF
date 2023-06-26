@@ -152,6 +152,9 @@ D2_MLS$depth_gg
 ```
 <img src = images/D2_MLS_tune.png width=350>
 
+Notably, if you got this message "_Error: Can't subset columns that don't exist. x Column `parent_sign` doesn't exist._", it suggests the denominator used for developing is too small, leading to a too large MLS for D2 forest so that the tree does not even split (the node does not have a parent node). In this scenario, increasing the denominator will solve the problem.
+
+
 ```{}
 D3_MLS=MinLeafSizeTune(denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3", "steelblue1")
 D3_MLS$depth_mean
