@@ -9,7 +9,7 @@
 #' @return final subgroup decision G_iCF
 #' 
 #' @export
-#' 
+#' f
 #'
 
 iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_posi, 
@@ -17,6 +17,8 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
                   P_threshold, variable_type, hdpct, HTE_P_cf.raw){
   
   s_iCF_CV=Sys.time()
+  intTRUE <<- "Unknown"
+  truth.list <<- TRUTH(intTRUE)
   
   if ( round(HTE_P_cf.raw,1) <= P_threshold ){
     
@@ -106,7 +108,8 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
                                   Test_ID =  Test_ID_cf,
                                   variable_type,
                                   HTE_P_cf.raw,
-                                  P_threshold)
+                                  P_threshold,
+                                  split_val_round_posi)
       
       vote_D5_tree.syn[[f]] <- SG_D[[f]]$vote_D5_tree.syn
       vote_D4_tree.syn[[f]] <- SG_D[[f]]$vote_D4_tree.syn

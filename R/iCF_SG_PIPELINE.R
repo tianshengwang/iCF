@@ -146,12 +146,13 @@ oneCF <- function(depth, treeNo, tunepara, tree_depth, split_val_round_posi){
   return(list(besttreelist=besttreelist, besttreelist_L=besttreelist_L, treeBlist=treeBlist, cf=cf, HTE_P_cf=HTE_P_cf, d=d))
 }
 
+
 #' function to get subroup decision G_D, get ready for predicting Y (transformed outcome) in testing set,  and models build from G_D to predict Y*
 #' @param leafsize minimum-node-size tuned 
 #' @treeNo tree No
 #' @iterationNo iteration No
 #' @Ntrain sample size of training set for developing G_D
-#' @Train_ID training set in Cross-Validation with the CV ID
+#' @Train_ID training set in Cross-Validation with the CV ID8D660E32|
 #' @Test_ID testing set in Cross-Validation with the CV ID
 #'  
 #' @return G_D
@@ -172,7 +173,8 @@ SUBGROUP_PIPELINE<- function(X,
                             Test_ID, 
                             variable_type,
                             HTE_P_cf.raw ,
-                            P_threshold){
+                            P_threshold, 
+                            split_val_round_posi){
   
   s_iCF=Sys.time()
   
@@ -184,19 +186,19 @@ SUBGROUP_PIPELINE<- function(X,
     #1/27/2023 already tuned leaf size, thus the following code may not be necessary
 
     #1/29/2023 debug at /local/projects/medicare/DPP4i_HTE/programs/macros/iCF_SG_PIPELINE.R#19: 
-    #iCF_D5 <- iCF(leafsize$D5, treeNo, iterationNo, Ntrain, "D5", split_val_round_posi)
+    #iCF_D5 <- iCF_basic(leafsize$D5, treeNo, iterationNo, Ntrain, "D5", split_val_round_posi)
 
-    iCF_D5<- iCF(leafsize$D5,  treeNo, iterationNo, Ntrain, "D5",  split_val_round_posi)
+    iCF_D5<- iCF_basic(leafsize$D5,  treeNo, iterationNo, Ntrain, "D5",  split_val_round_posi)
     
-    iCF_D4<- iCF(leafsize$D4,  treeNo, iterationNo, Ntrain, "D4",  split_val_round_posi)
+    iCF_D4<- iCF_basic(leafsize$D4,  treeNo, iterationNo, Ntrain, "D4",  split_val_round_posi)
     
-    iCF_D3<- iCF(leafsize$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi) 
+    iCF_D3<- iCF_basic(leafsize$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi) 
     
-    if ( is.null( tryCatch( iCF(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi), error=function(e){}) ) == TRUE ) {
+    if ( is.null( tryCatch( iCF_basic(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi), error=function(e){}) ) == TRUE ) {
       warning("The minimum leaf size is too small for Depth 2 causal forest, need to increase it!")
       iCF_D2 = iCF_D3
     } else {
-      iCF_D2 = iCF(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
+      iCF_D2 = iCF_basic(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
     }
    
     
