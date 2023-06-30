@@ -27,8 +27,8 @@ GET_TREE_L <- function (iCF_D, listindex) {
 #'
 #' @export
 #' 
-MinLeafSizeTune <- function(denominator, treeNo, iterationNo, depth){
-  iCF_D<- iCF(denominator,  treeNo, iterationNo, Train, depth,  split_val_round_posi)
+MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_round_posi, depth ,color){
+  iCF_D<- iCF_basic(denominator,  treeNo, iterationNo, dat, depth,  split_val_round_posi)
   iCF_D_BT=GET_TREE_L(iCF_D, 1)
   #turn tree into subgroup  
   iCF_D_BT_SG        <- lapply(iCF_D_BT, function(df)   TREE2SUBGROUP(df)$majority)
@@ -43,14 +43,15 @@ MinLeafSizeTune <- function(denominator, treeNo, iterationNo, depth){
               dplyr::rename(Depth=Var1, Frequency=Freq)
   
   depth_gg <- ggplot(data= depth_table, aes(x=Depth, y=Frequency)) +
-                        geom_bar(stat="identity", fill="skyblue1") +
+                        geom_bar(stat="identity", fill= color) +
                     theme(axis.text.x = element_text(face="bold",  size=14),
                           axis.text.y = element_text( size=10)) +
                     ggtitle(paste0("Depth distribution of ",iterationNo, " best trees generated \n from ",iterationNo, " causal forests by the proposed \n minimum-leaf-size = N/", denominator, " (sample size divided by ",denominator, ") for ",depth, " iCF")) 
                   
   
 
-  return(list(depth_mean=iCF_D_BT_SG_D_mean,
+  return(list(denominator= denominator,
+              depth_mean=iCF_D_BT_SG_D_mean,
               depth_gg=depth_gg))
 }
 
@@ -101,7 +102,7 @@ if (   iCF_D_BT_exp_SG_D_mean ==depth){
   #########################################
   for (m in 1: length(grid_MinNodeSize_D) ){
    #get iCF by proposed minimum node size
-    iCF_D_experiment <- iCF(grid_MinNodeSize_D[m],  treeNo, iterationNo, Ntrain, paste0("D",depth), 1)
+    iCF_D_experiment <- iCF_basic(grid_MinNodeSize_D[m],  treeNo, iterationNo, Ntrain, paste0("D",depth), 1)
    #get df of tree
     iCF_D_BT_experiment <- GET_TREE_L(iCF_D_experiment, 1) 
    #turn tree into subgroup  
@@ -149,7 +150,7 @@ LEAFSIZE_tune <- function(Ntrain, initial_D2, treeNo, iterationNo, tune_unit){
   #########################
   # Checking
   #########################
-  iCF_D2_exp = iCF(leafsize_initial$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
+  iCF_D2_exp = iCF_basic(leafsize_initial$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
   iCF_D2_BT_exp <<- GET_TREE_L(iCF_D2_exp, 1) 
   iCF_D2_BT_exp_D <- lapply(iCF_D2_BT_exp, function(df) nrow(df)   )
   
@@ -163,19 +164,19 @@ LEAFSIZE_tune <- function(Ntrain, initial_D2, treeNo, iterationNo, tune_unit){
                             D2=round(initial_D2*2,0)
                             )
     
-    iCF_D2_exp = iCF(leafsize_initial$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
+    iCF_D2_exp = iCF_basic(leafsize_initial$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
     iCF_D2_BT_exp <<- GET_TREE_L(iCF_D2_exp, 1) 
   }
 
   
   
-  iCF_D3_exp = iCF(leafsize_initial$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi)
+  iCF_D3_exp = iCF_basic(leafsize_initial$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi)
   iCF_D3_BT_exp <<- GET_TREE_L(iCF_D3_exp, 1) 
   
-  iCF_D4_exp = iCF(leafsize_initial$D4,  treeNo, iterationNo, Ntrain, "D4",  split_val_round_posi)
+  iCF_D4_exp = iCF_basic(leafsize_initial$D4,  treeNo, iterationNo, Ntrain, "D4",  split_val_round_posi)
   iCF_D4_BT_exp <<- GET_TREE_L(iCF_D4_exp, 1) 
 
-  iCF_D5_exp = iCF(leafsize_initial$D5,  treeNo, iterationNo, Ntrain, "D5",  split_val_round_posi)
+  iCF_D5_exp = iCF_basic(leafsize_initial$D5,  treeNo, iterationNo, Ntrain, "D5",  split_val_round_posi)
   iCF_D5_BT_exp <<- GET_TREE_L(iCF_D5_exp, 1) 
   
   iCF_D2_BT_exp_SG        <- lapply(iCF_D2_BT_exp, function(df)   TREE2SUBGROUP(df)$majority)

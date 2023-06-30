@@ -696,6 +696,45 @@ DLTYCOMBO <- function(DltY_iCF){
   return(DltY_iCF_df2)
 }
 
+
+#' Function that calculate per-subgroup treatment effect: 
+#' @param SGdecision subgroup decision
+#' @param dat data set for overall population
+#' 
+#' @return the subgroup leading to the largest Q(A)
+#' @export
+#' 
+#' 
+CATE_SG <- function(dat, SGdecision){
+  ID <-1:nrow(dat)
+  dat_ID <- cbind(dat, as.vector(ID)) %>% dplyr::rename (ID=`as.vector(ID)`) 
+  Delta_Y <- DltY_DATA(SGdecision, dat_ID, "non-test")
+  
+  CATE_table <- Delta_Y %>% dplyr::select(SubgroupID, Definition, W, Y,
+                                          dltY_crude, dltY_crude_low, dltY_crude_up, dltY_ate,dltY_ate_low,dltY_ate_up, dltY_att, dltY_att_low, dltY_att_up) %>%
+    dplyr::group_by(SubgroupID, Definition,W,Y) %>%
+    dplyr::summarise(n= n(),
+                     dltY_crude = mean(dltY_crude),
+                     dltY_crude_low = mean(dltY_crude_low),
+                     dltY_crude_up = mean(dltY_crude_up),
+                     dltY_ate = mean(dltY_ate),
+                     dltY_ate_low = mean(dltY_ate_low),
+                     dltY_ate_up = mean(dltY_ate_up),
+                     dltY_att = mean(dltY_att),
+                     dltY_att_low= mean(dltY_att_low),
+                     dltY_att_up = mean(dltY_att_up))%>%
+    dplyr::arrange(dltY_ate)%>%
+    dplyr::mutate(#Treatment = sum(W)
+      CATE_crude=paste0(dltY_crude,"(",dltY_crude_low,",",dltY_crude_up,")"),
+      CATE_iptw  =paste0(dltY_ate,"(",dltY_ate_low,",",dltY_ate_up,")"),
+      CATE_smr  =paste0(dltY_att,"(",dltY_att_low,",",dltY_att_up,")")) %>%
+    dplyr::select(-c(dltY_crude, dltY_crude_low, dltY_crude_up, dltY_ate, dltY_ate_low, dltY_ate_up, dltY_att, dltY_att_low, dltY_att_up)) 
+  
+  return(CATE_table)
+  
+}
+
+
 #' Function that identify subgroup with the largest CATE defined by: 
 #' 1) binary outcome: Q(A)=(P(Y=1|T=1, X∈A) - P(Y=1|T=0, X∈A)) – (P(Y=1|T=1) - P(Y=1|T=0))
 #' 2) continuous:     Q(A)=(E(Y=1|T=1, X∈A) - E(Y=1|T=0, X∈A)) – (E(Y=1|T=1) - E(Y=1|T=0))
