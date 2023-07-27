@@ -124,7 +124,7 @@ Make a dataset in this format to be run by iCF: the 1st column is treatment **W*
 
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 ```{}
- vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
+ vars_forest = colnames( Train %>% dplyr::select(-c("Y", "W" ))  )
  X <- Train[,vars_forest]
  Y <- as.vector( as.numeric( Train[,"Y"] ) )
  W <- as.vector( as.numeric( Train[,"W"] ) )
