@@ -134,7 +134,7 @@ Make a dataset in this format to be run by iCF: the 1st column is treatment **W*
  HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
  varimp_cf  <- cf_raw_key.tr$varimp_cf          
  selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx 
- GG_VI(varimp_cf, "Variable importance" )
+ GG_VI(varimp_cf, "Variable importance", colnames(X))
  ```
  <img src = images/GG_VI_fig.png width=300>
  
