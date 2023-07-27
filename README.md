@@ -118,17 +118,17 @@ We used a simulation setup similar to the one initially described by [Setoguchi 
 ```
 Make a dataset in this format to be run by iCF: the 1st column is treatment **W**, 2nd column is outcome **Y**, and remaining columns features **X**.
 ```{}
- dat <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
+ Train <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
 ``` 
 **4. Run iCF on simulated data**
 
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 ```{}
  vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W" ))  )
- X <- dat[,vars_forest]
- Y <- as.vector( as.numeric( dat[,"Y"] ) )
- W <- as.vector( as.numeric( dat[,"W"] ) )
- cf_raw_key.tr <- CF_RAW_key(dat, 1, "non-hd", hdpct=0.90) 
+ X <- Train[,vars_forest]
+ Y <- as.vector( as.numeric( Train[,"Y"] ) )
+ W <- as.vector( as.numeric( Train[,"W"] ) )
+ cf_raw_key.tr <- CF_RAW_key(Train, 1, "non-hd", hdpct=0.90) 
  Y.hat  <<- cf_raw_key.tr$Y.hat                 
  W.hat  <<- cf_raw_key.tr$W.hat                 
  HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
