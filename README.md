@@ -221,7 +221,7 @@ X <<- Train[,vars_forest]
 Y <<- as.vector( as.numeric( Train[,"Y"] ) )
 W <<- as.vector( as.numeric( Train[,"W"] ) )
 
-cf_raw_key.tr <- CF_RAW_key(dat, min.split.var=4, variable_type="non-hd", hdpct=0.95)    
+cf_raw_key.tr <- CF_RAW_key(Train, min.split.var=4, variable_type="non-hd", hdpct=0.95)    
 Y.hat  <<- cf_raw_key.tr$Y.hat
 W.hat  <<- cf_raw_key.tr$W.hat
 HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw
@@ -267,7 +267,7 @@ D5_MLS$depth_gg
 ```{}
 leafsize <<- list(D5=85, D4=65, D3=45, D2=25)
 
-iCFCV_B1000_i200_rwd <- iCFCV(dat=dat,K=5, treeNo=1000, iterationNo=100, min.split.var=4,
+iCFCV_B1000_i200_rwd <- iCFCV(dat=Train,K=5, treeNo=1000, iterationNo=100, min.split.var=4,
                               split_val_round_posi=0, P_threshold=0.1, variable_type = "non-HD", 
                               hdpct= 0.95, HTE_P_cf.raw = HTE_P_cf.raw) 
 
