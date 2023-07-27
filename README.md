@@ -182,7 +182,7 @@ D5_MLS$depth_gg
 ```{}
 leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denominator, D2=D2_MLS$denominator)
 
-iCFCV_B1000_i200_sim <- iCFCV(dat=dat,K=5, treeNo=1000, iterationNo=100, min.split.var=4,
+iCFCV_B1000_i200_sim <- iCFCV(dat=Train, K=5, treeNo=1000, iterationNo=100, min.split.var=4,
                               split_val_round_posi=0, P_threshold=0.1, variable_type = "non-HD", 
                               hdpct= 0.95, HTE_P_cf.raw = HTE_P_cf.raw) 
 
@@ -199,7 +199,7 @@ Make a dataset in this format to be run by iCF: the 1st column is treatment **W*
 ```{}
 load("HHF_SGLTvGLP_iCFCV.RData")
 
-dat <-  hfp_2yr_all_sgltvglp %>% 
+Train <-  hfp_2yr_all_sgltvglp %>% 
           dplyr::filter(FillDate2 <= 21184 -365*2 &  #31DEC2017
                         IndexDate >= 19449           #1APR2013
                         ) %>%
@@ -216,10 +216,10 @@ dat <-  hfp_2yr_all_sgltvglp %>%
 
 ```{}
 vars_catover2 <- c("race2", "age", "bl_HOSP", "bl_HOSPDAYS", "bl_ED", "bl_ERDM", "bl_outpt", "bl_outptdm")
-vars_forest = colnames( dat %>% dplyr::select(-c("Y", "W"))  ) 
-X <<- dat[,vars_forest]
-Y <<- as.vector( as.numeric( dat[,"Y"] ) )
-W <<- as.vector( as.numeric( dat[,"W"] ) )
+vars_forest = colnames( Train %>% dplyr::select(-c("Y", "W"))  ) 
+X <<- Train[,vars_forest]
+Y <<- as.vector( as.numeric( Train[,"Y"] ) )
+W <<- as.vector( as.numeric( Train[,"W"] ) )
 
 cf_raw_key.tr <- CF_RAW_key(dat, min.split.var=4, variable_type="non-hd", hdpct=0.95)    
 Y.hat  <<- cf_raw_key.tr$Y.hat
