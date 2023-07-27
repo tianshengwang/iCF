@@ -146,7 +146,7 @@ split_val_round_posi=0
 vars_catover2 <<- NA  
 ```
 ```{}
-D2_MLS=MinLeafSizeTune(denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "steelblue1")
+D2_MLS=MinLeafSizeTune(Train, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "steelblue1")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
@@ -156,21 +156,21 @@ Notably, if you got this message "_Error: Can't subset columns that don't exist.
 
 
 ```{}
-D3_MLS=MinLeafSizeTune(denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3", "steelblue1")
+D3_MLS=MinLeafSizeTune(Train, denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3", "steelblue1")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
 <img src = images/D3_MLS_tune.png width=350>
 
 ```{}
-D4_MLS=MinLeafSizeTune(denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4", "steelblue1")
+D4_MLS=MinLeafSizeTune(Train,denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4", "steelblue1")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
 <img src = images/D4_MLS_tune.png width=350>
 
 ```{}
-D5_MLS=MinLeafSizeTune(denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5", "steelblue1")
+D5_MLS=MinLeafSizeTune(Train, denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5", "steelblue1")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
@@ -236,28 +236,28 @@ GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', coln
  ***Step 2: Tune the MLS for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
 
 ```{}
-D2_MLS=MinLeafSizeTune(dat=dat, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "#62C6F2")
+D2_MLS=MinLeafSizeTune(dat=Train, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "#62C6F2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
 <img src = images/D2_MLS_tune_rwd.png width=350>
 
 ```{}
-D3_MLS=MinLeafSizeTune(dat=dat, denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3", "#62C6F2")
+D3_MLS=MinLeafSizeTune(dat=Train, denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3", "#62C6F2")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
 <img src = images/D3_MLS_tune_rwd.png width=350>
 
 ```{}
-D4_MLS=MinLeafSizeTune(dat=dat, denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4", "#62C6F2")
+D4_MLS=MinLeafSizeTune(dat=Train, denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4", "#62C6F2")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
 <img src = images/D4_MLS_tune_rwd.png width=350>
 
 ```{}
-D5_MLS=MinLeafSizeTune(dat=dat, denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5", "#62C6F2")
+D5_MLS=MinLeafSizeTune(dat=Train, denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5", "#62C6F2")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
@@ -265,7 +265,7 @@ D5_MLS$depth_gg
 
 ***Step 3. Implement iCF on Medicare SGLT2i vs GLP1RA new user cohort***
 ```{}
-leafsize <<- list(D5=85, D4=65, D3=45, D2=25)
+leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denominator, D2=D2_MLS$denominator)
 
 iCFCV_B1000_i200_rwd <- iCFCV(dat=Train,K=5, treeNo=1000, iterationNo=100, min.split.var=4,
                               split_val_round_posi=0, P_threshold=0.1, variable_type = "non-HD", 
