@@ -1,51 +1,53 @@
+
 iCF_basic <- function( depth, treeNo, iterationNo, Ntrain, tree_depth, split_val_round_posi){
-            besttreelist = list() #making an empty list
-            besttreelist_L = list () #for list format (rather than df format) of best trees
-            splitfreqlist = list()
-            treeBlist <- list()
-            #treeBlist_L <- list()
-            mvtreelist = list()
-            # mvtreelist_L = list()
-            for (k in 1:iterationNo) { 
-              cf <- CF(depth, # =as.numeric(sample(leafsize, 1)), 
-                       treeNo, "none")
-              #cf <- CF(depth, treeNo, "none")
-              #-----------------------------------------------------------------
-              #get P-value of omnibus test for HTE presence 
-              HTE_P_cf <- grf::test_calibration(cf)[8]
-              #-----------------------------------------------------------------
-              #Prepare for Split Frequency
-              max.depth_para= as.numeric(stringr::str_sub(tree_depth,-1,-1))
-              #split frequency for whole forest, not frequency of the "depth"!
-              freqs <- grf::split_frequencies(cf, max.depth = max.depth_para)
-              d <- data.frame(freqs)
-              real_index <- colnames(X[, selected_cf.idx])
-              #rename with real index 
-              data.table::setnames(d, old = c(colnames(d)), new = c(real_index))
-              d$k <- k
-              splitfreqlist[[k]] <- d # add it to your list
-              #-----------------------------------------------------------------
-              #############################-----------------------------------------------------------------
-              #BEST TREE SELECTION
-              #############################-----------------------------------------------------------------
-              best_tree_info<-find_best_tree(cf, "causal")
-              best_tree_info$best_tree
-              # Plot trees
-              tree.plot = plot(grf::get_tree(cf, best_tree_info$best_tree))
-              tree.plot
-              best.tree <- grf::get_tree(cf, best_tree_info$best_tree)
-              best.tree
-              besttreelist_L[[k]] <- best.tree # add it to your list
-              #-----------------------------------------------------------------
-              besttree <-   GET_TREE_DF(length(best.tree$nodes), best.tree, split_val_round_posi)
-              besttree$k <- k  # maybe you want to keep track of which iteration produced it?
-              besttree$HTE_P_cf <- HTE_P_cf  # record the omnibus HTE test P value
-              besttreelist[[k]] <- besttree # add it to your list
-            }
-            
-            all_list <- rlist::list.zip(besttreelist, besttreelist_L, splitfreqlist)
-            return(all_list) 
-          }
+  besttreelist = list() #making an empty list
+  besttreelist_L = list () #for list format (rather than df format) of best trees
+  splitfreqlist = list()
+  treeBlist <- list()
+  #treeBlist_L <- list()
+  mvtreelist = list()
+  # mvtreelist_L = list()
+  for (k in 1:iterationNo) { 
+    cf <- CF(depth, # =as.numeric(sample(leafsize, 1)), 
+             treeNo, "none")
+    #cf <- CF(depth, treeNo, "none")
+    #-----------------------------------------------------------------
+    #get P-value of omnibus test for HTE presence 
+    HTE_P_cf <- grf::test_calibration(cf)[8]
+    #-----------------------------------------------------------------
+    #Prepare for Split Frequency
+    max.depth_para= as.numeric(stringr::str_sub(tree_depth,-1,-1))
+    #split frequency for whole forest, not frequency of the "depth"!
+    freqs <- grf::split_frequencies(cf, max.depth = max.depth_para)
+    d <- data.frame(freqs)
+    real_index <- colnames(X[, selected_cf.idx])
+    #rename with real index 
+    data.table::setnames(d, old = c(colnames(d)), new = c(real_index))
+    d$k <- k
+    splitfreqlist[[k]] <- d # add it to your list
+    #-----------------------------------------------------------------
+    #############################-----------------------------------------------------------------
+    #BEST TREE SELECTION
+    #############################-----------------------------------------------------------------
+    best_tree_info<-find_best_tree(cf, "causal")
+    best_tree_info$best_tree
+    # Plot trees
+    tree.plot = plot(grf::get_tree(cf, best_tree_info$best_tree))
+    tree.plot
+    best.tree <- grf::get_tree(cf, best_tree_info$best_tree)
+    best.tree
+    besttreelist_L[[k]] <- best.tree # add it to your list
+    #-----------------------------------------------------------------
+    besttree <-   GET_TREE_DF(length(best.tree$nodes), best.tree, split_val_round_posi)
+    besttree$k <- k  # maybe you want to keep track of which iteration produced it?
+    besttree$HTE_P_cf <- HTE_P_cf  # record the omnibus HTE test P value
+    besttreelist[[k]] <- besttree # add it to your list
+  }
+  
+  all_list <- rlist::list.zip(besttreelist, besttreelist_L, splitfreqlist)
+  return(all_list) 
+}
+
 
 
 #' function to run Cross-Validation on whole dataset (except for external validation set) to get final subgroup decision G_iCF

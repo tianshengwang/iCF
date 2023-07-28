@@ -8,23 +8,16 @@
 #' @param tree_original the list of best trees from iCF (iCF_D4_BT, iCF_D3_BT, iCF_D2_BT)
 #' @param tree the ouput of previous parent level, if parent_level=1 then tree=tree_original 
 #' @param parent_level the level of parent node. The key idea of this function is backward stagewise method to obtain parent nodes of a upper level (shallower level) until reach node-01 
+#' 
+#' @return 
+#' 
+#' @export
 #' #' #---------------------------------------------------------------------------------------------------------------
 # III. "PARENT" function must run independently, recursivley to get the parent node, so that we can get subgroup decision
 # this is the most imporant and complicated part of the program: subgroup identification based on trees
-# the basic idea is using child node# to identify parent node# recursively, i.e.up to 3 times as we only deal with 4-way interactions using depth=4 trees (the 4th level is for leaves)
+# the basic idea is using child node# to identify parent node# recursively, 
+# i.e.up to 3 times as we only deal with 4-way interactions using depth=4 trees (the 4th level is for leaves)
 #---------------------------------------------------------------------------------------------------------------
-#lab start
-#tree_original<-iCF_D2_BT
-#tree         <-iCF_D2_BT
-#parent_level=1
-#-------------------------------
-#tree_original<-iCF_D4_BT
-#tree<-parent_final
-#parent_level=2
-
-
-#...
-#lab over
 
 #this PARENT_NODES is an intermediate function for PRE_MAJORITY_SUBGROUP
 PARENT_NODES <- function(tree_original, tree, parent_level){
