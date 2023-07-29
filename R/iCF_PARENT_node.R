@@ -4,7 +4,7 @@
 ########                      III. prepare subpopulation-based majority vote. PART I.
 ######################################################################################################----------------------------------------------
 ######################################################################################################-----------------------------------------------
-#' @param Child_node children nodes of upper level nodes (nodes at a shallower depth)
+#' PARENT_NODES: an intermediate function for PRE_MAJORITY_SUBGROUP
 #' @param tree_original the list of best trees from iCF (iCF_D4_BT, iCF_D3_BT, iCF_D2_BT)
 #' @param tree the ouput of previous parent level, if parent_level=1 then tree=tree_original 
 #' @param parent_level the level of parent node. The key idea of this function is backward stagewise method to obtain parent nodes of a upper level (shallower level) until reach node-01 
@@ -189,7 +189,9 @@ parent_sort  <- lapply(parent_sort_pre,
   #Subsection 4.3   other parent level of leaves, i.e. [1, max number of leaves]  need to add previous parent node info, 
   ######################################################################################################################################################################  
   #rename the "df" column to the "LEAF" columns to prepare for merging by LEAF for parent level 1.
-  leaf_Cnode_FREQ <- lapply(leaf_node_freq_woN1, function(df) {names(df)[names(df) == 'df' ] <- paste('Child_node');  df}) 
+  #leaf_Cnode_FREQ <- lapply(leaf_node_freq_woN1, function(df) {names(df)[names(df) == 'df' ] <- paste('Child_node');  df}) 
+  #7/29/2023 updated, new version of some package give the name of "node" rather than "df" for the first column, thus modifty to  
+  leaf_Cnode_FREQ <- lapply(leaf_node_freq_woN1, function(df) {colnames(df)[1] <- paste('Child_node');  df}) 
   #--------------------------------------------------------------------------------------------------------------------------------------  
   #step 1.  #merge node frequency info with parent_sort since unlike parent_level=1 where parent_sort has the same row # with LEAF info
   #--------------------------------------------------------------------------------------------------------------------------------------  
