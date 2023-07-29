@@ -90,7 +90,9 @@ if (parent_level==1){
 #extract frequency of node from parent_node
 leaf_node_freq      <- lapply(leaf_node_list,     function(df) as.data.frame( table(df ) ) )                     
 #EXCLUDE "node-01" as it cannot appear in left_child/right child column (making the same row # as )
-leaf_node_freq_woN1 <- lapply(leaf_node_freq,    function(df) df [which(df$df!="node-01" & df$df!="node-00001"),] )    
+#leaf_node_freq_woN1 <- lapply(leaf_node_freq,    function(df) df [which(df$df!="node-01" & df$df!="node-00001"),] )  
+#7/28/2023 updated, new version of some package give the name of "node" rather than "df" for the first column, thus modifty to     
+leaf_node_freq_woN1 <- lapply(leaf_node_freq,    function(df) df [which(df[1]!="node-01" & df[1]!="node-00001"),] )    
 #EXCLUDE "node-01" as it cannot appear in left_child/right child column (making the same row # as )
 N_freq_woN1_nrow  <- lapply(leaf_node_freq_woN1,    function(df)  nrow(df)  )   
 #Extract node number
@@ -160,7 +162,8 @@ parent_sort_pre <- list.zip(parent, N_freq_woN1_nrow, tree)
 parent_sort  <- lapply(parent_sort_pre, 
                        function(df)  
                        if (df$N_freq_woN1_nrow >0) {
-                                                   df$parent[with(df$parent, order(df$parent[1])), ]
+                                                   #df$parent[with(df$parent, order(df$parent[1])), ]  error with "order" Fx due to  R 4.0, updated on 7/28/2023
+                         df$parent %>% dplyr::arrange(df$parent[1])
                                                    } else {
                                                    df$tree   
                                                    }
