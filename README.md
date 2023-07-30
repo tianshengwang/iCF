@@ -34,6 +34,7 @@ library(Rfast)
 library(spaMM)
 library(ggplot2)
 library(ggridges)
+library(glmnet)
 ```
 **2. Installation**
 
