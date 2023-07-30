@@ -4,23 +4,35 @@
 ######################################################################################################----------------------------------------------
 ###################################################s###################################################-----------------------------------------------
 
-#library(tidyverse)
-#' @param PRE_Node The Y values
-#source("/local/projects/medicare/DPP4i_HTE/programs/macros/PRE_MAJORITY.R")
+
+
 #----------------------------------------------
 # I. prepare tree-based majority vote:  
 #----------------------------------------------
-#remove unnecessary columns in each datafram showing No. of nodes in the LIST
+#' PRE_MAJORITY_TREE
+#' remove unnecessary columns in each datafram showing No. of nodes in the LIST
+#' @param besttreeLIST a list of best tree
+#' 
+#' @return 
+#' 
+#' @export
+
 PRE_MAJORITY_TREE <- function(besttreeLIST){
   #list0<-lapply(LIST, function(df) cbind(df, No_nodes =nrow(df)) ) #add a new column in each datafram showing No. of nodes in the LIST, not necessary
   list1<-lapply(besttreeLIST, function(df) subset(df, select=-c(7:11 #remove samples, avg_Y, avg_W, k/b, HTE_P_cf #k=iteraction #
   )))
   return(list1)
 }
-#----------------2C01851D|--------------------------------------------------------------
+#------------------------------------------------------------------------------
 # II. prepare relaxed tree-based majority vote:  (dont' care split value) 
 #------------------------------------------------------------------------------
-#remove unnecessary columns in each datafram showing No. of nodes in the LIST
+#'PRE_MAJORITY_TREE_R
+#' remove unnecessary columns in each datafram showing No. of nodes in the LIST
+#' @param besttreeLIST a list of best tree
+#' 
+#' @return 
+#' 
+#' @export
 PRE_MAJORITY_TREE_R <- function(besttreeLIST){
   list1<-lapply(besttreeLIST, function(df) subset(df, select=-c(6:11 #remove split_value, samples, avg_Y, avg_W, k/b, split_value, HTE_P_cf
                                                                 )))
@@ -28,9 +40,13 @@ PRE_MAJORITY_TREE_R <- function(besttreeLIST){
 }
 
 
-#lab start
-#tree_original <-  list(IT_btree_df)
-#lab over
+#' PRE_MAJORITY_SUBGROUP
+#' store subgroup information into a table 
+#' @param tree_original a list of original best tree
+#' 
+#' @return 
+#' 
+#' @export
 
 PRE_MAJORITY_SUBGROUP <- function(tree_original){
   #as designed (by min node size) "depth=4" tree may still be depth=3 when the truth is 3-way interaction, 

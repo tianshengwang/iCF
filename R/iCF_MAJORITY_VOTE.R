@@ -1,8 +1,8 @@
 #############################################################################################
-# MAJORITY VOTEBC6CE50|
+# MAJORITY VOTE
 # Author: Tiansheng Wang  
-# Last update date:12/6/2020
-# Version: 0.1         
+# Last update date:7/29/2023
+# Version: 1.0         
 #############################################################################################
 
 #-------------------------666CD631|---------------------
@@ -12,6 +12,8 @@
 #################################################----------------------------------------------
 #################################################----------------------------------------------
 #
+#' MAJORITY_COUNT
+#' 
 #' This function count the occurence of majority 
 #' @param list_ref list of unique trees, tree relaxed, or subgroups
 #' @param list_all prepared list of trees, tree relaxed, or subgroups
@@ -34,7 +36,9 @@ MAJORITY_COUNT <- function(list_ref, list_all){
   return(n_occurence)
 }
 
-#' This function connects if identical or not label to a list and subsetting the list to exclude those not identical to reference list
+#' STANDARD_CHECK
+#' 
+#' This function connects if identical or not label to a list and subset the list to exclude those not identical to reference list
 #' if_ID means if Identical to MAJORITY VOTED or TRUTH
 #' @param standardLIST a label list of being identical or not 
 #' @param inputLIST the list need to be labeled and subsetted 
@@ -42,7 +46,7 @@ MAJORITY_COUNT <- function(list_ref, list_all){
 #' @return The subsetted list that all are identical to reference list.
 #'
 #' @export
-#' 
+
 STANDARD_CHECK <- function(standardLIST, inputLIST){
   if_ID_2_vote  <- rlist::list.zip(identical=standardLIST, df=inputLIST)  
   ID_2_vote     <- rlist::list.exclude(if_ID_2_vote, identical=='FALSE')    #exclude dataframes not identical with majority vote
@@ -50,7 +54,9 @@ STANDARD_CHECK <- function(standardLIST, inputLIST){
   return(pure_identical)
 }
 
-#
+
+#' MAJORITY_PICK_LEAF
+#' 
 #' This function pick those match matjority vote and with LEAF or NODE
 #' @param inputlist a list of df match the voted
 #' @param leaf_para "TRUE", means it is a leaf
@@ -67,13 +73,15 @@ MAJORITY_PICK_LEAF <- function (inputlist, leaf_para) {
   return(all_identical_LorN)
 }
 
+#' SG_PROBABILITY
+#' 
 #' This function check the probability of the majority voted subgroup from iCF 
 #' @param list1 prepared list of trees, tree relaxed, or subgroups
 #' 
 #' @return The subsetted list that all are identical to reference list.
 #'
 #' @export
-#'
+
 SG_PROBABILITY <- function( list1){
   #get a list of unique Tree (dataframe), Identify the unique dataframe
   list1_u <- unique(list1) #this function get unique SG
@@ -83,6 +91,8 @@ SG_PROBABILITY <- function( list1){
 }
 
 
+#' MAJORITY_VOTE
+#' 
 #' This function performs majority vote among best trees from iterative CF 
 #' @param list0 original list of trees
 #' @param list1 prepared list of trees, tree relaxed, or subgroups
@@ -96,17 +106,6 @@ SG_PROBABILITY <- function( list1){
 #' @return The subsetted list that all are identical to reference list.
 #'
 #' @export
-#'
-
-#vote_D3_tree_R  <-MAJORITY_VOTE(iCF_D3_BT,      iCF_D3_t_r,   iCF_D3_t_r,   iCF_D3_SF,   tree_true_r,        tree_true_N1_r, tree_true_N123_r, split_val_round_posi)
-#list0=iCF_D2_BT
-#list1=iCF_D2_t_r
-#list2=iCF_D2_t_r
-#list3=iCF_D2_SF
-#truth= tree_true_r
-#truth_N1=tree_true_N1_r
-#truth_N123=tree_true_N123_r
-#split_val_round_posi=split_val_round_posi
 
 MAJORITY_VOTE <- function(list0, #original list of trees
                           list1, #prepared list of trees, tree relaxed, or subgroups
@@ -343,13 +342,17 @@ MAJORITY_VOTE <- function(list0, #original list of trees
 
 
 
+#' CV_SG_MAJORITY
+#' 
 #' This function finds the majority voted subgroup decision across CV
 #' @param vote_D_subgroup.L list of vote_D_subgroup across CV
+#' @param stability_D_T_r stability of tree structures ignoring spliting value at each depth
+#' @param K cross-validation fold 
 #' 
 #' @return The majority voted subgroup decision across CV
 #'
 #' @export
-#'
+
 CV_SG_MAJORITY <- function(vote_D_subgroup.L, stability_D_T_r, K){
   
   #This function count the occurence of majority 
@@ -375,8 +378,13 @@ CV_SG_MAJORITY <- function(vote_D_subgroup.L, stability_D_T_r, K){
               stability_CV=stability_CV))
 }
 
+
+#' CVBIAS_D_MAJORITY
+#' 
 #' This function returns the mean MSE value of those majority voted subgroup decisions across CV
 #' @param vote_D_subgroup.L list of voted subgroup decisions, of those not majorityed, their MSE will be ignored
+#' @param stability_D_T_r stability of tree structures ignoring spliting value at each depth
+#' @param K cross-validation fold 
 #' @param metric list of metric including RMSE, Rsquared, MAE for continuous variables
 #' 
 #' @return The the mean MSE value across CV
@@ -397,7 +405,7 @@ CVBIAS_D_MAJORITY <- function(vote_D_subgroup.L, stability_D_T_r, K, metric){
                                                                    stability_D_T_r, 
                                                                    K)$majority_CV #finds the majority voted subgroup decision across CV 
                                                                    ))  #if none of SG appear > once, then the 1st one will be picked as the "majority"
-    #connects if identical or not label to a list and subsetting the list to exclude those not identical to reference list
+    #connects if identical or not label to a list and subset the list to exclude those not identical to reference list
     #if none of SG appear > once, then the 1st one will be picked 
     mse_per_fold_puremajor <- STANDARD_CHECK(if_majority,metric)
     mse_all_folds <- as.data.frame(do.call("rbind",mse_per_fold_puremajor))
@@ -412,6 +420,8 @@ CVBIAS_D_MAJORITY <- function(vote_D_subgroup.L, stability_D_T_r, K, metric){
   return(mse_all_folds$CV_MSE[1])
 }
 
+#' CVBIAS_MAIN
+#' 
 #' This function returns the mean MSE value across CV
 #' @param metric list of metric including RMSE, Rsquared, MAE for continuous variables
 #' 

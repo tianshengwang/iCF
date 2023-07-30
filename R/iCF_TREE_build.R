@@ -1,8 +1,10 @@
-#' This function connects the majority vote (or any) deicison with the list of original tree in list format
-#' @param Maj_Tree_Decision a majority voted tree decision df that need to be presented in a tree plot 
-#' @param ori_TreeL  #a list of original tree list   
+#' GET_TREE_L 
 #' 
-#' @return The original tree (lsit) that match the voted tree decision (df) 
+#' This function obtains dataframe of best tree from output of the iCF function
+#' @param iCF_D output of the iCF function 
+#' @param listindex index to help extract results from iCF_D
+#' 
+#' @return a list of dataframes of the best trees
 #'
 #' @export
 #' 
@@ -19,16 +21,23 @@ GET_TREE_L <- function (iCF_D, listindex) {
 
 
 
-#' This function for manually tuning MLS by inputting denominator (divide sample size into) and show plot of depth
-#' @param demoninator a demoninator to devide the sample
-#' @param depth depth descripion, e.g. "D4"   
+#' MinLeafSizeTune
 #' 
-#' @return The original tree (lsit) that match the voted tree decision (df) 
+#' This function tests the proposed denominator for minium leaf size (N/denominator) and provides the distribution of depth of generated best trees 
+#' @param dat dataset
+#' @param demoninator a demoninator to devide the sample size N
+#' @param treeNo tree No
+#' @param iterationNo iteration No (if = 1 then oneCF)
+#' @param split_val_round_posi split value rounding position
+#' @param depth depth descripion, e.g. "D4"
+#' @param color the color for histogram plot for distribution of depth of generated best trees   
+#' 
+#' @return The mean and histogram of depth of generated best trees
 #'
 #' @export
 #' 
 MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_round_posi, depth ,color){
-  iCF_D<- iCF_basic(denominator,  treeNo, iterationNo, dat, depth,  split_val_round_posi)
+  iCF_D<- iCF(denominator,  treeNo, tunepara = "none", iterationNo, dat, depth,  split_val_round_posi)
   iCF_D_BT=GET_TREE_L(iCF_D, 1)
   #turn tree into subgroup  
   iCF_D_BT_SG        <- lapply(iCF_D_BT, function(df)   TREE2SUBGROUP(df)$majority)
@@ -59,13 +68,15 @@ MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_rou
 
 
 
-
+#'GRID_LEAFSIZE
+#'
 #' This function find right leaf size at each depth
 #' @param depth depth of a forest
+#' @param treeNo tree No
+#' @param iterationNo iteration No (if = 1 then oneCF)
 #' @param initial intially tried value (the denominator of N/initial, e.g. minimum-leaf-size=N/25 for D2 tree, initial=25
-#' @param upper upper level if we need to get a deeper tree 
-#' @param lower lower level if we need to get a shallower tree 
-#' @iCF_D_BT_exp_SG_D_mean mean depth of best trees from causal forest grown by suggested initial value
+#' @param iCF_D_BT_exp_SG_D_mean mean depth of best trees from causal forest grown by suggested initial value
+#' @param tune_unit unit for tuning
 #' 
 #' @return the tuned leaf size 
 #'
@@ -126,15 +137,19 @@ if (   iCF_D_BT_exp_SG_D_mean ==depth){
 }
   
 
-#' This function tune leaf size for iCF 
+#'LEAFSIZE_tune
+#'
+#' This function tunes leaf size for iCF 
 #' @param Ntrain sample size
+#' @param initial_D2 initial dominator used for D2 forest
 #' @param treeNo  tree No, need to be >= 50, if =10 has this error: Error in lm.wfit(x, y, w, offset = offset, singular.ok = singular.ok,  : 0 (non-NA) cases
-#' @param iterationNo  iteration No  
+#' @param iterationNo  iteration No
+#' @param tune_unit tune unit  
 #' 
 #' @return the tuned leaf size 
 #'
 #' @export
-#' 
+ 
 LEAFSIZE_tune <- function(Ntrain, initial_D2, treeNo, iterationNo, tune_unit){
   
   #suggested N to start with, then check, if doesn't work then tune by increasing or  minimum leafsize
@@ -164,19 +179,19 @@ LEAFSIZE_tune <- function(Ntrain, initial_D2, treeNo, iterationNo, tune_unit){
                             D2=round(initial_D2*2,0)
                             )
     
-    iCF_D2_exp = iCF_basic(leafsize_initial$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
+    iCF_D2_exp = iCF(leafsize_initial$D2,  treeNo, tunepara = "none", iterationNo, Ntrain, "D2",  split_val_round_posi)
     iCF_D2_BT_exp <<- GET_TREE_L(iCF_D2_exp, 1) 
   }
 
   
   
-  iCF_D3_exp = iCF_basic(leafsize_initial$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi)
+  iCF_D3_exp = iCF(leafsize_initial$D3,  treeNo, tunepara = "none", iterationNo, Ntrain, "D3",  split_val_round_posi)
   iCF_D3_BT_exp <<- GET_TREE_L(iCF_D3_exp, 1) 
   
-  iCF_D4_exp = iCF_basic(leafsize_initial$D4,  treeNo, iterationNo, Ntrain, "D4",  split_val_round_posi)
+  iCF_D4_exp = iCF(leafsize_initial$D4,  treeNo, tunepara = "none", iterationNo, Ntrain, "D4",  split_val_round_posi)
   iCF_D4_BT_exp <<- GET_TREE_L(iCF_D4_exp, 1) 
 
-  iCF_D5_exp = iCF_basic(leafsize_initial$D5,  treeNo, iterationNo, Ntrain, "D5",  split_val_round_posi)
+  iCF_D5_exp = iCF(leafsize_initial$D5,  treeNo, tunepara = "none", iterationNo, Ntrain, "D5",  split_val_round_posi)
   iCF_D5_BT_exp <<- GET_TREE_L(iCF_D5_exp, 1) 
   
   iCF_D2_BT_exp_SG        <- lapply(iCF_D2_BT_exp, function(df)   TREE2SUBGROUP(df)$majority)
@@ -250,10 +265,13 @@ LEAFSIZE_tune <- function(Ntrain, initial_D2, treeNo, iterationNo, tune_unit){
 
 
 
-
+#'CF_RAW_key
+#'
 #' This function is the wrapper function to run raw causal forest
 #' @param Train_cf training data
 #' @param min.split.var minimum number of variables to split population
+#' @param variable_type high-dimensional (HD) or non-HD
+#' @param hdpct if high-dimensional (HD) variable, the top percentile used to split population
 #' 
 #' @return the key results from raw causal forest 
 #'
@@ -350,250 +368,17 @@ CF_RAW_key <- function(Train_cf, min.split.var, variable_type, hdpct){
   
 }
 
-#' This function is the wrapper function to run raw causal forest and for initial variable selection for hdICF, 
-#' which will be applied to a list of selected X by incremetally trimming VI score 
-#' @param Train_cf training data
-#' @param X_selected selected variables index
+
+#'GET_TREE_DF
+#'
+#' This function is the wrapper function to run raw causal forest
+#' @param No_nodes number of nodes from a best tree from a causal forest
+#' @param treetype list format of a tree from causal forest
+#' @param split_val_round_posi split value rounding position
 #' 
-#' @return the accuracy of predicting W from raw causal forest with different selected hdX
+#' @return the key results from raw causal forest 
 #'
 #' @export
-#' 
-#Xname_selected[[19]]
-
-hdiCF_VS_incremental <- function(#Train_cf, 
-                                 X_selected){
-  #X <- Train_cf[, X_selected]
-  X <- X[,X_selected]
-  
-  #Y <- as.vector( as.numeric( Train_cf[,1] ) )
-  #W <- as.vector( as.numeric( Train_cf[,2] ) )  
-  
-  #X_untreat <- Train_cf[, X_selected][ which(W==0),]
-  #Y_untreat <- as.vector( as.numeric( Train_cf[ which(W==0),][,1] ) )
-  #W_untreat <- as.vector( as.numeric( Train_cf[ which(W==0),][,2] ) )  
-
-  #------------------------------------------------------------------------
-  #when incrementally trim tail of VI score from all varaibles (VI doesn't change) only need W.hat 
-  W.forest <- regression_forest(X, W)
-  W.hat    <- predict(W.forest)$predictions
-  
-  #forest-based method to predict Y
- # Y.forest_untreat <- regression_forest(X_untreat, Y_untreat)
- # Y.hat_untreat    <- predict(Y.forest_untreat)$predictions
-  
-  # Compute confusion matrix
-  
- CMatrix_W <- caret::confusionMatrix(data = as.factor(ifelse(W.hat>0.5,1,0)) ,
-                                  reference = as.factor(W),
-                                  positive = "1")
- accuracy_W <-  as.numeric(CMatrix_W$overall[1])
- 
- #doesn't make much sense using only X (without W) to predict Y
-#CMatrix_Y_untreat <- caret::confusionMatrix(data = as.factor(ifelse(Y.hat_untreat>0.5,1,0)) ,
-#                                     reference = as.factor(Y_untreat),
-#                                    positive = "1")
-#accuracy_Y_untreat <-  as.numeric(CMatrix_Y_untreat$overall[1])
- 
-  #create transformed outcome
- # Y_star <- ifelse(W==1, Y/W.hat, -Y/(1-W.hat))
-  
-  #forest-based method to predict Y_star
-  #Y.forest.star <- regression_forest(X, Y_star)
-  #Y.hat.star    <- predict(Y.forest.star)$predictions
-
-  
-  #RMSE_Y_star = sqrt( sum((Y_star - Y.hat.star)^2)/length(Y)) 
-return(#list(
-       accuracy_W = accuracy_W#, 
-       #accuracy_Y_untreat = accuracy_Y_untreat)
-       )
-}
-  
- 
-
-
-hdiCF_VS_iterative <- function(#Train_ori, 
-  s, cutoffpct){
-  accuracy_W_list = list()
-  X_ncol_list = list()
-  CMatrix_W_list = list()
-  HTE_P_cf_list = list()
-  Train_list = list()  
-  Xselectedname_list = list()
-  
-  for (s in 1:s) { 
-    if(s==1){
-      #All HD variables, original dataset 
-      # Train <<- Train_ori
-      W.forest <- regression_forest(X, W)
-      W.hat    <- predict(W.forest)$predictions
-      
-      Y.forest <- regression_forest(X, Y)
-      Y.hat    <- predict(Y.forest)$predictions
-      
-      cf.raw = causal_forest(X, Y,  W,  Y.hat = Y.hat, W.hat = W.hat)
-      HTE_P_cf.raw <-test_calibration(cf.raw)[8]
-      varimp_cf <- variable_importance(cf.raw)
-      selected_cf.idx <<- which(varimp_cf >= quantile(varimp_cf, cutoffpct ) )
-      
-    } else {
-      #iteratively generate new dataset, new raw CF from new W.hat and new Y.hat, new VI score
-      X <<- X[,selected_cf.idx] #from previous (s-1)th loop
-      
-      W.forest <- regression_forest(X, W)
-      W.hat    <- predict(W.forest)$predictions
-      #new Y.hat
-      Y.forest <- regression_forest(X, Y)
-      Y.hat    <- predict(Y.forest)$predictions
-      
-      cf.raw = causal_forest(X,   Y,  W,  Y.hat = Y.hat, W.hat = W.hat)
-      HTE_P_cf.raw <-test_calibration(cf.raw)[8]
-      varimp_cf <- variable_importance(cf.raw) 
-      selected_cf.idx <<- which(varimp_cf >= quantile(varimp_cf, cutoffpct ) ) #for next (s+1)th loop, update it
-      
-    }
-    #X <- Train_cf[, X_selected]
-    #cf_raw_key.tr <- CF_RAW_key(Train, 1, "hd", hdpct=cutoffpct) 
-    # varimp_cf  <- cf_raw_key.tr$varimp_cf
-    #  selected_cf.idx = cf_raw_key.tr$selected_cf.idx #which(varimp_cf >= quantile(varimp_cf, cutoffpct) )
-    #  length(selected_cf.idx)
-    #W.hat <-   cf_raw_key.tr$W.hat
-    Xselectedname_list [[s]] <- colnames(X[,c(selected_cf.idx)])
-    
-    CMatrix_W <- caret::confusionMatrix(data = as.factor(ifelse(W.hat>0.5,1,0)) ,
-                                        reference = as.factor(W),
-                                        positive = "1")
-    
-    CMatrix_W_list[[s]] <- CMatrix_W
-    HTE_P_cf_list[[s]]= HTE_P_cf.raw
-    accuracy_W_list[[s]] <-  as.numeric(CMatrix_W$overall[1])
-    
-    #redefine X, Train
-    # X <<- X[,c(selected_cf.idx)] #<<- to make it avaialbe outside of a specific loop
-    # ncol(X)
-    #  Train <<- Train[,c("Y", "W", colnames( X )) ]
-    #vars_forest <<- colnames( Train %>% dplyr::select(-c("Y", "W")))
-    X_ncol_list[[s]] <- ncol(X)
-    
-    #Train_list[[s]] <- Train
-    
-  }
-  all_list <- rlist::list.zip(accuracy_W_list, CMatrix_W_list,  X_ncol_list, Xselectedname_list, HTE_P_cf_list #, Train_list
-  )
-  return(all_list) 
-  
-}
-
-
-
-
-CONVERT_tree_IT2CF <- function(btree_it) {
-  btree_cf <- btree_it  %>%  
-    mutate (is_leaf        = ifelse(is.na(vname)==TRUE , TRUE , FALSE))  %>%
-    mutate (left_child     = ifelse(is_leaf=="FALSE", paste0(node,1), "NA")) %>%
-    mutate (right_child    = ifelse(is_leaf=="FALSE", paste0(node,2), "NA")) %>%
-    mutate (split_variable = ifelse(is.na(vname)==FALSE, paste0(as.character(vname)), "NA" ) ) %>%
-    mutate (split_value    = ifelse(is.na(best.cut)==FALSE, round(as.numeric(as.character(best.cut)),1), "NA") ) %>%
-    mutate (samples        = ifelse(is_leaf=="TRUE", n, "NA") ) %>%
-    mutate (avg_Y          = 0) %>%
-    mutate (avg_W          = 0) %>%
-    mutate (b              = 1) %>%
-    mutate (HTE_P_cf       = 0) %>%
-    subset (select=  c(node, is_leaf, left_child, right_child, split_variable, split_value, samples, avg_Y, avg_W, b, HTE_P_cf)) %>%
-    mutate (node = paste("node", node, sep = '-') ) %>%
-    mutate (node = ifelse( stringr::str_sub(node,  -2, -2) =="-", sub("-([0-9])", "-0\\1", node), node ) ) %>%
-    mutate (node = ifelse( stringr::str_sub(node,  -3, -3) =="-", sub("-([0-9])", "-0\\1", node), node ) ) %>%
-    mutate (node = ifelse( stringr::str_sub(node,  -4, -4) =="-", sub("-([0-9])", "-0\\1", node), node ) ) %>%
-    mutate (node = ifelse( stringr::str_sub(node,  -5, -5) =="-", sub("-([0-9])", "-0\\1", node), node ) ) %>%
-    mutate (left_child  = ifelse(nchar(left_child)  == 2 & left_child  !="NA", paste0("000", left_child),  left_child ) ) %>%
-    mutate (left_child  = ifelse(nchar(left_child)  == 3 & left_child  !="NA", paste0("00" , left_child),  left_child ) ) %>%
-    mutate (left_child  = ifelse(nchar(left_child)  == 4 & left_child  !="NA", paste0("0" ,  left_child),  left_child ) ) %>%
-    mutate (right_child = ifelse(nchar(right_child) == 2 & right_child !="NA", paste0("000", right_child), right_child ) ) %>%
-    mutate (right_child = ifelse(nchar(right_child) == 3 & right_child !="NA", paste0("00" , right_child), right_child ) ) %>%
-    mutate (right_child = ifelse(nchar(right_child) == 4 & right_child !="NA", paste0("0" ,  right_child), right_child ) ) %>%
-    arrange(node) 
-  return( as.data.frame(btree_cf) )       
-}
-
-
-CONVERT_tree_stima2CF <- function(btree_stima) {
-btree_cf <- btree_stima %>% 
-mutate (node     = 1:nrow(btree_stima)) %>%
-mutate (node     = paste("node",node, sep = "-" )) %>%
-mutate (node = ifelse( stringr::str_sub(node,  -2, -2) =="-", sub("-([0-9])", "-0\\1", node), node ) ) %>%
-mutate (is_leaf     = ifelse(nchar(Region)!=0 , TRUE , FALSE)) %>%
-mutate ( value_1    =  lead(Splitpoint,n=1)   )%>%  
-mutate ( value_2    =  lead(Splitpoint,n=2)   )%>% 
-mutate ( value_3    =  lead(Splitpoint,n=3)   )%>%  
-mutate ( value_4    =  lead(Splitpoint,n=4)   )%>% 
-mutate ( var_1      =  lead(Predictor,n=1)   )   %>%  
-mutate ( var_2      =  lead(Predictor,n=2)   )   %>%  
-mutate ( var_3      =  lead(Predictor,n=3)   )   %>%  
-mutate ( var_4      =  lead(Predictor,n=4)   )   %>% 
-mutate ( Sign_1          =  lead(Sign,n=1)   )   %>%  
-mutate ( Sign_2          =  lead(Sign,n=2)   )   %>%  
-mutate ( Sign_3          =  lead(Sign,n=3)   )   %>%  
-mutate ( Sign_4          =  lead(Sign,n=4)   )   %>% 
-mutate ( node_1     =  lead(node,n=1)   )   %>%  
-mutate ( node_2     =  lead(node,n=2)   )   %>%  
-mutate ( node_3     =  lead(node,n=3)   )   %>%  
-mutate ( node_4     =  lead(node,n=4)   )   %>% 
-mutate ( Region_1     =  lead(Region,n=1)   )   %>%  
-mutate ( Region_2     =  lead(Region,n=2)   )   %>%  
-mutate ( Region_3     =  lead(Region,n=3)   )   %>%  
-mutate ( Region_4     =  lead(Region,n=4)   )   %>% 
-mutate (left_child =
-ifelse(is_leaf=="TRUE", "NA",          
-ifelse((Sign_1 == "<=" & value_1== value_2 & ( nchar(Region_1)==0|is.na(Region_1) |nchar(Region_2)==0|is.na(Region_2)|nchar(Region_3)==0|is.na(Region_3)|nchar(Region_4)==0|is.na(Region_4) ) )==TRUE, stringr::str_sub(node_1,-2,-1) , 
-ifelse((Sign_1 == ">"  & Sign_2 == "<=" #& Sign_3 == ">"  & Sign_4 == "<="  
-                                        & value_2== value_3 & var_2==var_3 &  ( nchar(Region_1)==0|is.na(Region_1) |nchar(Region_2)==0|is.na(Region_2)|nchar(Region_3)==0|is.na(Region_3)|nchar(Region_4)==0|is.na(Region_4) ) )==TRUE, stringr::str_sub(node_2,-2,-1),
-ifelse((Sign_1 == "<=" & Sign_2 == ">"  #& Sign_3 == "<=" & Sign_4 == ">"   
-                                        & value_1== value_2 & #value_3== value_4 & 
-                                                            var_1==var_2 #& var_3==var_4 
-                                                            & (nchar(Region_1)>=2&nchar(Region_2)>=2&nchar(Region_3)>=2&nchar(Region_4)>=2) ) ==TRUE, stringr::str_sub(node_3,-2,-1), NA
-))))) %>%
-mutate (right_child =
-ifelse(is_leaf=="TRUE", "NA",
-ifelse((Sign_1 == "<=" & value_1== value_2 & ( nchar(Region_1)==0|is.na(Region_1) |nchar(Region_2)==0|is.na(Region_2)|nchar(Region_3)==0|is.na(Region_3)|nchar(Region_4)==0|is.na(Region_4) ) )==TRUE, stringr::str_sub(node_2,-2,-1) , 
-ifelse((Sign_1 == ">"  & Sign_2 == "<=" #& Sign_3 == ">"  & Sign_4 == "<="  
-                                        & value_2== value_3 & var_2==var_3 & ( nchar(Region_1)==0|is.na(Region_1) |nchar(Region_2)==0|is.na(Region_2)|nchar(Region_3)==0|is.na(Region_3)|nchar(Region_4)==0|is.na(Region_4) ) ) ==TRUE, stringr::str_sub(node_3,-2,-1),
-ifelse((Sign_1 == "<=" & Sign_2 == ">"  #& Sign_3 == "<=" & Sign_4 == ">"   
-                                        & value_1== value_2 & value_3== value_4 & var_1==var_2 & var_3==var_4 & (nchar(Region_1)>=2&nchar(Region_2)>=2&nchar(Region_3)>=2&nchar(Region_4)>=2) ) ==TRUE, stringr::str_sub(node_4,-2,-1), NA
-))))) %>%
-mutate (split_variable = 
-ifelse(is_leaf=="TRUE", "NA",          
-ifelse((Sign_1 == "<=" & Sign_2 == ">"  #& Sign_3 == "<=" & Sign_4 == ">"  
-                                        & value_1== value_2 #& value_3== value_4 
-                                                            &( nchar(Region_1)==0|is.na(Region_1) |nchar(Region_2)==0|is.na(Region_2)|nchar(Region_3)==0|is.na(Region_3)|nchar(Region_4)==0|is.na(Region_4) ) )==TRUE, var_1, 
-ifelse((Sign_1 == ">"  & Sign_2 == "<=" #& Sign_3 == ">"  & Sign_4 == "<="  
-                                        #& value_2== value_3 & var_2==var_3 
-                                        & ( nchar(Region_1)==0|is.na(Region_1) |nchar(Region_2)==0|is.na(Region_2)|nchar(Region_3)==0|is.na(Region_3)|nchar(Region_4)==0|is.na(Region_4) ) ) ==TRUE,    var_2,
-ifelse((Sign_1 == "<=" & Sign_2 == ">"  #& Sign_3 == "<=" & Sign_4 == ">"   
-                                        & value_1== value_2 & value_3== value_4 & var_1==var_2 & var_3==var_4 & (nchar(Region_1)>=2&nchar(Region_2)>=2&nchar(Region_3)>=2&nchar(Region_4)>=2) ) ==TRUE, var_3, NA
-))))) %>%
-mutate (split_value = 
-ifelse(is_leaf=="TRUE", "NA",          
-ifelse((Sign_1 == "<=" & Sign_2 == ">"  #& Sign_3 == "<=" & Sign_4 == ">"  
-                                        & value_1== value_2 #& value_3== value_4 
-                                                            & ( nchar(Region_1)==0|is.na(Region_1) |nchar(Region_2)==0|is.na(Region_2)|nchar(Region_3)==0|is.na(Region_3)|nchar(Region_4)==0|is.na(Region_4) ) )==TRUE, round(as.numeric(as.character(value_1)),1), 
-ifelse((Sign_1 == ">"  & Sign_2 == "<=" #& Sign_3 == ">"  & Sign_4 == "<="  
-                                        #& value_2== value_3 & var_2==var_3 
-                                        & ( nchar(Region_1)==0|is.na(Region_1) |nchar(Region_2)==0|is.na(Region_2)|nchar(Region_3)==0|is.na(Region_3)|nchar(Region_4)==0|is.na(Region_4) ) ) ==TRUE,   round(as.numeric(as.character(value_2)),1),
-ifelse((Sign_1 == "<=" & Sign_2 == ">"  #& Sign_3 == "<=" & Sign_4 == ">"   
-                                        & value_1== value_2 & value_3== value_4 & var_1==var_2 & var_3==var_4 & (nchar(Region_1)>=2&nchar(Region_2)>=2&nchar(Region_3)>=2&nchar(Region_4)>=2) ) ==TRUE, round(as.numeric(as.character(value_3)),1), NA
-)))))  %>%
-
-    mutate (samples        = ifelse(is_leaf=="TRUE", n, "NA") ) %>%
-    mutate (avg_Y          = 0) %>%
-    mutate (avg_W          = 0) %>%
-    mutate (b              = 1) %>%
-    mutate (HTE_P_cf       = 0) %>%
-    subset (select=  c(node, is_leaf, left_child, right_child, split_variable, split_value, samples, avg_Y, avg_W, b, HTE_P_cf))
-
-  return( as.data.frame(btree_cf) )       
-}
-
 
 GET_TREE_DF <- function(No_nodes, treetype, split_val_round_posi) {
   node = rep(NA, No_nodes)
@@ -655,15 +440,16 @@ return(list(best_tree_info$best_tree, plot_bt))
 
 
 
-#' This function connects the majority vote (or any) deicison with the list of original tree in list format
+#' GET_ORI_TREE_L
+#' 
+#' This function connects the majority vote (or any) deicison with the list of original tree and ouptut its list format
 #' @param Maj_Tree_Decision a majority voted tree decision df that need to be presented in a tree plot 
-#' @param ori_TreeL  #a list of original tree list   
+#' @param ori_TreeL  #a list of original tree   
 #' 
 #' @return The original tree (lsit) that match the voted tree decision (df) 
 #'
 #' @export
-#' 
-#' 
+
 GET_ORI_TREE_L <- function(Maj_Tree_Decision,ori_TreeL){
  Tree_PreMaj <- PRE_MAJORITY_TREE(ori_TreeL)   #a list of tree df that remove samples, avg_Y, avg_W, k/b, HTE_P_cf #k=iteraction #
   if_majority <-lapply(Tree_PreMaj , function(df) identical(df, Maj_Tree_Decision))  #identical or not label
@@ -676,7 +462,16 @@ tree_ID_random <- sample(tree_ID_list, 1)[[1]]
 return(tree_ID_random)
 }
 
-
+#' HTE_P_extract
+#' 
+#' This function connects the majority vote (or any) deicison with the list of original tree and ouptut its list format
+#' @param iCF_D output of iCF at a certain depth 
+#' @param tree_depth  "D2", "D3", "D4", or "D5"   
+#' 
+#' @return P_value for heterogeneity of each causal forest 
+#'
+#' @export
+ 
 HTE_P_extract <- function(iCF_D, tree_depth){
   HTE_P_cf_list <- lapply(iCF_D, function(df) mean(df$HTE_P_cf))
   HTE_P_cf   <- as.data.frame(rlist::list.rbind(HTE_P_cf_list)) #Bind all list elements by row
@@ -684,97 +479,4 @@ HTE_P_extract <- function(iCF_D, tree_depth){
   HTE_P_cf$tree_depth <- tree_depth
   HTE_P_cf <- tibble::rowid_to_column(HTE_P_cf, "k")
   return(HTE_P_cf)
-}
-
-HTE_P_extract_M <- function(iCF_D_M, tree_depth){
-  HTE_P_cf_M <- iCF_D_M$HTE_P_cf_M
-  HTE_P_cf_M$tree_depth <- tree_depth
-  return(HTE_P_cf_M)
-}
-
-SF_extract_M <- function(iCF_D_M, tree_depth){
-  SF_M <- iCF_D_M$SF_ID_LIST
-  return(SF_M)
-}
-
-#combine all df function:
-COMBO_SAVE <- function(List,  Listname){
-  allonelist = do.call(rbind, List)
-  #record allbesttree data
-  write.table(allonelist,file=paste(Listname, depth, treeNo, iterationNo, Ntrain, tree_depth, intTRUE, ".csv", sep="_"),row.names=FALSE,col.names=T,sep=",",append=TRUE)
-  #save the list of frames
-  save(List,             file=paste(Listname, depth, treeNo, iterationNo, Ntrain, tree_depth, intTRUE, ".Rda", sep="_"))
-}
-
-FOREST_LIST <- function(dataset) {
-  vars_forest =c("X1","X2","X3","X4","X5","X6","X8","X9","X10") 
-  vars_IV=c("X7")
-  X<-dataset[,vars_forest]
-  Y<-dataset[,"Y"]
-  W<-dataset[,"a"]
-  Z<-dataset[,vars_IV]  
-  forest.list <- list(X = X, Y = Y, W = W, Z = Z)
-  return(forest.list)	    
-}
-
-
-#' This function find out a splitter is continuous, ordinal, orbinary variable
-#' @param tree the dataframe for a causal tree
-#' @param row_index  #the row number of the dataframe   
-#' 
-#' @return The level of this splitter, e.g.if continous splitter, then > 8 
-#'
-#' @export
-#' 
-#' 
-SPLITTER_LEVEL <- function(tree, row_index){
-  if (tree[row_index,"split_variable"] == "NA") {#if leaf
-    level_splitter = 0
-  } else {#if splitter
-    level_splitter = length(unique (  eval(parse(text=paste("X$", tree[row_index,"split_variable"], sep = ""))) ))
-  }
-  return(level_splitter)
-}
-
-#' This function impute Impute split values for splitters of D3 voted tree from D4 synthetic tree if top 3 nodes are identical
-#' @param level_D3_splitter_1 the node 1 (splitter1) of D3 voted tree structure
-#' @param level_D3_splitter_2 the node 2 (splitter2) of D3 voted tree structure
-#' @param level_D3_splitter_3 the node 3 (splitter3) of D3 voted tree structure
-#' @param vote_D3_tree.syn.ori  the original vote D3 tree stucutre (without imputing split value)   
-#' @param vote_D4_tree.syn  the original vote D4 tree stucutre (without imputing split value)   
-#' @return The imputed D3 tree if Node 1,2,3 of D3 identical to Node 1,2, 3 of D4, or original D3 tree if Node 1, 2, 3 of D3 not identical to D4
-#'
-#' @export
-#' 
-#'
-SPLIT_VAL_IMPUTE_D3 <- function(level_D3_splitter_1, level_D3_splitter_2, level_D3_splitter_3, vote_D3_tree.syn.ori, vote_D4_tree.syn     ){
-  if ( identical(vote_D3_tree.syn.ori[1:3,1:5], 
-                 vote_D4_tree.syn[1:3,1:5]) & #D3 and D4 trees have the same node 123
-       max(level_D3_splitter_1, level_D3_splitter_2, level_D3_splitter_3) > 2 #one of the splitter is not binary
-  ){
-    #node 1, 2, 3, if continuous splitter, then impute splitting value from D4 tree:
-    if (level_D3_splitter_1 > 2){vote_D3_tree.syn.ori[,"split_value"][ which( vote_D3_tree.syn.ori$node == "node-01" )]  <-  vote_D4_tree.syn[1,"split_value"] }
-    if (level_D3_splitter_2 > 2){vote_D3_tree.syn.ori[,"split_value"][ which( vote_D3_tree.syn.ori$node == "node-02" )]  <-  vote_D4_tree.syn[2,"split_value"] }
-    if (level_D3_splitter_3 > 2){vote_D3_tree.syn.ori[,"split_value"][ which( vote_D3_tree.syn.ori$node == "node-03" )]  <-  vote_D4_tree.syn[3,"split_value"] }
-  }
-  return(vote_D3_tree.syn.ori)
-}
-
-#' This function impute Impute split values for splitters of D2 voted tree from D4 synthetic tree if top 1 node, i.e.,root node, are identical
-#' @param level_D2_splitter_1 the node 1 (splitter1) of D3 voted tree structure
-#' @param vote_D2_tree.syn.ori  the original vote D3 tree stucutre (without imputing split value)   
-#' @param vote_D4_tree.syn  the original vote D4 tree stucutre (without imputing split value)   
-#' @return The imputed D3 tree if Node 1,2,3 of D3 identical to Node 1,2, 3 of D4, or original D3 tree if Node 1, 2, 3 of D3 not identical to D4
-#'
-#' @export
-#' 
-#'
-SPLIT_VAL_IMPUTE_D2 <- function(level_D2_splitter_1, vote_D2_tree.syn.ori, vote_D4_tree.syn){
-if ( identical(vote_D2_tree.syn.ori[1,1:5], 
-               vote_D4_tree.syn[1,1:5]) & #D2 and D4 trees have the same node 1
-     level_D2_splitter_1 > 2 #node 1 is not binary splitter
-){
-  vote_D2_tree.syn.ori[,"split_value"][ which( vote_D2_tree.syn.ori$node == "node-01" )]  <-  vote_D4_tree.syn[1,"split_value"] 
-}
-return(vote_D2_tree.syn.ori)  
 }

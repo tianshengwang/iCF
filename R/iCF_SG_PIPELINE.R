@@ -2,6 +2,8 @@
 ###############################################################################################
 # causal forest wrapper function for easy-input of different parameter
 ###############################################################################################
+#' CF
+#' 
 #' This function is the wrapper function to run raw causal forest with predefined min.node.size = round(nrow(Train)/depth, 0), 
 #' @param depth parameter to tune min.node.size = round(nrow(Train)/depth, 0), 
 #' @param treeNo number of trees in each forest
@@ -45,7 +47,21 @@ CF <- function(depth, treeNo, tunepara){
 ###############################################################################################
 #                      Iterative multidepth CF  + Majority Vote                               #
 ###############################################################################################
-iCF <- function( depth, treeNo, iterationNo, Ntrain, tree_depth, split_val_round_posi){
+#' iCF
+#' 
+#' function to run iterative causal forest at a certain depth
+#' @param depth parameter to tune min.node.size = round(nrow(Train)/depth, 0), 
+#' @param treeNo number of trees in each forest
+#' @param tunepara request wihout tuning
+#' @param iterationNo iteration No (if = 1 then oneCF)
+#' @param Ntrain split value rounding position
+#' @param tree_depth "D2", "D3", "D4", or "D5"
+#' @param split_val_round_posi split value rounding position
+#'  
+#' @return final subgroup decision G_iCF
+#' 
+#' @export
+iCF <- function( depth, treeNo, tunepara = "none", iterationNo, Ntrain, tree_depth, split_val_round_posi){
   besttreelist = list() #making an empty list
   besttreelist_L = list () #for list format (rather than df format) of best trees
   splitfreqlist = list()
@@ -55,7 +71,8 @@ iCF <- function( depth, treeNo, iterationNo, Ntrain, tree_depth, split_val_round
   # mvtreelist_L = list()
   for (k in 1:iterationNo) { 
     cf <- CF(depth, # =as.numeric(sample(leafsize, 1)), 
-             treeNo, "none")
+             treeNo, 
+             tunepara)
     #cf <- CF(depth, treeNo, "none")
     #-----------------------------------------------------------------
     #get P-value of omnibus test for HTE presence 
@@ -100,8 +117,21 @@ iCF <- function( depth, treeNo, iterationNo, Ntrain, tree_depth, split_val_round
 #         ONLY ONE multidepth CF  + Majority Vote,i.e. without best tree !!!                  #
 ###############################################################################################
 ###############################################################################################
-
-oneCF <- function(depth, treeNo, tunepara, tree_depth, split_val_round_posi){
+#' oneCF
+#' 
+#' function to run iterative causal forest at a certain depth
+#' @param depth parameter to tune min.node.size = round(nrow(Train)/depth, 0), 
+#' @param treeNo number of trees in each forest
+#' @param tunepara request wihout tuning
+#' @param iterationNo iteration No (if = 1 then oneCF)
+#' @param Ntrain split value rounding position
+#' @param tree_depth "D2", "D3", "D4", or "D5"
+#' @param split_val_round_posi split value rounding position
+#'  
+#' @return final subgroup decision G_iCF
+#' 
+#' @export
+oneCF <- function(depth, treeNo, tunepara="none", tree_depth, split_val_round_posi){
   treeBlist  = list()
   besttreelist = list() #making an empty list
   besttreelist_L = list () #for list format (rather than df format) of best trees
@@ -147,18 +177,28 @@ oneCF <- function(depth, treeNo, tunepara, tree_depth, split_val_round_posi){
 }
 
 
+#' SUBGROUP_PIPELINE
+#' 
 #' function to get subroup decision G_D, get ready for predicting Y (transformed outcome) in testing set,  and models build from G_D to predict Y*
-#' @param leafsize minimum-node-size tuned 
-#' @treeNo tree No
-#' @iterationNo iteration No
-#' @Ntrain sample size of training set for developing G_D
-#' @Train_ID training set in Cross-Validation with the CV ID8D660E32|
-#' @Test_ID testing set in Cross-Validation with the CV ID
+#' @param X features
+#' @param Y outcome
+#' @param W exposure 
+#' @param Y.hat predicted outcome
+#' @param W.hat predicted propensity score 
+#' @param treeNo tree No
+#' @param iterationNo iteration No
+#' @param Ntrain sample size of training set for developing G_D
+#' @param Train_ID training set in Cross-Validation with the CV ID
+#' @param Test_ID testing set in Cross-Validation with the CV ID
+#' @param variable_type high-dimensional (HD) or non-HD
+#' @param HTE_P_cf.raw P-value for HTE test in raw CF
+#' @param P_threshold threshold for P value
+#' @param split_val_round_posi split value rounding position
 #'  
 #' @return G_D
 #' 
 #' @export
-#' 
+ 
 SUBGROUP_PIPELINE<- function(X, 
                             Y, 
                             W, 
@@ -339,7 +379,8 @@ SUBGROUP_PIPELINE<- function(X,
   #Deci_Final_iCF.act.tr        <- CF_GROUP_DECISION(HTE_P_cf.raw, Train_ID_SG_iCF, "iCF", "actual" ,   P_threshold)
   Deci_Final_iCF.tran.tr       <- CF_GROUP_DECISION(HTE_P_cf.raw, Train_ID_SG_iCF, "iCF", "transform", P_threshold)
   #Deci_Final_iCF.act.te        <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "actual",     P_threshold)
-  Deci_Final_iCF.tran.te       <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "transform",  P_threshold)
+  #7/29/2023, actually doesn't need subgroup decisions or models from testing set
+  #Deci_Final_iCF.tran.te       <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "transform",  P_threshold)
 
   
   e_iCF=Sys.time()
@@ -370,7 +411,7 @@ SUBGROUP_PIPELINE<- function(X,
                 #Deci_Final_iCF.act.tr   = Deci_Final_iCF.act.tr,
                 Deci_Final_iCF.tran.tr  = Deci_Final_iCF.tran.tr ,
                 #Deci_Final_iCF.act.te  = Deci_Final_iCF.act.te,
-                Deci_Final_iCF.tran.te  = Deci_Final_iCF.tran.te ,
+                #Deci_Final_iCF.tran.te  = Deci_Final_iCF.tran.te ,
        
                 Train_ID_SG_iCF      = Train_ID_SG_iCF,
                 Test_ID_SG_iCF       = Test_ID_SG_iCF 
