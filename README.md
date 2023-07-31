@@ -1,5 +1,7 @@
 # Iterative Causal Forest (iCF): A Novel Algorithm for Subgroup Identification
 
+**iCF is free for nonprofit use**
+
 **Citation**
 
 **Wang T, Keil AP, Kim S, Wyss R, Htoo PT, Funk MJ, Buse JB, Kosorok MR, Stürmer T. Iterative Causal Forest: A Novel Algorithm for Subgroup Identification. _Am J Epidemiol._ 2023 (In Press).**
