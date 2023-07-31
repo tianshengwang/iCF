@@ -1,5 +1,5 @@
 # Iterative Causal Forest (iCF): A Novel Algorithm for Subgroup Identification 
-# iCF is free for nonprofit use
+** iCF is free for nonprofit use **
 
 **Citation**
 
