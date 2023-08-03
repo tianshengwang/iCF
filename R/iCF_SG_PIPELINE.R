@@ -234,11 +234,11 @@ SUBGROUP_PIPELINE<- function(X,
     
     iCF_D3<- iCF(leafsize$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi) 
     
-    if ( is.null( tryCatch( iCF_basic(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi), error=function(e){}) ) == TRUE ) {
+    if ( is.null( tryCatch( iCF(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi), error=function(e){}) ) == TRUE ) {
       warning("The minimum leaf size is too small for Depth 2 causal forest, need to increase it!")
       iCF_D2 = iCF_D3
     } else {
-      iCF_D2 = iCF_basic(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
+      iCF_D2 = iCF(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi)
     }
    
     
