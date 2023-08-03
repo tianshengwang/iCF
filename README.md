@@ -195,7 +195,7 @@ iCFCV_B1000_i200_sim
 
 We compared the **two-year risk difference** of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort were described previously by [Htoo et al.](https://www.ahajournals.org/doi/full/10.1161/JAHA.121.022376) and are available in the mehtod paper (Wang et al.) 
 
-Make a dataset in this format to be run by iCF: the 1st column is treatment **W**, 2nd column is outcome **Y**, and remaining columns features **X**.
+Make a dataset in this format to be run by iCF: the 1st column is treatment **W**, 2nd column is outcome **Y**, and remaining columns features **X**. And please name the dataset following this pattern: "W" for treatment and "Y" for outcome.
 
 ```{}
 load("HHF_SGLTvGLP_iCFCV.RData")
