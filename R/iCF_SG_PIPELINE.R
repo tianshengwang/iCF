@@ -226,13 +226,13 @@ SUBGROUP_PIPELINE<- function(X,
     #1/27/2023 already tuned leaf size, thus the following code may not be necessary
 
     #1/29/2023 debug at /local/projects/medicare/DPP4i_HTE/programs/macros/iCF_SG_PIPELINE.R#19: 
-    #iCF_D5 <- iCF_basic(leafsize$D5, treeNo, iterationNo, Ntrain, "D5", split_val_round_posi)
+    #iCF_D5 <- iCF(leafsize$D5, treeNo, iterationNo, Ntrain, "D5", split_val_round_posi)
 
-    iCF_D5<- iCF_basic(leafsize$D5,  treeNo, iterationNo, Ntrain, "D5",  split_val_round_posi)
+    iCF_D5<- iCF(leafsize$D5,  treeNo, iterationNo, Ntrain, "D5",  split_val_round_posi)
     
-    iCF_D4<- iCF_basic(leafsize$D4,  treeNo, iterationNo, Ntrain, "D4",  split_val_round_posi)
+    iCF_D4<- iCF(leafsize$D4,  treeNo, iterationNo, Ntrain, "D4",  split_val_round_posi)
     
-    iCF_D3<- iCF_basic(leafsize$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi) 
+    iCF_D3<- iCF(leafsize$D3,  treeNo, iterationNo, Ntrain, "D3",  split_val_round_posi) 
     
     if ( is.null( tryCatch( iCF_basic(leafsize$D2,  treeNo, iterationNo, Ntrain, "D2",  split_val_round_posi), error=function(e){}) ) == TRUE ) {
       warning("The minimum leaf size is too small for Depth 2 causal forest, need to increase it!")
