@@ -19,6 +19,26 @@ prop.func <- function(x, trt)
 }
 
 
+#' GET_SUBGROUP_ID
+#' 
+#' Function that obtain subgroup ID 
+#' @param decision the subgroup decision by different methods 
+#' @param dataset the dataset analyzed for residual & MSE
+#' 
+#' @return the dataframe of residual & MSE
+#' 
+#' @export
+
+GET_SUBGROUP_ID <- function (decision, dataset){
+  #generate a list of subgroups (i.e.stratified population by subgroup definitions)
+  subgroup_L        <- SUBSETTING(decision, dataset)
+  
+  DltY <- rlist::list.rbind( subgroup_L ) %>% #combine all observations from each subgroups into one dataset 
+    dplyr::arrange (ID)                    #order by ID
+  
+  return(DltY)
+}
+
 
 #-----------------------
 #subsetting first!
