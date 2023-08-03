@@ -216,7 +216,7 @@ Train <-  hfp_2yr_all_sgltvglp %>%
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 
 ```{}
-#define categorical variables that are more than two levels:
+#Define categorical variables with more than two levels.
 vars_catover2 <- c("race2", "age", "bl_HOSP", "bl_HOSPDAYS", "bl_ED", "bl_ERDM", "bl_outpt", "bl_outptdm")
 
 vars_forest = colnames( Train %>% dplyr::select(-c("Y", "W"))  ) 
