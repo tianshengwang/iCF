@@ -143,7 +143,7 @@ Make a dataset in this format to be run by iCF: the 1st column is treatment **W*
  ```{}
 #Specify the decimal position for continuous variables in the subgroup definition.
 split_val_round_posi=0
-#Define categorical variables with more than two levels.
+#Define categorical variables with more than two levels. If no such variables, set it equal to "NA":
 vars_catover2 <<- NA  
 ```
 ```{}
