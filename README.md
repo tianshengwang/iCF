@@ -195,7 +195,7 @@ iCFCV_B1000_i200_sim
 
 We compared the **two-year risk difference** of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort were described previously by [Htoo et al.](https://www.ahajournals.org/doi/full/10.1161/JAHA.121.022376) and are available in the mehtod paper (Wang et al.) 
 
-Note the outcome Y should be on **risk difference** scale. For example, only 2 (Patient 1 & 4) out of the following 6 patients had heart failure hospitalization (black dot) events in a 2-year period.
+Note the outcome Y should be on **risk difference** scale. For example, only 2 (Patient 1 & 4) out of the following 5 patients had heart failure hospitalization (black dot) events in a 2-year period.
 
 
 <img src = images/RD_scale_outcome.png width=800>
