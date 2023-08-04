@@ -197,7 +197,9 @@ We compared the **two-year risk difference** of hospitalized heart failure (HHF)
 
 Note the outcome Y should be on risk difference scale. For example, based on a risk difference scale, only 2 (Patient 1 & 4) out of the following 6 patients have heart failure hospitalization (black dot) in a 2-year period.
 
-<img src = images/RD_scale_outcome.jpg width=600>
+
+<img src = images/RD_scale_outcome.png width=600>
+
 
 Make a dataset in this format to be run by iCF: the 1st column is treatment **W**, 2nd column is outcome **Y**, and remaining columns features **X**. And please name the dataset following this pattern: "W" for treatment and "Y" for outcome.
 
