@@ -137,7 +137,7 @@ Make a dataset in this format to be run by iCF: the 1st column is treatment **W*
  selected_cf.idx <<- cf_raw_key.tr$selected_cf.idx 
  GG_VI(varimp_cf, "Variable importance", colnames(X))
  ```
- <img src = images/GG_VI_fig.png width=300>
+ <img src = images/GG_VI_fig.png width=400>
  
  ***Step 2: Tune the minimum leaf size (MLS) for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
  ```{}
@@ -151,7 +151,7 @@ D2_MLS=MinLeafSizeTune(Train, denominator=25, treeNo = 1000, iterationNo=100, sp
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
-<img src = images/D2_MLS_tune.png width=350>
+<img src = images/D2_MLS_tune.png width=400>
 
 Notably, if you got this message "_Error: Can't subset columns that don't exist. x Column `parent_sign` doesn't exist._", it suggests the denominator used for developing is too small, leading to a too large MLS for D2 forest so that the tree does not even split (the node does not have a parent node). In this scenario, increasing the denominator will solve the problem.
 
@@ -161,21 +161,21 @@ D3_MLS=MinLeafSizeTune(Train, denominator=45, treeNo = 1000, iterationNo=100, sp
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
-<img src = images/D3_MLS_tune.png width=350>
+<img src = images/D3_MLS_tune.png width=400>
 
 ```{}
 D4_MLS=MinLeafSizeTune(Train,denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4", "steelblue1")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
-<img src = images/D4_MLS_tune.png width=350>
+<img src = images/D4_MLS_tune.png width=400>
 
 ```{}
 D5_MLS=MinLeafSizeTune(Train, denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5", "steelblue1")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
-<img src = images/D5_MLS_tune.png width=350>
+<img src = images/D5_MLS_tune.png width=400>
 
 *Note that despite using a smaller MLS, the best trees from causal forests do not grow deeper due to the presence of a strong three-way interaction (W:X1:X3) in the simulated data set. In such scenarios, we can proceed with implementing iCF when tuning MLS does not affect the depth of the best tree.* 
 
@@ -198,7 +198,7 @@ We compared the **two-year risk difference** of hospitalized heart failure (HHF)
 Note the outcome Y should be on **risk difference** scale. For example, based on a **risk difference** scale, only 2 (Patient 1 & 4) out of the following 6 patients have heart failure hospitalization (black dot) in a 2-year period.
 
 
-<img src = images/RD_scale_outcome.png width=600>
+<img src = images/RD_scale_outcome.png width=800>
 
 
 Make a dataset in this format to be run by iCF: the 1st column is treatment **W**, 2nd column is outcome **Y**, and remaining columns features **X**. And please name the dataset following this pattern: "W" for treatment and "Y" for outcome.
@@ -240,7 +240,7 @@ time_rawCF <- cf_raw_key.tr$time_rawCF
 X[,selected_cf.idx]
 GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', colnames(X))
  ```
- <img src = images/VI_HHF2y_nolabel.png width=600>
+ <img src = images/VI_HHF2y_nolabel.png width=800>
  
  ***Step 2: Tune the MLS for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
 
@@ -249,28 +249,28 @@ D2_MLS=MinLeafSizeTune(dat=Train, denominator=25, treeNo = 1000, iterationNo=100
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
-<img src = images/D2_MLS_tune_rwd.png width=350>
+<img src = images/D2_MLS_tune_rwd.png width=400>
 
 ```{}
 D3_MLS=MinLeafSizeTune(dat=Train, denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3", "#62C6F2")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
-<img src = images/D3_MLS_tune_rwd.png width=350>
+<img src = images/D3_MLS_tune_rwd.png width=400>
 
 ```{}
 D4_MLS=MinLeafSizeTune(dat=Train, denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4", "#62C6F2")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
-<img src = images/D4_MLS_tune_rwd.png width=350>
+<img src = images/D4_MLS_tune_rwd.png width=400>
 
 ```{}
 D5_MLS=MinLeafSizeTune(dat=Train, denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5", "#62C6F2")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
-<img src = images/D5_MLS_tune_rwd.png width=350>
+<img src = images/D5_MLS_tune_rwd.png width=400>
 
 ***Step 3. Implement iCF on Medicare SGLT2i vs GLP1RA new user cohort***
 ```{}
