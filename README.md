@@ -201,7 +201,7 @@ Note the outcome Y should be on **risk difference** scale. For example, based on
 <img src = images/RD_scale_outcome.png width=800>
 
 
-Make a dataset in this format to be run by iCF: the 1st column is treatment **W**, 2nd column is outcome **Y**, and remaining columns features **X**. And please name the dataset following this pattern: "W" for treatment and "Y" for outcome.
+Make a dataset in this format to be run by iCF: the 1st column is treatment **W**, 2nd column is outcome **Y**, and remaining columns features **X**. And the 1st and 2nd columns should be named following this pattern, i.e., 'W' for treatment and 'Y' for outcome.
 
 ```{}
 load("HHF_SGLTvGLP_iCFCV.RData")
