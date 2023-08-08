@@ -19,7 +19,7 @@
 
 iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_posi, 
                   #tune_unit, 
-                  P_threshold, variable_type, hdpct, HTE_P_cf.raw){
+                  P_threshold=0.5, variable_type, hdpct, HTE_P_cf.raw){
   
   s_iCF_CV=Sys.time()
   intTRUE <<- "Unknown"
