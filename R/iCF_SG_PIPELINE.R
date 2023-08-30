@@ -223,10 +223,6 @@ SUBGROUP_PIPELINE<- function(X,
     #when leaf size too small, D2 has this error "Error in aggregate.data.frame(lhs, mf[-1L], FUN = FUN, ...) : no rows to aggregate"
     #thus to make it auto run, if iCF_D2 has error, then make it equal to iCF_D3 temparily.
     #after tuning leaf size, this erorr unlikely to happen
-    #1/27/2023 already tuned leaf size, thus the following code may not be necessary
-
-    #1/29/2023 debug at /local/projects/medicare/DPP4i_HTE/programs/macros/iCF_SG_PIPELINE.R#19: 
-    #iCF_D5 <- iCF(leafsize$D5, treeNo, tunepara = "none", iterationNo, Ntrain, "D5", split_val_round_posi)
 
     iCF_D5<- iCF(leafsize$D5,  treeNo, tunepara = "none", iterationNo, Ntrain, "D5",  split_val_round_posi)
     
@@ -355,36 +351,20 @@ SUBGROUP_PIPELINE<- function(X,
   Test_ID_SG_iCF        <- DATA4grplasso_iCF_te$Dat_ID_SG
   
   #the following formulas work for both binary and continuous outcome
-  #actually, formula_gl = formula_g234; and iCF and oneCF can use the same formula, thus did not distinguish the name
-  #main effect only: Y ~ W + X
 
-  #if (variable_type=="hd") {
-  #formula_basic<<-  as.formula(  paste0("Y ~ W +", paste0(colnames(X[, selected_cf.idx]), collapse = " + ") )   )
-    
-  #} else {
   formula_basic<<-  as.formula(  paste0("Y ~ W +", paste0(colnames(X), collapse = " + ") )   )
-  #}
- 
+
   #main effect + interactions of W and G
   formula_g2   <<- DATA4grplasso_iCF_tr$formula_g2
   formula_g3   <<- DATA4grplasso_iCF_tr$formula_g3
   formula_g4   <<- DATA4grplasso_iCF_tr$formula_g4
   formula_g5   <<- DATA4grplasso_iCF_tr$formula_g5
   
-  #formula_g23  <<- DATA4grplasso_iCF_tr$formula_g23
-  #_________________________________________________
-  #Models:
-  #act=actual outome Y; tran=transformed outocme Y*, tr=training set, te=testing set;
-  #Function that obtain MODELS from subgroup decisions at different depths from CF  
-  #Deci_Final_iCF.act.tr        <- CF_GROUP_DECISION(HTE_P_cf.raw, Train_ID_SG_iCF, "iCF", "actual" ,   P_threshold)
+
   Deci_Final_iCF.tran.tr       <- CF_GROUP_DECISION(HTE_P_cf.raw, Train_ID_SG_iCF, "iCF", "transform", P_threshold)
-  #Deci_Final_iCF.act.te        <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "actual",     P_threshold)
-  #7/29/2023, actually doesn't need subgroup decisions or models from testing set
-  #Deci_Final_iCF.tran.te       <- CF_GROUP_DECISION(HTE_P_cf.raw, Test_ID_SG_iCF, "iCF", "transform",  P_threshold)
 
   
   e_iCF=Sys.time()
-  
   
   
   return(list ( vote_D5_tree.syn = vote_D5_tree.syn,
@@ -408,10 +388,7 @@ SUBGROUP_PIPELINE<- function(X,
                 stability_D2_T       = unlist(vote_D2_tree$stability),   
                 stability_D2_T_r     = unlist(vote_D2_tree_R$stability),
                 
-                #Deci_Final_iCF.act.tr   = Deci_Final_iCF.act.tr,
                 Deci_Final_iCF.tran.tr  = Deci_Final_iCF.tran.tr ,
-                #Deci_Final_iCF.act.te  = Deci_Final_iCF.act.te,
-                #Deci_Final_iCF.tran.te  = Deci_Final_iCF.tran.te ,
        
                 Train_ID_SG_iCF      = Train_ID_SG_iCF,
                 Test_ID_SG_iCF       = Test_ID_SG_iCF 
