@@ -145,7 +145,7 @@ ANA_SUBGROUP <- function(subgroup){
       } else if (Wt == "none") {  dltY_Mod<- glm(Y ~  W,
                                                  data=subdataset, 
                                                  family= gaussian) 
-  #    } 
+      } 
   #  } else if (length(unique(Y)) ==2){
       # starting value helps: https://stackoverflow.com/questions/35618026/what-do-these-r-glm-error-messages-mean-error-no-valid-set-of-coefficients-ha
       # length of 'start' should equal 2 and correspond to initial coefs for c("(Intercept)", "W")
@@ -365,7 +365,7 @@ CATE_SG <- function(dat, SGdecision){
     dplyr::select(-c(dltY_crude, dltY_crude_low, dltY_crude_up, dltY_ate, dltY_ate_low, dltY_ate_up, dltY_att, dltY_att_low, dltY_att_up)) 
   
   return(CATE_table)
-  
+   
 }
 
 
