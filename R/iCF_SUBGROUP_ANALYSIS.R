@@ -146,25 +146,6 @@ ANA_SUBGROUP <- function(subgroup){
                                                  data=subdataset, 
                                                  family= gaussian) 
       } 
-  #  } else if (length(unique(Y)) ==2){
-      # starting value helps: https://stackoverflow.com/questions/35618026/what-do-these-r-glm-error-messages-mean-error-no-valid-set-of-coefficients-ha
-      # length of 'start' should equal 2 and correspond to initial coefs for c("(Intercept)", "W")
-  #    if(Wt == "iptw_s"){ dltY_Mod<- spaMM::spaMM_glm(Y ~ W,
-  #                                                    data=subdataset, 
-  #                                                    family= binomial(link="identity"),  #risk difference scale, 
-  #                                                    weights=iptw_s#, 
-  #    )
-  #    } else if (Wt == "smrw") {  dltY_Mod <- spaMM::spaMM_glm(Y ~  W,
-  #                                                             data=subdataset, 
-  #                                                             family= binomial(link="identity"), #risk difference scale
-  #                                                             weights=smrw#,
-  #    ) 
-  #    } else if (Wt == "none") { dltY_Mod <- spaMM::spaMM_glm(Y ~  W,
-  #                                                            data=subdataset, 
-  #                                                            family= binomial(link="identity")#, #risk difference scale
-  #    ) 
-  #    }
-  #  }
     
     #exposure coefficient, i,e.the difference in the expected value of Y between the exposed and unexposed
     dlt_Y <- summary(dltY_Mod)$coefficient
