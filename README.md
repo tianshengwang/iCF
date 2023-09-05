@@ -62,7 +62,7 @@ install.packages('devtools')
 devtools::install_github("tianshengwang/iCF")
 library(iCF)
 ```
-Third, you can download the 'iCF_0.0.0.9000.tar.gz' file (this option is currently being worked on and will be available soon)..."
+Third, you can download the 'iCF_0.1.0.tar.gz' file (this option is currently being worked on and will be available soon)..."
 
 ```{}
 install.packages("iCF_0.1.0.tar.gz", repos = NULL, type ="source")
