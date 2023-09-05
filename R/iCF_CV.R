@@ -254,7 +254,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       } else {
       CATE_icvsw <- CATE_SG(dat, PICK_CV_icvsw$selectedSG$majority)
       }
-      CATE_icvsw_kable <-  CATE_icvsw %>% mutate(Wt="icvsw")
+      CATE_icvsw_kable <-  CATE_icvsw %>% dplyr::mutate(Wt="icvsw")
  
     
   } else if (round(HTE_P_cf.raw,1) > P_threshold){

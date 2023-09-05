@@ -131,6 +131,7 @@ iCF <- function( depth, treeNo, tunepara = "none", iterationNo, Ntrain, tree_dep
 #' @return final subgroup decision G_iCF
 #' 
 #' @export
+
 oneCF <- function(depth, treeNo, tunepara="none", tree_depth, split_val_round_posi){
   treeBlist  = list()
   besttreelist = list() #making an empty list

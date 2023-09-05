@@ -18,7 +18,6 @@
 #' @export
 
 PRE_MAJORITY_TREE <- function(besttreeLIST){
-  #list0<-lapply(LIST, function(df) cbind(df, No_nodes =nrow(df)) ) #add a new column in each datafram showing No. of nodes in the LIST, not necessary
   list1<-lapply(besttreeLIST, function(df) subset(df, select=-c(7:11 #remove samples, avg_Y, avg_W, k/b, HTE_P_cf #k=iteraction #
   )))
   return(list1)
@@ -33,6 +32,7 @@ PRE_MAJORITY_TREE <- function(besttreeLIST){
 #' @return 
 #' 
 #' @export
+
 PRE_MAJORITY_TREE_R <- function(besttreeLIST){
   list1<-lapply(besttreeLIST, function(df) subset(df, select=-c(6:11 #remove split_value, samples, avg_Y, avg_W, k/b, split_value, HTE_P_cf
                                                                 )))

@@ -35,7 +35,8 @@ GET_TREE_L <- function (iCF_D, listindex) {
 #' @return The mean and histogram of depth of generated best trees
 #'
 #' @export
-#' 
+#'
+ 
 MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_round_posi, depth ,color){
   iCF_D<- iCF(denominator,  treeNo, tunepara = "none", iterationNo, dat, depth,  split_val_round_posi)
   iCF_D_BT=GET_TREE_L(iCF_D, 1)
@@ -51,7 +52,7 @@ MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_rou
   depth_table=as.data.frame(table(do.call("rbind" , lapply( iCF_D_BT_SG_Depth, function(df) df$Depth[1] ))))%>%
               dplyr::rename(Depth=Var1, Frequency=Freq)
   
-  depth_gg <- ggplot(data= depth_table, aes(x=Depth, y=Frequency)) +
+  depth_gg <- ggplot2::ggplot(data= depth_table, aes(x=Depth, y=Frequency)) +
                         geom_bar(stat="identity", fill= color) +
                     theme(axis.text.x = element_text(face="bold",  size=14),
                           axis.text.y = element_text( size=10)) +
@@ -423,12 +424,7 @@ GET_TREE_DF <- function(No_nodes, treetype, split_val_round_posi) {
   return(tree_information)
 }
 
-PLOT_BT<-function(forest, type){
-best_tree_info<-find_best_tree(forest, type)
-best_tree_info$best_tree
-plot_bt<-plot(grf::get_tree(forest, best_tree_info$best_tree))
-return(list(best_tree_info$best_tree, plot_bt))
-}
+
 
 
 

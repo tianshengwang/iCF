@@ -72,7 +72,7 @@ GG_VI <- function(varimp_cf, title, var_label){
     dplyr::arrange(desc(impValue))
   
   VarImp <- varimp_cf_df %>%
-    ggplot() +
+    ggplot2::ggplot() +
     geom_bar(aes(y=reorder(vars_f, impValue),x=impValue, fill = impValue), stat = 'identity') + 
     scale_fill_viridis_c(name = "value") +
     theme_minimal() + 

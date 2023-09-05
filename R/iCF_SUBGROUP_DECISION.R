@@ -34,7 +34,7 @@ TREE2SUBGROUP <- function(tree){
 #' 2) transformed outcome
 #' @param dat data set
 #' @param outcome_type "actual" or "transform" 
-#'https://gsbdbi.github.io/ml_tutorial/hte_tutorial/hte_tutorial.html
+#' https://gsbdbi.github.io/ml_tutorial/hte_tutorial/hte_tutorial.html
 #' Estimation of Heterogeneous Treatment Effects - prepared for “Machine Learning and Causal Inference” class
 #'  
 #' @return the prepared data and "contr"
@@ -80,7 +80,7 @@ SGMODEL_DATA<-function(dat, outcome_type_at){
   } else {
     dat_ID_SG_df <-  dat_ID_SG_pre %>%  mutate_at(vars(  c ("G5", "G4", "G3", "G2", vars_catover2) ) , as.factor) 
     contr <- rep(list("contr.sum"), ncol( dat_ID_SG_df %>% dplyr::select(   c("G5", "G4","G3", "G2",vars_catover2 ) ) ) )
-    names(contr) <-  names( dat_ID_SG_df %>% dplyr::select(c("G5", "G4", "G3", "G2", vars_catover2  ) ) )   # grep("_", names(dat_ID_SG %>% select( -contains(c("_define")))), value=TRUE)
+    names(contr) <-  names( dat_ID_SG_df %>% dplyr::select(c("G5", "G4", "G3", "G2", vars_catover2  ) ) )   
   } 
   
   return(list(dat_ID_SG_df=dat_ID_SG_df,

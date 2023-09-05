@@ -57,7 +57,7 @@ if (parent_level==1){
   #extract actual "parent level" info
   leaf_L_N1_colname <- lapply(leaf_L_N1, function (df) as.numeric( stringr::str_sub(colnames(df[1]),-1,-1) ) )
   #rename, i.e. remove the suffix for "parent_level" version                                                                                                                                        #
-  leaf_L_N1_rename_pre <- list.zip(leaf_L_N1_colname, leaf_L_N1)
+  leaf_L_N1_rename_pre <- rlist::list.zip(leaf_L_N1_colname, leaf_L_N1)
   leaf_L_N1_rename <- lapply( leaf_L_N1_rename_pre, function(df) {names(df$leaf_L_N1)[names(df$leaf_L_N1) == paste('parent_left_child',  df$leaf_L_N1_colname, sep="_")] <-  'parent_left_child' ;                                        #   
                                                                   names(df$leaf_L_N1)[names(df$leaf_L_N1) == paste('parent_right_child', df$leaf_L_N1_colname, sep="_")] <-  'parent_right_child';                                        # 
                                                                   names(df$leaf_L_N1)[names(df$leaf_L_N1) == paste('parent_sign',        df$leaf_L_N1_colname, sep="_")] <-  'parent_sign'       ;                                        #             
@@ -69,7 +69,7 @@ if (parent_level==1){
                                                                   names(df$leaf_L_N1)[names(df$leaf_L_N1) == paste('left_child',         df$leaf_L_N1_colname, sep="_")] <- 'left_child'         ;                                        #
                                                                   names(df$leaf_L_N1)[names(df$leaf_L_N1) == paste('right_child',        df$leaf_L_N1_colname, sep="_")] <- 'right_child'        ; df$leaf_L_N1})                                   #  
   leaf_L_N1_ori <- lapply(tree_original,  function(df)   df[which(df[,1] =="node-01" | df[,1] =="node-00001" ), ]   )                                                                                                       # 
-  leaf_L_N1_pre <- list.zip(leaf_L_N1_ori, leaf_L_N1_rename)                                                                                                                                          # 
+  leaf_L_N1_pre <- rlist::list.zip(leaf_L_N1_ori, leaf_L_N1_rename)                                                                                                                                          # 
  require(dplyr)
    leaf_L_N1_co <- lapply(leaf_L_N1_pre, 
                          function(df)  
@@ -101,7 +101,7 @@ leaf_node_No_L    <- lapply(leaf_node_list,     function(df) df$node_No <- sub('
 #step 3.1 extract the node # of each leaf saving as a vector in a list                                                                                                 #  
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------# 
 #combine the node # of each leaf and splitter info                                                                                                                     #
-List0 <- list.zip(leaf_node_No_L, splitter_L_original, N_freq_woN1_nrow, tree)                                                                                         #
+List0 <- rlist::list.zip(leaf_node_No_L, splitter_L_original, N_freq_woN1_nrow, tree)                                                                                         #
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#  
 #step 3.2 find the parent node by reading current "leaf_node_No_L" from left_child and right_child columns in original splitter info,respectively                      #
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------# 
@@ -126,7 +126,7 @@ List_right <- lapply(List0,
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#####                                                                                                                   
 #if children node on the left, then parent_left_child =TRUE; if children node on the right, then parent_right_child=TRUE,                                              #  
 #add "<=" sign, the top 1, 2 node may not be included in lef/right node, thus if (nrow(df) != 0 )                                                                      #
-L_sign_left_pre <- list.zip(List_left, N_freq_woN1_nrow, tree)
+L_sign_left_pre <- rlist::list.zip(List_left, N_freq_woN1_nrow, tree)
 List_sign_left  <- lapply(L_sign_left_pre,  
                           function(df) 
                           if (df$N_freq_woN1_nrow >0 & nrow(df$List_left)  != 0 ) {
@@ -134,7 +134,7 @@ List_sign_left  <- lapply(L_sign_left_pre,
                                                                                   } 
                                                                                   )  #
 #add ">"  sign, the top 1, 2 node may not be included in lef/right node, thus if (nrow(df) != 0 )                                                                      #
-L_sign_right_pre <- list.zip(List_right, N_freq_woN1_nrow, tree)
+L_sign_right_pre <- rlist::list.zip(List_right, N_freq_woN1_nrow, tree)
 List_sign_right <- lapply(L_sign_right_pre, 
                           function(df) 
                           if (df$N_freq_woN1_nrow >0 & nrow(df$List_right) != 0 ) {
@@ -143,7 +143,7 @@ List_sign_right <- lapply(L_sign_right_pre,
                                                                                   )  #
 #save both left parent and right parent node info as 2 dataframes in a list                                                                                            #
 #in the combo list leaf_L_N1_c, leaf_L_N1_c$leaf_L_N1 as a label for leaf_L_N1_c$leaf_L_N1_f exist or not                                                              #
-List1 <- list.zip(List_sign_left, List_sign_right, N_freq_woN1_nrow, tree)                                                                                                               #
+List1 <- rlist::list.zip(List_sign_left, List_sign_right, N_freq_woN1_nrow, tree)                                                                                                               #
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------#####  
 #step 3.4 #stack (rbind) the left parent and right parent dataframe, if dataframe=NULL, then only the other part will be added                                         #
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------# 
@@ -158,7 +158,7 @@ parent <- lapply(List1,
 #already add leading 0 to node number, otherwise when ranking an only be child node rather than parent node,                                                           #
 #without leading 0, when ranking, it will be node-1> node-11 > node-12 > ... node-19 > node2                                                                           #
 #with    leading 0, when ranking, it will be node-01> node-02 > ...    > ... node-09 > node-10                                                                         #
-parent_sort_pre <- list.zip(parent, N_freq_woN1_nrow, tree)      
+parent_sort_pre <- rlist::list.zip(parent, N_freq_woN1_nrow, tree)      
 parent_sort  <- lapply(parent_sort_pre, 
                        function(df)  
                        if (df$N_freq_woN1_nrow >0) {
@@ -179,10 +179,11 @@ parent_sort  <- lapply(parent_sort_pre,
   ######################################################################################################################################################################  
   #rename the "df" column to the "LEAF" columns to prepare for merging by LEAF for parent level 1.
   #merge LEAF info with parent_sort first! row # are the same, so can merge first!
-  List_N0 <- list.zip(parent_sort, LEAF_L_ori ) 
+  List_N0 <- rlist::list.zip(parent_sort, LEAF_L_ori ) 
   #To add the leaves for the spliters, the following line to merge is OK, as the original tree dataframe is ordered by number, so is LEAF.
   #deepest nodes will have two rows (leaves) matching to them
-  List_N4 <- lapply(List_N0,  function(df)  merge(data.frame(df$parent_sort, row.names=NULL),  data.frame(df$LEAF_L_ori, row.names=NULL), by = 0, all = TRUE)[-1] %>% mutate(Child_node = LEAF ) ) 
+  List_N4 <- lapply(List_N0,  function(df)  merge(data.frame(df$parent_sort, row.names=NULL),  data.frame(df$LEAF_L_ori, row.names=NULL), by = 0, all = TRUE)[-1] %>% 
+                      dplyr::mutate(Child_node = LEAF ) ) 
 } else {
   
   ######################################################################################################################################################################  
@@ -195,7 +196,7 @@ parent_sort  <- lapply(parent_sort_pre,
   #--------------------------------------------------------------------------------------------------------------------------------------  
   #step 1.  #merge node frequency info with parent_sort since unlike parent_level=1 where parent_sort has the same row # with LEAF info
   #--------------------------------------------------------------------------------------------------------------------------------------  
-  List_N0 <- list.zip(parent_sort, leaf_Cnode_FREQ,  N_freq_woN1_nrow, tree)
+  List_N0 <- rlist::list.zip(parent_sort, leaf_Cnode_FREQ,  N_freq_woN1_nrow, tree)
   #merge Child_node frequency from previous run with current run(parent_sort)!!! 
   #row # are the same, so can merge without worrying about order for now!
   List_N1 <- lapply(List_N0,  
@@ -209,7 +210,7 @@ parent_sort  <- lapply(parent_sort_pre,
   #--------------------------------------------------------------------------------------------------------------------------------------  
   #step 2.  subsetting, SORT
   #--------------------------------------------------------------------------------------------------------------------------------------  
-  parent_bothC_pre <- list.zip (List_N1, N_freq_woN1_nrow, tree)
+  parent_bothC_pre <- rlist::list.zip (List_N1, N_freq_woN1_nrow, tree)
       #--------------------------------------------- 
       #step 2.1.  subsetting node w/ Freq==1, 
       #--------------------------------------------- 
@@ -236,7 +237,7 @@ parent_sort  <- lapply(parent_sort_pre,
                                                              ) 
       
       #replicate rows the number of times specified in the column "Freq", then correct value in "Freq", which should be 1
-      parent_bothC_gt1_D_pre <- list.zip(parent_bothC_gt1, N_freq_woN1_nrow, tree)
+      parent_bothC_gt1_D_pre <- rlist::list.zip(parent_bothC_gt1, N_freq_woN1_nrow, tree)
       parent_bothC_gt1_D <- lapply(parent_bothC_gt1_D_pre,  
                                    function(df)  
                                    if (df$N_freq_woN1_nrow >0) {
@@ -248,7 +249,7 @@ parent_sort  <- lapply(parent_sort_pre,
       #--------------------------------------------- 
       #step 2.3.  Combine nodes Freq!=1 and Freq==1 
       #--------------------------------------------- 
-  List_bothC <- list.zip(parent_bothC_1, parent_bothC_gt1_D, N_freq_woN1_nrow, tree)
+  List_bothC <- rlist::list.zip(parent_bothC_1, parent_bothC_gt1_D, N_freq_woN1_nrow, tree)
   #although parent_bothC_1 comes originally from List_N0 which is sorted,  NEED TO RESORT since stacking for nodes freq==1 and !=1 !!!
   parent_bothC <- lapply(List_bothC,  
                          function(df)  
@@ -259,7 +260,7 @@ parent_sort  <- lapply(parent_sort_pre,
                                                              }
                                                              )
   #SORT by Child_node! key step to merge accurately!!!
-  parent_bothC_pre <- list.zip(parent_bothC, N_freq_woN1_nrow, tree)
+  parent_bothC_pre <- rlist::list.zip(parent_bothC, N_freq_woN1_nrow, tree)
   parent_bothC_sort <- lapply(parent_bothC_pre, 
                               function(df)  
                               if (df$N_freq_woN1_nrow >0) {
@@ -272,7 +273,7 @@ parent_sort  <- lapply(parent_sort_pre,
   #step 3. generating multiple rows of node-01 as needed
   #-------------------------------------------------------------------------------------------------------------------------------------- 
   #combine preparing for merge
-  List_N2 <- list.zip(parent_bothC_sort, leaf_L_N1_co, leaf_node_freq, leaf_node_freq_woN1, N_freq_woN1_nrow, tree)                                                                                                               #
+  List_N2 <- rlist::list.zip(parent_bothC_sort, leaf_L_N1_co, leaf_node_freq, leaf_node_freq_woN1, N_freq_woN1_nrow, tree)                                                                                                               #
   #--------------------------------------------------------------------------------------------------------------------------------------  
   #step 4 added node-01 as needed, replace NA by node nubmer and Freq 1 for node-01                                          #
   #-------------------------------------------------------------------------------------------------------------------------------------- 
@@ -291,7 +292,7 @@ parent_sort  <- lapply(parent_sort_pre,
                   }
                   )       
   #keep node-01 info when necessary, i.e. parent_sign, parent_left_child, or parent_right_child != NA, drop if =NA
-  List_N2_Node1_T_pre <- list.zip(List_N2_Node1, N_freq_woN1_nrow, tree)
+  List_N2_Node1_T_pre <- rlist::list.zip(List_N2_Node1, N_freq_woN1_nrow, tree)
   
   List_N2_Node1_T  <- lapply (List_N2_Node1_T_pre, 
                              function(df)  
@@ -303,7 +304,7 @@ parent_sort  <- lapply(parent_sort_pre,
                                                                  )
   
   #connect original LEAF node, and parent_level info, prepare for merge, then replace "NA": of Freq column by 1
-  List_N3 <- list.zip(List_N2_Node1_T, LEAF_L_ori,  N_freq_woN1_nrow, tree)
+  List_N3 <- rlist::list.zip(List_N2_Node1_T, LEAF_L_ori,  N_freq_woN1_nrow, tree)
   List_N4 <- 
     lapply(List_N3 ,  
            function(df) 
@@ -321,7 +322,7 @@ parent_sort  <- lapply(parent_sort_pre,
 ########################################################################################################################################################################  
 ########################################################################################################################################################################  
 #
-parent_condition_pre <- list.zip (List_N4, N_freq_woN1_nrow, tree)
+parent_condition_pre <- rlist::list.zip (List_N4, N_freq_woN1_nrow, tree)
 parent_condition <- lapply(parent_condition_pre, 
                            function(df) 
                            if (df$N_freq_woN1_nrow >0) {
@@ -333,7 +334,7 @@ parent_condition <- lapply(parent_condition_pre,
 
 
 #rename to show parent_level to preparing merging with next parent level                                                                                                             #
-parent_rename_pre <- list.zip (parent_condition, N_freq_woN1_nrow, tree)
+parent_rename_pre <- rlist::list.zip (parent_condition, N_freq_woN1_nrow, tree)
 parent_rename <- lapply(parent_rename_pre, 
                         function(df) 
                         if (df$N_freq_woN1_nrow >0) {
@@ -357,7 +358,7 @@ parent_rename <- lapply(parent_rename_pre,
 
     
 #remove non related columns                                                                                                                                            #
-parent_final_pre <- list.zip(parent_rename, N_freq_woN1_nrow, tree)
+parent_final_pre <- rlist::list.zip(parent_rename, N_freq_woN1_nrow, tree)
 parent_final <- lapply(parent_final_pre,
                        function(df) 
                        if (df$N_freq_woN1_nrow >0) {
@@ -377,11 +378,11 @@ if (parent_level==1){                                                           
                             #------------------------------------------------------------------------------------------------------------------------------------------#  
                             # combine with previoous output  (i.e. current tree) if parent_level > 1 & non-node-01 still exists (N_freq_woN1_nrow >0)                  #
                             #------------------------------------------------------------------------------------------------------------------------------------------#  
-                            List_N5 <- list.zip(parent_final, N_freq_woN1_nrow, tree)                                                                                                   
+                            List_N5 <- rlist::list.zip(parent_final, N_freq_woN1_nrow, tree)                                                                                                   
                             parent_final <- lapply(List_N5,  
                                                    function(df) 
                                                    if (df$N_freq_woN1_nrow >0) {
-                                                                               left_join(df$parent_final, df$tree, by = "LEAF" )
+                                                                               dplyr::left_join(df$parent_final, df$tree, by = "LEAF" )
                                                                                } else {
                                                                                        df$tree  
                                                                                        }
