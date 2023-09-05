@@ -12,7 +12,7 @@
 #' @return 
 #' 
 #' @export
-#' #' #---------------------------------------------------------------------------------------------------------------
+#'---------------------------------------------------------------------------------------------------------------
 # III. "PARENT" function must run independently, recursivley to get the parent node, so that we can get subgroup decision
 # this is the most imporant and complicated part of the program: subgroup identification based on trees
 # the basic idea is using child node# to identify parent node# recursively, 

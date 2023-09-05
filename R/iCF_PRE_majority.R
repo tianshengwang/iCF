@@ -73,8 +73,8 @@ PRE_MAJORITY_SUBGROUP <- function(tree_original){
     parent_19 <- PARENT_NODES (tree_original, parent_18,     19)
     parent_20 <- PARENT_NODES (tree_original, parent_19,     20)
     
-  # 10/30/2022 I haven't figured out how to do it in a loop like below to run only necessary iteration to a max of nrow(tree_original) times, 
-    #but since it's not computationally expensive, I'll just manually write 20 lines of codes
+  # 09/05/2023 will do it in a loop similar to codes below to run only necessary iteration to a max of nrow(tree_original) times,
+    #but since it's not computationally expensive, will just manually write 20 lines of codes for now
   #  for (nr in 1: nrow(tree_original) ){
   #    if (nr==1) {
   #      parent_1 <- PARENT_NODES (tree_original, tree_original,1)
@@ -85,8 +85,7 @@ PRE_MAJORITY_SUBGROUP <- function(tree_original){
     
 
    
-    
-    #combine parent_split_var, parent_sign, and parent_split_val
+#combine parent_split_var, parent_sign, and parent_split_val
     
 subgroup_0 <- lapply( parent_20, 
                      function(df) df %>% dplyr::select (tidyselect::starts_with( c("LEAF", "condition_", "parent_split_var_", "parent_sign_", "parent_split_val_" ) ) ))	

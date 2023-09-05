@@ -58,10 +58,6 @@ SGMODEL_DATA<-function(dat, outcome_type_at){
   #create transformed outcome, https://johaupt.github.io/blog/Uplift_ITE_summary.html
   dat_ID_SG_pre$Y_star <- ifelse(dat_ID_SG_pre$W==1, dat_ID_SG_pre$Y/dat_ID_SG_pre$ps, -dat_ID_SG_pre$Y/(1-dat_ID_SG_pre$ps))
   
-  # Compute Y-star, https://gsbdbi.github.io/ml_tutorial/hte_tutorial/hte_tutorial.html 
-  #dat_ID_SG_pre$p <- mean(dat_ID_SG_pre$W)
-  #dat_ID_SG_pre$Y_star <- ((dat_ID_SG_pre$W - dat_ID_SG_pre$p)/(dat_ID_SG_pre$p*(1-dat_ID_SG_pre$p)))*dat_ID_SG_pre$Y
-  
 
   #create dataset depends on mehtod (actual outcome vs transormed outcome)
   if (outcome_type_at=="actual"){
@@ -152,24 +148,17 @@ PICK_CV <- function(HTE_P_value, MAF_m,
 
   
   #Function that does shows the depth of subgroup selected 
-  #grp_CV_pick_D.act   <- PICK_m2345(HTE_P_cf.raw, #P_all_folds.mean, 
-  #                                  mse_all_folds.m.act,  mse_all_folds.g2.act,  mse_all_folds.g3.act,  mse_all_folds.g4.act, mse_all_folds.g5.act, P_threshold)
   grp_pick_D <- PICK_m2345(HTE_P_cf.raw, MAF_m, MAF_g2, MAF_g3, MAF_g4, MAF_g5, P_threshold)
   
   
   #finds the majority voted subgroup decision across CV
-  #seletedSG_CV.act.bias  <- CV_SG_MAJORITY(  eval(parse(text =  paste0("vote_D",  grp_pick.act  + 1, "_subgroup.L" ))) )
   selectedSG <- CV_SG_MAJORITY( eval(parse(text =  paste0("vote_D",      grp_pick + 1, "_subgroup.L" ))),
                                 eval(parse(text =  paste0("stability_D", grp_pick + 1, "_T_r" ))),
                                 K)$majority_CV 
   
-  selectedSG_stability_CV <- #CV_SG_MAJORITY(eval(parse(text =  paste0("vote_D",      grp_pick + 1, "_subgroup.L" ))),
-                                    #              eval(parse(text =  paste0("stability_D", grp_pick + 1, "_T_r" ))),
-                                    #              K)$stability_CV 
-                              eval(parse(text =  paste0("stability_D", grp_pick + 1, "_CV" )))
+  selectedSG_stability_CV   <- eval(parse(text =  paste0("stability_D", grp_pick + 1, "_CV" )))
   
   selectedSG_stability_vote <-  eval(parse(text =  paste0("stability_D", grp_pick + 1, "_vote" )))
-  
   
   
   selectedSG_wt <- as.data.frame(cbind(grp_pick_D, selectedSG_stability_vote, selectedSG_stability_CV, 

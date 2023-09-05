@@ -5,8 +5,7 @@
 # Version: 1.0         
 #############################################################################################
 
-#-------------------------666CD631|---------------------
-###################666CD631|##############################----------------------------------------------
+#################################################----------------------------------------------
 #################################################----------------------------------------------
 # IV. majority vote
 #################################################----------------------------------------------
@@ -113,7 +112,7 @@ MAJORITY_VOTE <- function(list0, #original list of trees
                           list3, #original list of split frequency!
                           truth, 
                           truth_N1, #for tree
-                          truth_N123, #, #for tree
+                          truth_N123, #for tree
                           split_val_round_posi
 ){
   #----------------------------------------------------------------------------
@@ -153,14 +152,10 @@ MAJORITY_VOTE <- function(list0, #original list of trees
     list0_N1   <-lapply(list0, function(df) subset(df, node=="node-01", select = c(1:5) ) )
     list0_N123 <-lapply(list0, function(df) subset(df, node=="node-01"|node=="node-02"|node=="node-03", select = c(1:5) ) )
     
-    #list0_N1   <-lapply(list0, function(df) subset(df, node=="node-01", select = c(-samples, -avg_Y, -avg_W, -split_value, -k, -HTE_P_cf)))
-    #list0_N123 <-lapply(list0, function(df) subset(df, node=="node-01"|node=="node-02"|node=="node-03", select = c(-samples, -avg_Y, -avg_W, -split_value, -k, -HTE_P_cf)))
   } else {
     list0_N1   <-lapply(list0, function(df) subset(df, node=="node-01", select = c(1:6)))
-    #list0_N1   <-lapply(list0, function(df) subset(df, node=="node-01", select = c(-samples, -avg_Y, -avg_W, -k,  -HTE_P_cf)))
     list0_N123 <-lapply(list0, function(df) subset(df, node=="node-01"|node=="node-02"|node=="node-03", select = c(1:6)))  
-    #list0_N123 <-lapply(list0, function(df) subset(df, node=="node-01"|node=="node-02"|node=="node-03", select = c(-samples, -avg_Y, -avg_W,  -k, -HTE_P_cf)))  
-    
+
   }
   #get occurence of node-1 in the truth
   N_occur_truth_N1   <-  MAJORITY_COUNT(truth_N1_list,   list0_N1)
@@ -260,8 +255,7 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   split_value_quantile <- aggregate(cbind(split_value) ~ node, data = all_identical_node, quantile, na.rm = TRUE) %>%
     dplyr::mutate(across(where(is.numeric), round, split_val_round_posi))
   #won't calculate MODE as there might be multiple MODE number 
-  #HTE_P_cf_meanvalue                <-round(HTE_P_cf_M_mean,3), don't round here, round when averaging result across simulations!!!
-  
+
   #obtain a synthetic tree by combing tree structure (split_variable only) with mean split_value
   
   majority.syn0 <-  dplyr::left_join(majority.tree %>% select(c(1:5)), #make sure drop split_value from original df for tree (i.e., when not for tree_r)
@@ -279,8 +273,8 @@ MAJORITY_VOTE <- function(list0, #original list of trees
     dplyr::filter(split_variable != "NA") 
   
   #In case the synthetic mean split value is not integer for ordinal variable (bianry variable is perfectly fine as it always split at "0")
-  # test code: assign a non integer to ordinal X2's split value, e.g., by: majority.syn1 [,"split_value"][ which(  majority.syn1$node == "node-01" )]  <- 1.7; #then run the following
-  #round applied to each row of the sub dataset
+  # test code: assign a non integer to ordinal X2's split value, e.g., by: majority.syn1 [,"split_value"][which(majority.syn1$node == "node-01" )] <- 1.7; 
+  # then round applied to each row of the sub dataset
   rounded_split_value <- apply(majority.syn1, 1, function(x) if ( length(unique (  eval(parse(text=paste("X$", x[5], sep = ""))) )) <8) {
     round(  as.numeric(x[6]), digits = 0) 
   } else {
@@ -299,7 +293,6 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   
   
   # devide dataframe into several dataframe by row and cobmine in a LIST
-  #split(all_identical_node, with(all_identical_node, interaction(node)), drop = TRUE)
   #_______________________________________________
   stability     <- max(N_occur_majority)/sum(N_occur_majority)
   stability.2nd <- Rfast::nth(N_occur_majority, 2, descending = T)/sum(N_occur_majority)
@@ -332,11 +325,6 @@ MAJORITY_VOTE <- function(list0, #original list of trees
                         HTE_P_cf_M_median    =HTE_P_cf_M_median,
                         HTE_P_cf_M           =HTE_P_cf_M,
                         SF_ID_LIST           =SF_ID_list)
-  #record majority vote of allbesttree data
-  #write.table(majority.tree,file=paste("majority.tree", minnodesize, treeNo, iterationNo, Ntrain, tree_depth, intTRUE, name, ".csv", sep="_") , row.names=FALSE,col.names=T,sep=",",append=TRUE)
-  
-  
-  
   return(majority.list)
 }
 

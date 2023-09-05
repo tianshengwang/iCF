@@ -42,10 +42,3 @@ DATA4grplasso <- function(V_D5_subgroup, V_D4_subgroup, V_D3_subgroup, V_D2_subg
               formula_g4  = formula_g4,
               formula_g5  = formula_g5) )
 }
-
-
-
-
-  
-  
-  

@@ -57,8 +57,6 @@ MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_rou
                           axis.text.y = element_text( size=10)) +
                     ggtitle(paste0("Depth distribution of ",iterationNo, " best trees generated \n from ",iterationNo, " causal forests by the proposed \n minimum-leaf-size = N/", denominator, " (sample size divided by ",denominator, ") for ",depth, " iCF")) 
                   
-  
-
   return(list(denominator= denominator,
               depth_mean=iCF_D_BT_SG_D_mean,
               depth_gg=depth_gg))
@@ -309,10 +307,7 @@ CF_RAW_key <- function(Train_cf, min.split.var, variable_type, hdpct){
   HTE_P_cf.raw <-test_calibration(cf.raw)[8]
   HTE_P_cf.raw
   varimp_cf <- variable_importance(cf.raw)
-  #par(ask=F)
-  #old.par <- par(mar = c(0, 0, 0, 0))
-  #par(old.par)
-  #par()
+
   plot(varimp_cf)
   text(1:ncol(X), varimp_cf,labels=colnames(X))
   
@@ -325,8 +320,8 @@ CF_RAW_key <- function(Train_cf, min.split.var, variable_type, hdpct){
   selected_cf.idx_q0 = which(varimp_cf > 0 ) #selected all
   selected_cf.idx_hd = which(varimp_cf > quantile(varimp_cf, hdpct) ) #for hdiCF
   #to develop D5 tree, need to select >=4 variables. e.g., it will develop D4 tree if selecting only 3 variables.
-  #28=7*4, i.e., 7 is the minimum node# for a depth 4symmetrical tree, and when 7 variables are the q4 part of distribution, it requires 28 varaibles  
-  #60=15*4, i.e., 15 is the minimum node# for a depth 5symmetrical tree, and when 7 variables are the q4 part of distribution, it requires 28 varaibles 
+  #28=7*4, i.e., 7 is the minimum node# for a depth 4 Symmetrical tree, and when 7 variables are the q4 part of distribution, it requires 28 varaibles  
+  #60=15*4, i.e., 15 is the minimum node# for a depth 5 Symmetrical tree, and when 7 variables are the q4 part of distribution, it requires 28 varaibles 
   if(variable_type=="hd"){
   selected_cf.idx =  selected_cf.idx_hd 
   } else if (variable_type=="hdshrink") {
@@ -344,14 +339,12 @@ CF_RAW_key <- function(Train_cf, min.split.var, variable_type, hdpct){
   ) {
     selected_cf.idx = selected_cf.idx_q1
   } else if (        length(selected_cf.idx_mean) <  min.split.var & length( selected_cf.idx_q1) < min.split.var #& 
-     # dim(X)[2]>=15*4 # number of covariates >= 60
   ) {
     selected_cf.idx =  selected_cf.idx_q0 # select all
   } 
   }
   #---------------------------------------------------------------
   #head( X[, selected_cf.idx], 1 ) #be careful!!! not head(Train[, selected_cf.idx])
-  
   #colnames(X[, selected_cf.idx ] )
   e_rawCF =  Sys.time()
   time_rawCF =  difftime(e_rawCF, s_rawCF,units="secs")

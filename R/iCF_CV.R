@@ -67,11 +67,8 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
     stability_D3_T_r <- list()
     stability_D2_T_r <- list()
     
-    #Deci_Final_iCF.act.tr <- list()
     Deci_Final_iCF.tran.tr <- list()
-    #Deci_Final_iCF.act.te <- list()
-    #Deci_Final_iCF.tran.te <- list()
-    
+
     test_data.tran <- list()
 
     Test_ID_SG_iCF <- list()
@@ -88,7 +85,6 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       ID_cf <-1:nrow(dat)
       Train_ID_cf <- cbind(Train_cf, as.vector(ID_cf[-tt_indicies[[f]]])) %>% dplyr::rename (ID=`as.vector(ID_cf[-tt_indicies[[f]]])`)
       Test_ID_cf  <- cbind(Test_cf,  as.vector(       tt_indicies[[f]]) ) %>% dplyr::rename (ID=`as.vector(tt_indicies[[f]])`)  
-      #dplyr::all_equal(Train_ID_cf, Test_ID_cf)
       #============================== raw full CF for CV training data ==============================
       #for each training set, X, Y, W ... are regenerated
       cf_raw_key[[f]] <- CF_RAW_key(Train_cf, min.split.var, variable_type, hdpct)   
@@ -143,17 +139,10 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       
       #' Function that does prepare data that 1) ready to apply the formulas including interacting terms between treatment and factor subgroup deicision variable; 
       #' #2)transformed outcome
-      #test_data.act[[f]] = SGMODEL_DATA(Test_ID_SG_iCF[[f]], "actual")$dat_ID_SG_df
       test_data.tran[[f]] =SGMODEL_DATA(Test_ID_SG_iCF[[f]], "transform")$dat_ID_SG_df
       
       
       #========================================
-      #Deci_Final_iCF.tran.te[[f]] <- SG_D[[f]]$Deci_Final_iCF.tran.te
-      
-      
- #     if (length(unique(Y)) >=8){
-      
-      #get the number of G5, G4, G3, G2 columns
         Ncol_g2345= ncol(test_data.tran[[f]] %>% dplyr::select((contains( c("G5", "G4", "G3", "G2") ) ) ) %>%
                                                 dplyr::select(starts_with("G")) %>% #when hdiCF, some variable (code) names include "G5-2", e.g. dx3_outpt_G47
                                                 dplyr::select(ends_with(c("5", "4", "3", "2") ))
@@ -195,7 +184,6 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       # Bind together, add MSE
 
       #This function returns the mean MSE value across CV for main effect model, has nothing to do with HTE or SG decision!
-      #mse_all_folds.m.act  <- CVBIAS_MAIN  (mse_per_fold.m.act)
       mse_all_folds.m.tran <- CVBIAS_MAIN  (mse_per_fold.m.tran)
     
     
@@ -222,8 +210,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       stability_D2345_CV = cbind(stability_D2_CV, stability_D3_CV, stability_D4_CV, stability_D5_CV) %>% knitr::kable()
       
       stability_vote_across_CV = cbind(stability_D2_T_r, stability_D3_T_r, stability_D4_T_r, stability_D5_T_r) %>% as.data.frame() 
-      #stability_vote_across_CV <- tibble::rowid_to_column(stability_vote_across_CV, "CVfold") 
-      
+
       vote_D2_subgroup.L.majority <- cv_sg_majority_D2$majority_CV
       vote_D3_subgroup.L.majority <- cv_sg_majority_D3$majority_CV
       vote_D4_subgroup.L.majority <- cv_sg_majority_D4$majority_CV
@@ -244,7 +231,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
 
 
       ATE_all <- CATE_SG(dat, "NA")
-      ATE_kable <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") #%>% knitr::kable()
+      ATE_kable <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") 
       #--------------------------------------------------------------------------------------------------------------------------------------------------
       #Original, without any stability weight
       PICK_CV_ori <- PICK_CV(HTE_P_cf.raw, mse_all_folds.m.tran, 
@@ -253,7 +240,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
                              stability_D2_T_r, stability_D3_T_r,  stability_D4_T_r,  stability_D5_T_r,
                               P_threshold, K )
       CATE_ori <- CATE_SG(dat, PICK_CV_ori$selectedSG$majority)
-      CATE_ori_kable <-  CATE_ori %>% mutate(Wt="NA") #%>% knitr::kable()
+      CATE_ori_kable <-  CATE_ori %>% mutate(Wt="NA") 
       #--------------------------------------------------------------------------------------------------------------------------------------------------
       #Inverse CV stability weight
       PICK_CV_icvsw <- PICK_CV(HTE_P_cf.raw, mse_all_folds.m.tran, 
@@ -267,7 +254,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       } else {
       CATE_icvsw <- CATE_SG(dat, PICK_CV_icvsw$selectedSG$majority)
       }
-      CATE_icvsw_kable <-  CATE_icvsw %>% mutate(Wt="icvsw") #%>% knitr::kable()
+      CATE_icvsw_kable <-  CATE_icvsw %>% mutate(Wt="icvsw")
  
     
   } else if (round(HTE_P_cf.raw,1) > P_threshold){
