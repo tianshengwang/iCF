@@ -286,17 +286,17 @@ CF_RAW_key <- function(Train_cf, min.split.var, variable_type, hdpct){
   Y <- as.vector( as.numeric( Train_cf[,1] ) )
   W <- as.vector( as.numeric( Train_cf[,2] ) )  
 
-  W.forest <- regression_forest(X, W)
+  W.forest <- grf::regression_forest(X, W)
   W.hat    <- predict(W.forest)$predictions
   
   #forest-based method to predict Y
-  Y.forest <- regression_forest(X, Y)
+  Y.forest <- grf::regression_forest(X, Y)
   Y.hat    <- predict(Y.forest)$predictions
   
   #------------------------------------------------------------------------
   #step 2. run CF to get VI and P-value of omnibus test for HTE presence 
   #------------------------------------------------------------------------
-  cf.raw = causal_forest(X, Y,  W,  Y.hat = Y.hat, W.hat = W.hat)
+  cf.raw = grf::causal_forest(X, Y,  W,  Y.hat = Y.hat, W.hat = W.hat)
   
   best_tree_info<-find_best_tree(cf.raw, "causal")
   best_tree_info$best_tree
@@ -305,9 +305,9 @@ CF_RAW_key <- function(Train_cf, min.split.var, variable_type, hdpct){
   tree.plot = plot(grf::get_tree(cf.raw, best_tree_info$best_tree))
   tree.plot
   
-  HTE_P_cf.raw <-test_calibration(cf.raw)[8]
+  HTE_P_cf.raw <-grf::test_calibration(cf.raw)[8]
   HTE_P_cf.raw
-  varimp_cf <- variable_importance(cf.raw)
+  varimp_cf <- grf::variable_importance(cf.raw)
 
   plot(varimp_cf)
   text(1:ncol(X), varimp_cf,labels=colnames(X))
