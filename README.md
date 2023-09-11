@@ -232,7 +232,7 @@ Train <-  hfp_2yr_all_sgltvglp %>%
                                              labels=c("65<age<=70 ","70<age<=75","75<age<=80","80<age<=85", "age>85")))) %>% 
           dplyr::rename(W=SGLT) %>%
           dplyr::select(Y, W, age, race2, sex,baselinecvd, baselinechf, 
-                        dplyr::start_with("bl_")) %>% 
+                        dplyr::starts_with("bl_")) %>% 
                       as.data.frame.matrix() %>%
                       mutate(sex=as.numeric(sex))
 ```
