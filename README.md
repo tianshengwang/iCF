@@ -100,24 +100,35 @@ We used a simulation setup similar to the one initially described by [Setoguchi 
     return(Y)
   }
 
-  X1 <- rnorm(nstudy, mean=0, sd=1)
-  X2 <- rnorm(nstudy, mean=0, sd=1)
-  X3 <- rnorm(nstudy, mean=0, sd=1)
+#4 standard normal: X2, X4, X7, X10;
+  X2 <- rnorm(nstudy, mean=0, sd=1)  
   X4 <- rnorm(nstudy, mean=0, sd=1)
-  X5 <- F.sample.cor(X1, 0.2)
-  X6 <- F.sample.cor(X2, 0.9)
-  X7 <- rnorm(nstudy, mean=0, sd=1)
-  X8 <- F.sample.cor(X3, 0.2)
-  X9 <- F.sample.cor(X4, 0.9)
+  X7 <- rnorm(nstudy, mean=0, sd=1)    
   X10 <- rnorm(nstudy, mean=0, sd=1)
 
+#6 binary variables: X1, X3, X5, X6, X8, X9;
+  X1 <- rnorm(nstudy, mean=0, sd=1)
   X1 <- ifelse(X1 > mean(X1), 1, 0)
+
+  X3 <- rnorm(nstudy, mean=0, sd=1)
   X3 <- ifelse(X3 > mean(X3), 1, 0)
+
+  X5 <- F.sample.cor(X1, 0.2)
   X5 <- ifelse(X5 > mean(X5), 1, 0)
+
+  X6 <- F.sample.cor(X2, 0.9)
   X6 <- ifelse(X6 > mean(X6), 1, 0)
+
+  X8 <- F.sample.cor(X3, 0.2)
   X8 <- ifelse(X8 > mean(X8), 1, 0)
+
+  X9 <- F.sample.cor(X4, 0.9)
   X9 <- ifelse(X9 > mean(X9), 1, 0)
-  
+
+#4 confounders: X1, X2, X3, X4;
+#3 outcome predictors: X8, X9, X10;
+#1 instrumental X7;
+ 
  PS <- (1 + exp( -(b0 + b1*X1 + b2*X2 + b3*X3 + b4*X4 + b5*X5 + b6*X6 + b7*X7) ))^-1 #true propensity score
  W <- rbinom(nstudy,1,PS) 
 #3-way interaction of W, X1, and X3 (W:X1:X3)
