@@ -73,6 +73,8 @@ library(iCF)
 
 We used a simulation setup similar to the one initially described by [Setoguchi et al.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2905676/) and modified it by incorporating treatment-covariate interactions to model heterogeneous treatment effects.
 
+<img src = images/SimulationData.png width=600>
+
 ```{}
   nstudy = 10000
   b0 <- 0
