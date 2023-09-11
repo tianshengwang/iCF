@@ -165,7 +165,7 @@ split_val_round_posi=0
 vars_catover2 <<- NA  
 ```
 ```{}
-D2_MLS=MinLeafSizeTune(Train, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "steelblue1")
+D2_MLS=MinLeafSizeTune(Train, denominator=25, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D2", "steelblue1")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
@@ -175,21 +175,21 @@ Notably, if you got this message "_Error: Can't subset columns that don't exist.
 
 
 ```{}
-D3_MLS=MinLeafSizeTune(Train, denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3", "steelblue1")
+D3_MLS=MinLeafSizeTune(Train, denominator=45, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D3", "steelblue1")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
 <img src = images/D3_MLS_tune.png width=400>
 
 ```{}
-D4_MLS=MinLeafSizeTune(Train,denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4", "steelblue1")
+D4_MLS=MinLeafSizeTune(Train,denominator=65, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D4", "steelblue1")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
 <img src = images/D4_MLS_tune.png width=400>
 
 ```{}
-D5_MLS=MinLeafSizeTune(Train, denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5", "steelblue1")
+D5_MLS=MinLeafSizeTune(Train, denominator=85, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D5", "steelblue1")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
@@ -201,7 +201,7 @@ D5_MLS$depth_gg
 ```{}
 leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denominator, D2=D2_MLS$denominator)
 
-iCFCV_B1000_i200_sim <- iCFCV(dat=Train, K=5, treeNo=1000, iterationNo=100, min.split.var=4,
+iCFCV_B1000_i200_sim <- iCFCV(dat=Train, K=5, treeNo=200, iterationNo=10, min.split.var=4,
                               split_val_round_posi=0, P_threshold=0.5, variable_type = "non-HD", 
                               hdpct= 0.95, HTE_P_cf.raw = HTE_P_cf.raw) 
 
