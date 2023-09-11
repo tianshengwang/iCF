@@ -164,6 +164,13 @@ split_val_round_posi=0
 #Define categorical variables with more than two levels. If no such variables, let it be NA:
 vars_catover2 <<- NA  
 ```
+
+```{}
+#Be cautious: a diminutive denominator can result in an excessively large min.node.size (calculated as sample size divided by the denominator).
+#This may prevent iCF from splitting and subsequently trigger an error. For illustration, consider using a denominator of 10：
+D2_MLS=MinLeafSizeTune(Train, denominator=10, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D2", "steelblue1")
+```
+
 ```{}
 D2_MLS=MinLeafSizeTune(Train, denominator=25, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D2", "steelblue1")
 D2_MLS$depth_mean
