@@ -168,11 +168,11 @@ vars_catover2 <<- NA
 ```{}
 #Be cautious: a diminutive denominator can result in an excessively large min.node.size (calculated as sample size divided by the denominator).
 #This may prevent iCF from splitting and subsequently trigger an error. For illustration, consider using a denominator of 10：
-D2_MLS=MinLeafSizeTune(Train, denominator=10, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D2", "steelblue1")
+D2_MLS=MinLeafSizeTune(Train, denominator=10, treeNo = 200, iterationNo=50, split_val_round_posi=0, "D2", "steelblue1")
 ```
 
 ```{}
-D2_MLS=MinLeafSizeTune(Train, denominator=25, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D2", "steelblue1")
+D2_MLS=MinLeafSizeTune(Train, denominator=25, treeNo = 200, iterationNo=50, split_val_round_posi=0, "D2", "steelblue1")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
@@ -182,21 +182,21 @@ Notably, if you got this message "_Error: Can't subset columns that don't exist.
 
 
 ```{}
-D3_MLS=MinLeafSizeTune(Train, denominator=45, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D3", "steelblue1")
+D3_MLS=MinLeafSizeTune(Train, denominator=45, treeNo = 200, iterationNo=50, split_val_round_posi=0, "D3", "steelblue1")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
 <img src = images/D3_MLS_tune.png width=400>
 
 ```{}
-D4_MLS=MinLeafSizeTune(Train,denominator=65, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D4", "steelblue1")
+D4_MLS=MinLeafSizeTune(Train,denominator=65, treeNo = 200, iterationNo=50, split_val_round_posi=0, "D4", "steelblue1")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
 <img src = images/D4_MLS_tune.png width=400>
 
 ```{}
-D5_MLS=MinLeafSizeTune(Train, denominator=85, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D5", "steelblue1")
+D5_MLS=MinLeafSizeTune(Train, denominator=85, treeNo = 200, iterationNo=50, split_val_round_posi=0, "D5", "steelblue1")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
