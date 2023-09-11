@@ -263,28 +263,28 @@ GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', coln
  ***Step 2: Tune the MLS for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
 
 ```{}
-D2_MLS=MinLeafSizeTune(dat=Train, denominator=25, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D2", "#62C6F2")
+D2_MLS=MinLeafSizeTune(dat=Train, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "#62C6F2")
 D2_MLS$depth_mean
 D2_MLS$depth_gg
 ```
 <img src = images/D2_MLS_tune_rwd.png width=400>
 
 ```{}
-D3_MLS=MinLeafSizeTune(dat=Train, denominator=45, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D3", "#62C6F2")
+D3_MLS=MinLeafSizeTune(dat=Train, denominator=45, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D3", "#62C6F2")
 D3_MLS$depth_mean
 D3_MLS$depth_gg
 ```
 <img src = images/D3_MLS_tune_rwd.png width=400>
 
 ```{}
-D4_MLS=MinLeafSizeTune(dat=Train, denominator=65, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D4", "#62C6F2")
+D4_MLS=MinLeafSizeTune(dat=Train, denominator=65, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D4", "#62C6F2")
 D4_MLS$depth_mean
 D4_MLS$depth_gg
 ```
 <img src = images/D4_MLS_tune_rwd.png width=400>
 
 ```{}
-D5_MLS=MinLeafSizeTune(dat=Train, denominator=85, treeNo = 200, iterationNo=10, split_val_round_posi=0, "D5", "#62C6F2")
+D5_MLS=MinLeafSizeTune(dat=Train, denominator=85, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D5", "#62C6F2")
 D5_MLS$depth_mean
 D5_MLS$depth_gg
 ```
@@ -294,7 +294,7 @@ D5_MLS$depth_gg
 ```{}
 leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denominator, D2=D2_MLS$denominator)
 
-iCFCV_B1000_i200_rwd <- iCFCV(dat=Train,K=5, treeNo=200, iterationNo=25, min.split.var=4,
+iCFCV_B1000_i200_rwd <- iCFCV(dat=Train,K=5, treeNo=1000, iterationNo=100, min.split.var=4,
                               split_val_round_posi=0, P_threshold=0.5, variable_type = "non-HD", 
                               hdpct= 0.95, HTE_P_cf.raw = HTE_P_cf.raw) 
 
