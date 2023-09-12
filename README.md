@@ -161,8 +161,8 @@ Make a dataset in this format to be run by iCF: the 1st column is treatment **W*
  ```{}
 #Specify the decimal position for continuous variables in the subgroup definition.
 split_val_round_posi=0
-#Define categorical variables with more than two levels. If no such variables, let it be NA:
-vars_catover2 <<- NA  
+#Define categorical variables with more than two levels:
+vars_catover2 <<- find_level_over2(X)
 ```
 
 ```{}
@@ -248,13 +248,13 @@ Train <-  hfp_2yr_all_sgltvglp %>%
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 
 ```{}
-#Define categorical variables with more than two levels.
-vars_catover2 <- c("race2", "age", "bl_HOSP", "bl_HOSPDAYS", "bl_ED", "bl_ERDM", "bl_outpt", "bl_outptdm")
-
 vars_forest = colnames( Train %>% dplyr::select(-c("Y", "W"))  ) 
 X <<- Train[,vars_forest]
 Y <<- as.vector( as.numeric( Train[,"Y"] ) )
 W <<- as.vector( as.numeric( Train[,"W"] ) )
+
+#Define categorical variables with more than two levels.
+vars_catover2 <<- find_level_over2(X)
 
 cf_raw_key.tr <- CF_RAW_key(Train, min.split.var=4, variable_type="non-hd", hdpct=0.95)    
 Y.hat  <<- cf_raw_key.tr$Y.hat
