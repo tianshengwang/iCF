@@ -253,9 +253,6 @@ X <<- Train[,vars_forest]
 Y <<- as.vector( as.numeric( Train[,"Y"] ) )
 W <<- as.vector( as.numeric( Train[,"W"] ) )
 
-#Define categorical variables with more than two levels.
-vars_catover2 <<- find_level_over2(X)
-
 cf_raw_key.tr <- CF_RAW_key(Train, min.split.var=4, variable_type="non-hd", hdpct=0.95)    
 Y.hat  <<- cf_raw_key.tr$Y.hat
 W.hat  <<- cf_raw_key.tr$W.hat
@@ -269,6 +266,12 @@ GG_VI(varimp_cf, 'Variable Importance for SGLT2i vs GLP1RA cohort for HFF', coln
  <img src = images/VI_HHF2y_nolabel.png width=800>
  
  ***Step 2: Tune the MLS for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
+```{}
+#Specify the decimal position for continuous variables in the subgroup definition.
+split_val_round_posi=0
+#Define categorical variables with more than two levels:
+vars_catover2 <<- find_level_over2(X)
+```
 
 ```{}
 D2_MLS=MinLeafSizeTune(dat=Train, denominator=25, treeNo = 1000, iterationNo=100, split_val_round_posi=0, "D2", "#62C6F2")
