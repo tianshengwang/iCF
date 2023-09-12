@@ -243,7 +243,7 @@ Train <-  hfp_2yr_all_sgltvglp %>%
                         dplyr::starts_with("bl_")) %>% 
                         as.data.frame.matrix() %>%
                         mutate(sex=as.numeric(sex)) %>%
-         dplyr::select_if(~ !any(is.na(.)))
+          dplyr::select_if(~ !any(is.na(.)))
 ```
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 
