@@ -177,6 +177,28 @@ oneCF <- function(depth, treeNo, tunepara="none", tree_depth, split_val_round_po
   return(list(besttreelist=besttreelist, besttreelist_L=besttreelist_L, treeBlist=treeBlist, cf=cf, HTE_P_cf=HTE_P_cf, d=d))
 }
 
+#' find_level_over2
+#' 
+#' function to find variables with > 2 levls
+#' @param X features
+#'  
+#' @return varialbes more than 2 levels in X
+#' 
+#' @export
+
+find_level_over2 <- function(X_dat){
+vars_levelover2 <-sapply(X_dat, function(x) length(unique(x)) )%>% as.data.frame() %>% 
+  dplyr::rename(level = 1) %>% tibble::rownames_to_column() %>%
+  dplyr::filter(level>2 & level <=8) 
+
+if (nrow(vars_levelover2)==0) {
+  var_catover2 <<- NA 
+} else {
+  var_catover2 <<-vars_levelover2$rowname
+}
+
+return(var_catover2)
+}
 
 #' SUBGROUP_PIPELINE
 #' 
