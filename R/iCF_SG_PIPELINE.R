@@ -177,6 +177,7 @@ oneCF <- function(depth, treeNo, tunepara="none", tree_depth, split_val_round_po
   return(list(besttreelist=besttreelist, besttreelist_L=besttreelist_L, treeBlist=treeBlist, cf=cf, HTE_P_cf=HTE_P_cf, d=d))
 }
 
+
 #' find_level_over2
 #' 
 #' function to find variables with > 2 levls
@@ -199,6 +200,8 @@ if (nrow(vars_levelover2)==0) {
 
 return(var_catover2)
 }
+
+
 
 #' SUBGROUP_PIPELINE
 #' 

@@ -48,7 +48,7 @@ SGMODEL_DATA<-function(dat, outcome_type_at){
     dat_ID_SG_pre <- dat %>%  dplyr::select(-contains( c("G5_define", "G4_define", "G3_define", "G2_define" ,"ID" ) ) ) 
   } else {
     #for Medicare, don't use contains Fx as it delete more columns than expected!!!
-    dat_ID_SG_pre <- dat %>%  # dplyr::select(-contains( c("G4_define", "G3_define", "G2_define" ,"ID" ) ) ) #%>% 
+    dat_ID_SG_pre <- dat %>%
       dplyr::select(-G5_define, -G4_define, -G3_define, -G2_define ,-ID  ) 
   } 
   
@@ -71,16 +71,16 @@ SGMODEL_DATA<-function(dat, outcome_type_at){
   
   
   if (identical(vars_catover2,NA) ){
-    dat_ID_SG_df <-  dat_ID_SG_pre %>%  mutate_at(vars( c ("G5", "G4", "G3", "G2")    ), as.factor) 
+    dat_ID_SG_df <-  dat_ID_SG_pre %>%  dplyr::mutate_at(vars( c ("G5", "G4", "G3", "G2")    ), as.factor) 
     contr <- rep(list("contr.sum"), ncol( dat_ID_SG_df %>% dplyr::select( c("G5", "G4","G3", "G2") )  
                                          )
                                          )
     names(contr) <-  names( dat_ID_SG_df %>% dplyr::select(c("G5", "G4", "G3", "G2"  )) 
-                            )   # grep("_", names(dat_ID_SG %>% select( -contains(c("_define")))), value=TRUE)
+                            )  
   } else {
-    dat_ID_SG_df <-  dat_ID_SG_pre %>%  mutate_at(vars(  c ("G5", "G4", "G3", "G2", vars_catover2) ) , as.factor) 
-    contr <- rep(list("contr.sum"), ncol( dat_ID_SG_df %>% dplyr::select(   c("G5", "G4","G3", "G2",vars_catover2 ) ) ) )
-    names(contr) <-  names( dat_ID_SG_df %>% dplyr::select(c("G5", "G4", "G3", "G2", vars_catover2  ) ) )   
+    dat_ID_SG_df <-  dat_ID_SG_pre %>%  dplyr::mutate_at(vars(  c ("G5", "G4", "G3", "G2", all_of(vars_catover2) ) ) , as.factor) 
+    contr <- rep(list("contr.sum"), ncol( dat_ID_SG_df %>% dplyr::select(   c("G5", "G4","G3", "G2", all_of(vars_catover2) ) ) ) )
+    names(contr) <-  names( dat_ID_SG_df %>% dplyr::select(c("G5", "G4", "G3", "G2", all_of(vars_catover2)  ) ) )   
   } 
   
   return(list(dat_ID_SG_df=dat_ID_SG_df,
