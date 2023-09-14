@@ -54,14 +54,14 @@ CF <- function(depth, treeNo, tunepara){
 #' @param treeNo number of trees in each forest
 #' @param tunepara request wihout tuning
 #' @param iterationNo iteration No (if = 1 then oneCF)
-#' @param Ntrain split value rounding position
 #' @param tree_depth "D2", "D3", "D4", or "D5"
 #' @param split_val_round_posi split value rounding position
 #'  
 #' @return final subgroup decision G_iCF
 #' 
 #' @export
-iCF <- function( depth, treeNo, tunepara = "none", iterationNo, Ntrain, tree_depth, split_val_round_posi){
+#' 
+iCF <- function( depth, treeNo, tunepara = "none", iterationNo, tree_depth, split_val_round_posi){
   besttreelist = list() #making an empty list
   besttreelist_L = list () #for list format (rather than df format) of best trees
   splitfreqlist = list()
@@ -124,7 +124,6 @@ iCF <- function( depth, treeNo, tunepara = "none", iterationNo, Ntrain, tree_dep
 #' @param treeNo number of trees in each forest
 #' @param tunepara request wihout tuning
 #' @param iterationNo iteration No (if = 1 then oneCF)
-#' @param Ntrain split value rounding position
 #' @param tree_depth "D2", "D3", "D4", or "D5"
 #' @param split_val_round_posi split value rounding position
 #'  
@@ -250,17 +249,17 @@ SUBGROUP_PIPELINE<- function(X,
     #thus to make it auto run, if iCF_D2 has error, then make it equal to iCF_D3 temparily.
     #after tuning leaf size, this erorr unlikely to happen
 
-    iCF_D5<- iCF(leafsize$D5,  treeNo, tunepara = "none", iterationNo, Ntrain, "D5",  split_val_round_posi)
+    iCF_D5<- iCF(leafsize$D5,  treeNo, tunepara = "none", iterationNo,  "D5",  split_val_round_posi)
     
-    iCF_D4<- iCF(leafsize$D4,  treeNo, tunepara = "none", iterationNo, Ntrain, "D4",  split_val_round_posi)
+    iCF_D4<- iCF(leafsize$D4,  treeNo, tunepara = "none", iterationNo,  "D4",  split_val_round_posi)
     
-    iCF_D3<- iCF(leafsize$D3,  treeNo, tunepara = "none", iterationNo, Ntrain, "D3",  split_val_round_posi) 
+    iCF_D3<- iCF(leafsize$D3,  treeNo, tunepara = "none", iterationNo,  "D3",  split_val_round_posi) 
     
-    if ( is.null( tryCatch( iCF(leafsize$D2,  treeNo, tunepara = "none", iterationNo, Ntrain, "D2",  split_val_round_posi), error=function(e){}) ) == TRUE ) {
+    if ( is.null( tryCatch( iCF(leafsize$D2,  treeNo, tunepara = "none", iterationNo,  "D2",  split_val_round_posi), error=function(e){}) ) == TRUE ) {
       warning("The minimum leaf size is too small for Depth 2 causal forest, need to increase it!")
       iCF_D2 = iCF_D3
     } else {
-      iCF_D2 = iCF(leafsize$D2,  treeNo, tunepara = "none", iterationNo, Ntrain, "D2",  split_val_round_posi)
+      iCF_D2 = iCF(leafsize$D2,  treeNo, tunepara = "none", iterationNo, "D2",  split_val_round_posi)
     }
    
     

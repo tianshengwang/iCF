@@ -35,10 +35,11 @@ GET_TREE_L <- function (iCF_D, listindex) {
 #' @return The mean and histogram of depth of generated best trees
 #'
 #' @export
-#'
  
 MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_round_posi, depth ,color){
-  iCF_D<- iCF(denominator,  treeNo, tunepara = "none", iterationNo, dat, depth,  split_val_round_posi)
+  
+  iCF_D<- iCF(denominator,  treeNo, tunepara = "none", iterationNo, #dat,
+              depth,  split_val_round_posi)
   iCF_D_BT=GET_TREE_L(iCF_D, 1)
   #turn tree into subgroup  
   iCF_D_BT_SG        <- lapply(iCF_D_BT, function(df)   TREE2SUBGROUP(df)$majority)
@@ -80,8 +81,7 @@ MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_rou
 #' @return the tuned leaf size 
 #'
 #' @export
-#' 
-#' 
+
 GRID_LEAFSIZE <- function (depth, treeNo, iterationNo, initial, iCF_D_BT_exp_SG_D_mean, tune_unit){
 if (   iCF_D_BT_exp_SG_D_mean ==depth){
   #Scenario 1: suggested value is good, very lucky!
@@ -275,7 +275,7 @@ LEAFSIZE_tune <- function(Ntrain, initial_D2, treeNo, iterationNo, tune_unit){
 #' @return the key results from raw causal forest 
 #'
 #' @export
-#' 
+ 
 
 CF_RAW_key <- function(Train_cf, min.split.var, variable_type, hdpct){
   s_rawCF =  Sys.time()

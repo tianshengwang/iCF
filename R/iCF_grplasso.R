@@ -12,8 +12,7 @@
 #' 
 #' @export
 
-DATA4grplasso <- function(V_D5_subgroup, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup, dat
-                          ){
+DATA4grplasso <- function(V_D5_subgroup, V_D4_subgroup, V_D3_subgroup, V_D2_subgroup, dat){
  # Function that obtain subgroup ID 
  Dat_ID_SG_D5 <- GET_SUBGROUP_ID(V_D5_subgroup$majority, dat)
  Dat_ID_SG_D4 <- GET_SUBGROUP_ID(V_D4_subgroup$majority, dat)
