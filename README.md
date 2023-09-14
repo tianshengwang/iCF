@@ -215,10 +215,13 @@ iCFCV_B1000_i200_sim <- iCFCV(dat=Train, K=5, treeNo=200, iterationNo=10, min.sp
 Table2 <- (iCFCV_B1000_i200_sim$CATE_t2_ori %>% as.data.frame()) [,c("SubgroupID", "Definition",  "CATE_crude", "CATE_iptw")]
 T2 <- Table2[!duplicated(Table2), ]
 rownames(T2) <- NULL
+library(knitr)
 library(kableExtra)
+library(magrittr)
+webshot::install_phantomjs()
 kable(T2) %>% kable_styling() %>% save_kable(file = "table2_sim.png")
 ```
-
+<img src = images/table2_sim.png width=10f00>
 
 **5. Run iCF on real-world data**
 
