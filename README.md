@@ -211,8 +211,10 @@ leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denomi
 iCFCV_B1000_i200_sim <- iCFCV(dat=Train, K=5, treeNo=200, iterationNo=10, min.split.var=4,
                               split_val_round_posi=0, P_threshold=0.5, variable_type = "non-HD", 
                               hdpct= 0.95, HTE_P_cf.raw = HTE_P_cf.raw) 
+
+iCFCV_B1000_i200_sim$selectedSG_ori #subgroup decision
 ```
-View subgroup decision and subgroup-specific treatment effect (CATE)
+Save subgroup decision and subgroup-specific treatment effect (CATE) as an image
 ```{}
 Table2 <- (iCFCV_B1000_i200_sim$CATE_t2_ori %>% as.data.frame()) [,c("SubgroupID", "Definition",  "CATE_crude", "CATE_iptw")]
 T2 <- Table2[!duplicated(Table2), ]
@@ -316,9 +318,11 @@ leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denomi
 
 iCFCV_B1000_i100_rwd <- iCFCV(dat=Train,K=5, treeNo=1000, iterationNo=100, min.split.var=4,
                               split_val_round_posi=0, P_threshold=0.5, variable_type = "non-HD", 
-                              hdpct= 0.95, HTE_P_cf.raw = HTE_P_cf.raw) 
+                              hdpct= 0.95, HTE_P_cf.raw = HTE_P_cf.raw)
+
+iCFCV_B1000_i100_rwd$selectedSG_ori #subgroup decision
 ```
-View subgroup decision and subgroup-specific treatment effect (CATE)
+Save subgroup decision and subgroup-specific treatment effect (CATE) as an image
 ```{}
 Table2 <- (iCFCV_B1000_i100_rwd$CATE_t2_ori %>% as.data.frame()) [,c("SubgroupID", "Definition",  "CATE_crude", "CATE_iptw")]
 T2 <- Table2[!duplicated(Table2), ]
