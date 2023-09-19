@@ -291,8 +291,14 @@ DltY_DATA <- function (decision, dataset, label){
   #remove useless iterms of each sublist
   DltY_L_l_dataonly <- lapply(DltY_L, function(x) rlist::list.remove(x, c("model_ate", "model_att", "model_cru", "TorChi")) )
   #combine all obseravtions after removing useless iterms 
-  DltY_L_dataonly   <- lapply(DltY_L_l_dataonly, function(x) data.table::rbindlist (x)  )
   
+ #remvoe data.table function  by Tian 9/19/2023 
+ #DltY_L_dataonly   <- lapply(DltY_L_l_dataonly, function(x) data.table::rbindlist (x)  )
+  
+  
+  DltY_L_dataonly   <- lapply(DltY_L_l_dataonly, function(x) dplyr::bind_rows(x) )
+  
+
   oldnames = c("dltY_ate",   "dltY_ate_low",   "dltY_ate_up",   "dltY_att",   "dltY_att_low",   "dltY_att_up",   "dltY_crude",   "dltY_crude_low",   "dltY_crude_up", "TorChi", "TorChi_df", "TorChi_pval")
   
   newnames = c("dltY_ate_t", "dltY_ate_low_t", "dltY_ate_up_t", "dltY_att_t", "dltY_att_low_t", "dltY_att_up_t", "dltY_crude_t", "dltY_crude_low_t", "dltY_crude_up_t", "TorChi_t", "TorChi_df_t", "TorChi_pval_t")

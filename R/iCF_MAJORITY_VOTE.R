@@ -256,21 +256,20 @@ MAJORITY_VOTE <- function(list0, #original list of trees
     dplyr::mutate(across(where(is.numeric), round, split_val_round_posi))
   #won't calculate MODE as there might be multiple MODE number 
 
+  #----------------------------------------------------------------------------------------
   #obtain a synthetic tree by combing tree structure (split_variable only) with mean split_value
-  
   majority.syn0 <-  dplyr::left_join(majority.tree %>% select(c(1:5)), #make sure drop split_value from original df for tree (i.e., when not for tree_r)
                                      dplyr::select(split_value_mean,   #left join with df for  mean split 
                                                    c(node, split_value_mean)),
                                      by = "node" )  %>%
-    dplyr::rename(split_value=split_value_mean) %>%    #rename mean split value
-    dplyr::left_join(dplyr::select(avg_leaf,           #left joint df for sample size, avg_Y, avg_W
-                                   c(node, samples, avg_Y, avg_W)),
-                     by = "node" ) %>%
-    dplyr::mutate(k=1, 
-                  HTE_P_cf = mean(HTE_P_cf_M$HTE_P_cf))
+                    dplyr::rename(split_value=split_value_mean) %>%    #rename mean split value
+                    dplyr::left_join(dplyr::select(avg_leaf,           #left joint df for sample size, avg_Y, avg_W
+                                                   c(node, samples, avg_Y, avg_W)),
+                                     by = "node" ) %>%
+                    dplyr::mutate(k=1, 
+                                  HTE_P_cf = mean(HTE_P_cf_M$HTE_P_cf))
   
-  majority.syn1 <- majority.syn0 %>% 
-    dplyr::filter(split_variable != "NA") 
+  majority.syn1 <- majority.syn0 %>% dplyr::filter(split_variable != "NA") 
   
   #In case the synthetic mean split value is not integer for ordinal variable (bianry variable is perfectly fine as it always split at "0")
   # test code: assign a non integer to ordinal X2's split value, e.g., by: majority.syn1 [,"split_value"][which(majority.syn1$node == "node-01" )] <- 1.7; 
@@ -285,12 +284,16 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   majority.syn1$split_value =  rounded_split_value
   #pick key columns
   majority.syn2 <- majority.syn1 %>% dplyr::select(node, split_variable, split_value)
-  #a join operation in which update some values in the original dataset, easy to do with great performance using data.table because of its fast joins and update-by-reference:
-  library(data.table)
-  data.table::setDT(majority.syn0)
-  data.table::setDT(majority.syn2)
-  majority.syn0[  majority.syn2, on = c("node", "split_variable"), split_value := i.split_value]
+  #----------------------------------------------------------------------------------------
   
+  
+  #Replace split_value from majority.syn2 (synthetic tree's average split_value) by node 
+
+  majority.syn0 <-  dplyr::left_join(majority.syn0, majority.syn2, by = c("node", "split_variable")) %>% 
+                    dplyr::mutate(Values = ifelse(!is.na(split_value.x), split_value.y, split_value.x)) %>% 
+                    dplyr::select(-c(split_value.x, split_value.y)) %>%
+                    dplyr::rename(split_value=Values) %>%
+                    dplyr::relocate(split_value, .after=split_variable)
   
   # devide dataframe into several dataframe by row and cobmine in a LIST
   #_______________________________________________

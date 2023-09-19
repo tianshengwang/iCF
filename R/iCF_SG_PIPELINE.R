@@ -85,7 +85,8 @@ iCF <- function( depth, treeNo, tunepara = "none", iterationNo, tree_depth, spli
     d <- data.frame(freqs)
     real_index <- colnames(X[, selected_cf.idx])
     #rename with real index 
-    data.table::setnames(d, old = c(colnames(d)), new = c(real_index))
+    d <- d %>% dplyr::rename_with(~ c(real_index), all_of(c(colnames(d))))
+    
     d$k <- k
     splitfreqlist[[k]] <- d # add it to your list
     #-----------------------------------------------------------------
@@ -147,7 +148,8 @@ oneCF <- function(depth, treeNo, tunepara="none", tree_depth, split_val_round_po
   d <- data.frame(freqs)
   real_index <- colnames(X[, selected_cf.idx])
   #rename with real index 
-  data.table::setnames(d, old = c(colnames(d)), new = c(real_index))
+  d <- d %>% dplyr::rename_with(~ c(real_index), all_of(c(colnames(d))))
+  
   #-----------------------------------------------------------------
   for (b in 1:treeNo) { 
     tree_b_l <- grf::get_tree(cf, b)
