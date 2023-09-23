@@ -214,11 +214,15 @@ iCFCV_B1000_i200_sim <- iCFCV(dat=Train, K=5, treeNo=200, iterationNo=10, min.sp
 
 iCFCV_B1000_i200_sim$selectedSG_ori #subgroup decision
 ```
-Save subgroup decision and subgroup-specific treatment effect (CATE) as an image
+subgroup decision and subgroup-specific treatment effect (CATE)
 ```{}
 Table2 <- (iCFCV_B1000_i200_sim$CATE_t2_ori %>% as.data.frame()) [,c("SubgroupID", "Definition",  "CATE_crude", "CATE_iptw")]
 T2 <- Table2[!duplicated(Table2), ]
 rownames(T2) <- NULL
+T2
+```
+Save T2 as an image
+```{}
 library(knitr)
 library(kableExtra)
 library(magrittr)
