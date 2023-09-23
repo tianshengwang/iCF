@@ -223,7 +223,6 @@ T2
 ```
 Save T2 as an image
 ```{}
-library(knitr)
 library(kableExtra)
 library(magrittr)
 webshot::install_phantomjs()
