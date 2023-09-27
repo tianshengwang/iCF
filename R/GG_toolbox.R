@@ -73,15 +73,15 @@ GG_VI <- function(varimp_cf, title, var_label){
   
   VarImp <- varimp_cf_df %>%
     ggplot2::ggplot() +
-    geom_bar(aes(y=reorder(vars_f, impValue),x=impValue, fill = impValue), stat = 'identity') + 
-    scale_fill_viridis_c(name = "value") +
-    theme_minimal() + 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
-    labs(
+    ggplot2::geom_bar(aes(y=reorder(vars_f, impValue),x=impValue, fill = impValue), stat = 'identity') + 
+    ggplot2::scale_fill_viridis_c(name = "value") +
+    ggplot2::theme_minimal() + 
+    ggplot2::theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+    ggplot2::labs(
       title = title,
       x = 'Importance Value',
       y= "Variables") +
-    theme(plot.title    = element_text(color = "black", size=18, face="bold", #hjust = 0.5, 
+    ggplot2::theme(plot.title    = element_text(color = "black", size=18, face="bold", #hjust = 0.5, 
                                        vjust=5, margin =ggplot2:: margin(0.5, 0, 0, 0, "cm")),
           plot.subtitle = element_text(color = "black", size=16, face="bold" ),
           axis.title.x  = element_text(color = "black", size=14, face="plain",  hjust=0.5),
