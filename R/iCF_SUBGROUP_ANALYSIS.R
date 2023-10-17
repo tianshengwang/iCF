@@ -81,7 +81,7 @@ SUBSETTING <- function(decision,  dataset ){
 
 #' ANA_SUBGROUP
 #' 
-#' Function that calcualts observed treatment effect size
+#' Function that calcualts observed treatment effect size, PS predicted by "logistic lasso" rather than "regression_forest"
 #' @param subgroup the database (subgroup) in a list of stratified population accroding to subgroup decision
 #' 
 #' @return The ATE (IPTW), ATT (SMR), and crude treatment effect (i.e., Delta Y) 

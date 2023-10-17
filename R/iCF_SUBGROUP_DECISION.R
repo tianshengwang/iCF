@@ -32,18 +32,21 @@ TREE2SUBGROUP <- function(tree){
 #' Function that does prepare data that:
 #' 1) ready to apply the formulas including interacting terms between treatment and factor subgroup deicision variable; 
 #' 2) transformed outcome
+#' used in the CF_GROUP_DECISION function below
+#' 9/29/2023, update propensity score estiamtion, which used the W.hat from regression_forest rather than ps predicted by prop.func
 #' @param dat data set
 #' @param outcome_type "actual" or "transform" 
 #' https://gsbdbi.github.io/ml_tutorial/hte_tutorial/hte_tutorial.html
 #' Estimation of Heterogeneous Treatment Effects - prepared for “Machine Learning and Causal Inference” class
-#'  
+#' @param W.hat PS predicted by regression_forest  
 #' @return the prepared data and "contr"
 #' 
 #' @export
 
 
-SGMODEL_DATA<-function(dat, outcome_type_at){
-  if (intTRUE != "Unknown" & intTRUE != "Medicare"){
+SGMODEL_DATA<-function(dat, outcome_type_at, W.hat){
+  if (intTRUE != "Unknown" & intTRUE != "Medicare" #i.e., for simulation data
+      ){
     #remove the columns for subgroup definitions (characters)
     dat_ID_SG_pre <- dat %>%  dplyr::select(-contains( c("G5_define", "G4_define", "G3_define", "G2_define" ,"ID" ) ) ) 
   } else {
@@ -52,10 +55,18 @@ SGMODEL_DATA<-function(dat, outcome_type_at){
       dplyr::select(-G5_define, -G4_define, -G3_define, -G2_define ,-ID  ) 
   } 
   
-  dat_ID_SG_pre$ps <- prop.func(as.matrix( dat_ID_SG_pre %>% dplyr::select (-contains( c("W", "Y", "G5",  "G4", "G3", "G2")))), #matrix of covariates
-                                dat_ID_SG_pre$W #outcome for glmnet
-                                )
-  #create transformed outcome, https://johaupt.github.io/blog/Uplift_ITE_summary.html
+  #if (PSmethod="regression_forest") {
+    
+    dat_ID_SG_pre$ps <- W.hat
+    
+  #} else if (PSmethod="logistic_lasso") {
+  #dat_ID_SG_pre$ps <- prop.func(as.matrix( dat_ID_SG_pre %>% dplyr::select (-contains( c("W", "Y", "G5",  "G4", "G3", "G2")))), #matrix of covariates
+  #                              dat_ID_SG_pre$W #outcome for glmnet
+  #                              )
+  #}
+  
+  
+  #create IPW structured transformed outcome, https://johaupt.github.io/blog/Uplift_ITE_summary.html
   dat_ID_SG_pre$Y_star <- ifelse(dat_ID_SG_pre$W==1, dat_ID_SG_pre$Y/dat_ID_SG_pre$ps, -dat_ID_SG_pre$Y/(1-dat_ID_SG_pre$ps))
   
 
@@ -197,13 +208,14 @@ PICK_CV <- function(HTE_P_value, MAF_m,
 #' @param method_CF method for CF: "iCF" or "oneCF"
 #' @param outcome_type_at "actual" or "transform"
 #' @param P_threshold threshold for P-value of heterogeneity  
+#' @param W.hat threshold for P-value of heterogeneity  
 #'  
 #' @return subgroup decision
 #' 
 #' @export
 
 
-CF_GROUP_DECISION <- function(HTE_P_cf.raw, dat, method_CF, outcome_type_at ,  P_threshold ){
+CF_GROUP_DECISION <- function(HTE_P_cf.raw, dat, method_CF, outcome_type_at ,  P_threshold, W.hat ){
   if (  round(HTE_P_cf.raw,1) > P_threshold ){
     model.basic="NA"
     model.g2="NA"
@@ -223,7 +235,7 @@ CF_GROUP_DECISION <- function(HTE_P_cf.raw, dat, method_CF, outcome_type_at ,  P
     #Function that does prepare data that 
     #1) ready to apply the formulas including interacting terms between treatment and factor subgroup deicision variable; 
     #2)transformed outcome
-    SGmodel_dat <-  SGMODEL_DATA (dat,outcome_type_at)#works for HD covariates!
+    SGmodel_dat <-  SGMODEL_DATA (dat,outcome_type_at, W.hat)#works for HD covariates!
     
     dat_ID_SG_df = SGmodel_dat$dat_ID_SG_df
     contr = SGmodel_dat$contr

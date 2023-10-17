@@ -1086,3 +1086,40 @@ PLOT_BT<-function(forest, type){
   plot_bt<-plot(grf::get_tree(forest, best_tree_info$best_tree))
   return(list(best_tree_info$best_tree, plot_bt))
 }
+
+
+#' ROC2comp
+#' 
+#' Function that compares 2 ROCs, not necessary for iCF/hdiCF
+#' @param response1 true outcome 1
+#' @param response2 true outcome 2
+#' @param predict1 prediction 1
+#' @param predict2 prediction 2  
+#' @param label1 label 1
+#' @param label2 lebel 2 
+#' @param outcome outcome, e.g. Y or W
+#' @return the image object
+#' 
+#' @export
+
+
+ROC2comp <- function(response1, predict1, response2, predict2,label1, label2, outcome){
+  dev.off()
+  
+  par(pty = "s") 
+  roc_Y.hat_all <-pROC::roc(response = response1, predictor = predict1, plot=T, 
+                            legacy.axes=TRUE, percent=TRUE, 
+                            xlab="False Positive Percentage", ylab="True Postive Percentage", 
+                            col="#377eb8", lwd=4, print.auc=TRUE)
+  
+  pROC::plot.roc(response2, predict2, percent=TRUE, col="#4daf4a", lwd=4, print.auc=TRUE, add=TRUE, print.auc.y=40)
+  legend("bottomright", 
+         legend=c(label1, label2), 
+         col=c("#377eb8", "#4daf4a"), 
+         lwd=4)
+  title(main =  paste0("ROC of predicted ", outcome) ,  line = 3, adj = 0)
+  
+  ROC_compare <- recordPlot()
+  return( ROC_compare )
+  
+}

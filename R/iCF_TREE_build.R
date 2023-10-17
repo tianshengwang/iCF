@@ -57,7 +57,11 @@ MinLeafSizeTune <- function(dat, denominator, treeNo, iterationNo, split_val_rou
                         geom_bar(stat="identity", fill= color) +
                     theme(axis.text.x = element_text(face="bold",  size=14),
                           axis.text.y = element_text( size=10)) +
-                    ggtitle(paste0("Depth distribution of ",iterationNo, " best trees generated \n from ",iterationNo, " causal forests by the proposed \n minimum-leaf-size = N/", denominator, " (sample size divided by ",denominator, ") for ",depth, " iCF")) 
+    labs(title =  paste0("Depth distribution of ",iterationNo, " best trees generated \n from ",iterationNo, " causal forests by the proposed \n minimum-leaf-size = N/", denominator, " (sample size divided by ",denominator, ") for ",depth, " iCF") 
+,
+         subtitle = paste0("Number of variables: " , (ncol(dat)-2) ),
+         caption = paste0("Sample size N=", nrow(dat), "; Iteration number=", iterationNo ) )
+  
                   
   return(list(denominator= denominator,
               depth_mean=iCF_D_BT_SG_D_mean,
@@ -262,6 +266,34 @@ LEAFSIZE_tune <- function(Ntrain, initial_D2, treeNo, iterationNo, tune_unit){
 
 
 
+#'regression_forest_4PS
+#'
+#' This function is the wrapper function to run raw causal forest
+#' @param dat dataset
+#' 
+#' @return predicted PS 
+#'
+#' @export
+
+
+regression_forest_4PS <- function(dat){
+  s_rawCF =  Sys.time()
+  #------------------------------------------------------------------------
+  #step 1. get W.hat, Y.hat based on X
+  #------------------------------------------------------------------------
+  X <- dat[,vars_forest]
+  W <- as.vector( as.numeric( dat[,2] ) )  
+  
+  W.forest <- grf::regression_forest(X, W)
+  W.hat    <- predict(W.forest)$predictions
+  
+  return(W.hat=W.hat)
+  
+}
+
+
+
+
 
 
 #'CF_RAW_key
@@ -361,6 +393,93 @@ CF_RAW_key <- function(Train_cf, min.split.var, variable_type, hdpct){
               time_rawCF=time_rawCF))
   
 }
+
+
+CF_RAW_key_hd <- function(Train_cf, min.split.var, variable_type, hdpct){
+  s_rawCF =  Sys.time()
+  #------------------------------------------------------------------------
+  #step 1. get W.hat, Y.hat based on X
+  #------------------------------------------------------------------------
+  X <- Train_cf[,vars_forest]
+  Y <- as.vector( as.numeric( Train_cf[,1] ) )
+  W <- as.vector( as.numeric( Train_cf[,2] ) )  
+  
+  #W.forest <- grf::regression_forest(X, W)
+  W.hat    <- predict(W.forest)$predictions
+  
+  #forest-based method to predict Y
+  #Y.forest <- grf::regression_forest(X, Y)
+  Y.hat    <- predict(Y.forest)$predictions
+  
+  #------------------------------------------------------------------------
+  #step 2. run CF to get VI and P-value of omnibus test for HTE presence 
+  #------------------------------------------------------------------------
+  cf.raw = grf::causal_forest(X, Y,  W,  Y.hat = Y.hat, W.hat = W.hat)
+  
+  best_tree_info<-find_best_tree(cf.raw, "causal")
+  best_tree_info$best_tree
+  # Plot trees
+  par(mar=c(1,1,1,1))
+  tree.plot = plot(grf::get_tree(cf.raw, best_tree_info$best_tree))
+  tree.plot
+  
+  HTE_P_cf.raw <-grf::test_calibration(cf.raw)[8]
+  HTE_P_cf.raw
+  varimp_cf <- grf::variable_importance(cf.raw)
+  
+  plot(varimp_cf)
+  text(1:ncol(X), varimp_cf,labels=colnames(X))
+  
+  #---------------------------------------------------------------
+  #if usng > mean critiera, may select only 1 varialbe when using "binary" (indicator) ,
+  selected_cf.idx_mean = which(varimp_cf > mean(varimp_cf)) 
+  selected_cf.idx_q3 = which(varimp_cf > quantile(varimp_cf, 0.75) )
+  selected_cf.idx_q2 = which(varimp_cf > quantile(varimp_cf, 0.5) )
+  selected_cf.idx_q1 = which(varimp_cf > quantile(varimp_cf, 0.25) )
+  selected_cf.idx_q0 = which(varimp_cf > 0 ) #selected all
+  selected_cf.idx_hd = which(varimp_cf > quantile(varimp_cf, hdpct) ) #for hdiCF
+  #to develop D5 tree, need to select >=4 variables. e.g., it will develop D4 tree if selecting only 3 variables.
+  #28=7*4, i.e., 7 is the minimum node# for a depth 4 Symmetrical tree, and when 7 variables are the q4 part of distribution, it requires 28 varaibles  
+  #60=15*4, i.e., 15 is the minimum node# for a depth 5 Symmetrical tree, and when 7 variables are the q4 part of distribution, it requires 28 varaibles 
+  if(variable_type=="hd"){
+    selected_cf.idx =  selected_cf.idx_hd 
+  } else if (variable_type=="hdshrink") {
+    selected_cf.idx =  selected_cf.idx_q0   
+  } else{
+    if( length(selected_cf.idx_mean) >=  min.split.var ) {
+      selected_cf.idx = selected_cf.idx_mean
+    } else if(  length(selected_cf.idx_mean) <  min.split.var &  length( selected_cf.idx_q3) >=  min.split.var
+    ) {
+      selected_cf.idx = selected_cf.idx_q3
+    } else if(  length(selected_cf.idx_mean) <  min.split.var & length( selected_cf.idx_q3) <  min.split.var &  length( selected_cf.idx_q2) >=  min.split.var
+    ) {
+      selected_cf.idx = selected_cf.idx_q2
+    } else if(  length(selected_cf.idx_mean) <  min.split.var & length( selected_cf.idx_q2) <  min.split.var & length( selected_cf.idx_q1) >=  min.split.var 
+    ) {
+      selected_cf.idx = selected_cf.idx_q1
+    } else if (        length(selected_cf.idx_mean) <  min.split.var & length( selected_cf.idx_q1) < min.split.var #& 
+    ) {
+      selected_cf.idx =  selected_cf.idx_q0 # select all
+    } 
+  }
+  #---------------------------------------------------------------
+  #head( X[, selected_cf.idx], 1 ) #be careful!!! not head(Train[, selected_cf.idx])
+  #colnames(X[, selected_cf.idx ] )
+  e_rawCF =  Sys.time()
+  time_rawCF =  difftime(e_rawCF, s_rawCF,units="secs")
+  
+  return(list(X=X, 
+              Y=Y,
+              W=W,
+              Y.hat=Y.hat,
+              W.hat=W.hat,
+              HTE_P_cf.raw=HTE_P_cf.raw,
+              varimp_cf=varimp_cf,
+              selected_cf.idx=selected_cf.idx,
+              time_rawCF=time_rawCF))
+  
+}
+
 
 
 #'GET_TREE_DF

@@ -42,6 +42,39 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
     model.m.tran  <- list()
     
     cf_raw_key <- list()
+    PS_distribution <- list()
+    iptw_u <- list()
+    iptw_u_summary <- list()
+    IPTW_distribution <- list()
+    Y_star <- list()
+    Y_star_summary <- list()
+    Y_star_distribution <- list()
+    
+    Y_star_No0 <- list()
+    Y_star_No0_summary <- list()
+    Y_star_No0_distribution <- list()
+    
+    W.hat_test <- list()
+    PS_distribution_test <- list()
+    iptw_u_test <- list()
+    iptw_u_summary_test <- list()
+    IPTW_distribution_test <- list()
+    Y_star_test <- list()
+    Y_star_summary_test <- list()
+    Y_star_distribution_test <- list()
+    
+    Y_star_No0_test <- list()
+    Y_star_No0_summary_test <- list()
+    Y_star_No0_distribution_test <- list()
+    
+    W.hat_train <- list()
+    Y.hat_train <- list()
+    W.hat_test  <- list()
+    
+    #ROC_Y_n_W <- list()
+    #Y.hat_Test_cf  <- list()
+    
+    
     mse_per_fold.g2.act     <- list()
     mse_per_fold.g3.act     <- list()
     mse_per_fold.g4.act     <- list()
@@ -77,22 +110,78 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
     
     selected_cf.idx.L <- list()
     accuracy_per_fold <- list()
+    
 
     set.seed(1234)
     tt_indicies <- caret::createFolds(y=dat[,1], k= K)
 
     for(f in 1:length(tt_indicies)){
-      Train_cf <- dat[-tt_indicies[[f]],]
-      Test_cf  <- dat[tt_indicies[[f]],]
-      ID_cf <-1:nrow(dat)
-      Train_ID_cf <- cbind(Train_cf, as.vector(ID_cf[-tt_indicies[[f]]])) %>% dplyr::rename (ID=`as.vector(ID_cf[-tt_indicies[[f]]])`)
-      Test_ID_cf  <- cbind(Test_cf,  as.vector(       tt_indicies[[f]]) ) %>% dplyr::rename (ID=`as.vector(tt_indicies[[f]])`)  
-      #============================== raw full CF for CV training data ==============================
-      #for each training set, X, Y, W ... are regenerated
-      cf_raw_key[[f]] <- CF_RAW_key(Train_cf, min.split.var, variable_type, hdpct)   
+      
+  
+        Train_cf <- dat[-tt_indicies[[f]],]
+        Test_cf  <- dat[tt_indicies[[f]],]
 
-      selected_cf.idx.L[[f]]  <- cf_raw_key[[f]]$selected_cf.idx
+        ID_cf <-1:nrow(dat)
+        Train_ID_cf <- cbind(Train_cf, as.vector(ID_cf[-tt_indicies[[f]]])) %>% dplyr::rename (ID=`as.vector(ID_cf[-tt_indicies[[f]]])`)
+        Test_ID_cf  <- cbind(Test_cf,  as.vector(       tt_indicies[[f]]) ) %>% dplyr::rename (ID=`as.vector(tt_indicies[[f]])`)  
+        #============================== raw full CF for CV training data ==============================
+        #for each training set, X, Y, W ... are regenerated
+        cf_raw_key[[f]] <- CF_RAW_key(Train_cf, min.split.var, variable_type, hdpct) 
+        
+        selected_cf.idx.L[[f]]  <- cf_raw_key[[f]]$selected_cf.idx
+        
+        W.hat_train[[f]] =  cf_raw_key[[f]]$W.hat
+        Y.hat_train[[f]] =  cf_raw_key[[f]]$Y.hat
+        W.hat_test[[f]]  <- regression_forest_4PS(Test_ID_cf)
+      
+     
+     # ROC_Y_n_W[[f]] <- ROC2comp(Train_cf$Y,  Y.hat_train[[f]], Train_cf$W,  W.hat_train[[f]], "Y.hat", "W.hat", "Y and W")
 
+      PS_distribution[[f]] <- GG_PS(Train_cf, 
+                                    W.hat_train[[f]],
+                                    "Propensity Score", 0.006, "PS_trainCV")
+      
+      iptw_u[[f]] <-  ifelse(cf_raw_key[[f]]$W==1, 
+                             1/W.hat_train[[f]], 
+                             1/(1-W.hat_train[[f]]))
+      
+      iptw_u_summary[[f]] <- summary( iptw_u[[f]] )
+      IPTW_distribution[[f]] <-  GG_PS(Train_cf, iptw_u[[f]], "Inverse Probabilty Treatment Weight", 0.006, "iptw_trainCV")
+      
+
+      Y_star[[f]]  <- ifelse(cf_raw_key[[f]]$W==1, 
+                              cf_raw_key[[f]]$Y/W.hat_train[[f]], 
+                             -cf_raw_key[[f]]$Y/(1-W.hat_train[[f]]))
+      Y_star_summary[[f]]      <- summary( Y_star[[f]] )
+      Y_star_distribution[[f]] <- GG_Y_star(Train_cf, Y_star[[f]], F)
+      
+      Y_star_No0[[f]]          <-  Y_star[[f]] [!Y_star[[f]]  %in% 0]
+      Y_star_No0_summary[[f]]  <- summary( Y_star_No0[[f]] )
+      Y_star_No0_distribution[[f]] <- GG_Y_star(Train_cf, Y_star_No0[[f]], T)
+      
+      
+      #-------------------------------------------test set----------------------------------------------------------------
+      PS_distribution_test[[f]] <- GG_PS(Test_cf, W.hat_test[[f]], "Propensity Score", 0.006,"PS_testCV")
+      iptw_u_test[[f]] <-  ifelse(Test_cf$W==1, 
+                                  1/W.hat_test[[f]], 
+                                  1/(1-W.hat_test[[f]]))
+      iptw_u_summary_test[[f]] <- summary( iptw_u_test[[f]] )
+      IPTW_distribution_test[[f]] <-  GG_PS(Test_cf, iptw_u_test[[f]],  "Inverse Probabilty Treatment Weight", 0.006, "iptw_testCV")
+      
+      Y_star_test[[f]]  <- ifelse(Test_cf$W==1, 
+                                  Test_cf$Y/W.hat_test[[f]], 
+                                 -Test_cf$Y/(1-W.hat_test[[f]]))
+      Y_star_summary_test[[f]] <- summary( Y_star_test[[f]] )
+      Y_star_distribution_test[[f]] <- GG_Y_star(Test_cf, Y_star_test[[f]], F)
+      
+      Y_star_No0_test[[f]] <-  Y_star_test[[f]] [!Y_star_test[[f]]  %in% 0]
+      Y_star_No0_summary_test[[f]] <- summary( Y_star_No0_test[[f]] )
+      Y_star_No0_distribution_test[[f]] <- GG_Y_star(Test_cf, Y_star_No0_test[[f]], T)
+      
+      #-------------------------------------------test set----------------------------------------------------------------
+      
+    
+       
       #==============================     iCF for CV training data   ==============================
       
       #check the top of this file: SUBGROUP_PIPLINE
@@ -100,8 +189,9 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       SG_D[[f]]<-SUBGROUP_PIPELINE(X = cf_raw_key[[f]]$X,
                                   Y = cf_raw_key[[f]]$Y, 
                                   W = cf_raw_key[[f]]$W, 
-                                  Y.hat =  cf_raw_key[[f]]$Y.hat, 
-                                  W.hat =  cf_raw_key[[f]]$W.hat, 
+                                  Y.hat =  Y.hat_train[[f]], 
+                                  W.hat =  W.hat_train[[f]], 
+                                  W.hat_test = W.hat_test[[f]],
                                   selected_cf.idx =selected_cf.idx.L[[f]],
                                   leafsize, 
                                   treeNo, 
@@ -141,7 +231,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       
       #Function that does prepare data that 1) ready to apply the formulas including interacting terms between treatment and factor subgroup deicision variable; 
       #2)transformed outcome
-      test_data.tran[[f]] =SGMODEL_DATA(Test_ID_SG_iCF[[f]], "transform")$dat_ID_SG_df
+      test_data.tran[[f]] =SGMODEL_DATA(Test_ID_SG_iCF[[f]], "transform", W.hat_test[[f]])$dat_ID_SG_df
       
       
       #========================================
@@ -262,7 +352,14 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
   } else if (round(HTE_P_cf.raw,1) > P_threshold){
     
     time_iCFCV = "NA"
-    
+    PS_distribution <- "NA"
+    IPTW_distribution <- "NA"
+    Y_star_distribution <- "NA"
+    Y_star_No0_distribution <- "NA"
+    PS_distribution_test <- "NA"
+    IPTW_distribution_test <- "NA"
+    Y_star_distribution_test <- "NA"
+    Y_star_No0_distribution_test <- "NA"
     ATE_all <- CATE_SG(dat, "NA")
     ATE_kable <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") %>% knitr::kable()
     
@@ -297,6 +394,15 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
   
   if(variable_type=="hd")
   {  return(list(time_iCFCV = time_iCF_CV,
+              PS_distribution = PS_distribution,
+              IPTW_distribution = IPTW_distribution,
+              Y_star_distribution = Y_star_distribution,
+              Y_star_No0_distribution = Y_star_No0_distribution,
+              PS_distribution_test = PS_distribution_test,
+              IPTW_distribution_test = IPTW_distribution_test,
+              Y_star_distribution_test = Y_star_distribution_test,
+              Y_star_No0_distribution_test = Y_star_No0_distribution_test,
+              #ROC_Y_n_W =  ROC_Y_n_W,
               
               ATE_kable = ATE_kable,
               
@@ -330,6 +436,15 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
   } else {
     
     return(list(time_iCFCV = time_iCF_CV,
+                PS_distribution = PS_distribution,
+                IPTW_distribution = IPTW_distribution,
+                Y_star_distribution = Y_star_distribution,
+                Y_star_No0_distribution = Y_star_No0_distribution,
+                PS_distribution_test = PS_distribution_test,
+                IPTW_distribution_test = IPTW_distribution_test,
+                Y_star_distribution_test = Y_star_distribution_test,
+                Y_star_No0_distribution_test = Y_star_No0_distribution_test,
+                ROC_Y_n_W = ROC_Y_n_W,
                 
                 ATE_kable = ATE_kable,
                 
@@ -348,7 +463,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
                 selectedSG_stability_ori   = PICK_CV_ori$selectedSG_wt, 
                 CATE_t2_ori = CATE_ori_kable ,
                 
-                #no need to apply icvsw
+                #no need to apply icvsw September 2023
                 #selectedSG_icvsw             = PICK_CV_icvsw$selectedSG ,
                 #selectedSG_stability_icvsw   = PICK_CV_icvsw$selectedSG_wt, 
                 #CATE_t2_icvsw = CATE_icvsw_kable ,
