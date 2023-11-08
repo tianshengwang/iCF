@@ -23,6 +23,8 @@ GG_DepthDistribution <- function(D2_distribtion,D3_distribtion,D4_distribtion, D
 }
 
 
+
+
 #-------------------------------
 # Variable Importance
 #-------------------------------
@@ -104,50 +106,109 @@ return(VarImp)
 #' 
 #' @export
 
-GG_PS <- function(dat, PS, title, binwid, filename){
+GG_PS <- function(dat, PS, title, filename){
   dat_new = cbind(dat, PS)
   dat_new_W1 = subset(dat_new,W==1)
   dat_new_W0 = subset(dat_new,W==0)
 png(filename=paste0(filename, ".png"))
 PSplot <-ggplot2::ggplot(data=dat_new,
                       aes(x=PS, group=factor(W), fill=factor(W)))+
- # ggplot2:: geom_density(aes(y=..density..), alpha = 0.75, position = position_dodge(width=0.01)) +
-  ggplot2::geom_histogram(aes(y=#..count.. 
-                       ..density..
-                     ),
-                 alpha = 0.75,
-                 binwidth=binwid,
-                 position = position_dodge(width=0.01))+
+  geom_density(alpha=0.4) + 
+  #ggplot2:: geom_density(aes(y=..density..), alpha = 0.75, position = position_dodge(width=0.01)) +
+  
+  #ggplot2:: geom_density(aes(y=..density..), alpha = 0.75, position = position_dodge(width=0.01)) +
+ # ggplot2::geom_histogram(aes(y=#..count.. 
+#                       ..density..
+#                     ),
+#                 alpha = 0.75,
+#                 binwidth=binwid,
+#                 position = position_dodge(width=0.01))+
   
   theme_classic()+
   xlab(paste(title, sep=": "))+ylab("Density")+
   labs(fill = "Treatment",
-       title = paste0("Distribtution of ", title),
-       subtitle = paste0("Number of variables: " , (ncol(dat)-2),
-                         "; \n" ,
-                         "Treatment=1: ",
-                         "Min=" ,      round(summary( dat_new_W1$PS )[[1]] ,2 ),    
-                         ";  Q1=",     round(summary( dat_new_W1$PS )[[2]] ,2 ),
-                         ";  Median=", round(summary( dat_new_W1$PS )[[3]] ,2 ),
-                         ";  Mean=",   round(summary( dat_new_W1$PS )[[4]] ,2 ),
-                         ";  Q3=",     round(summary( dat_new_W1$PS )[[5]] ,2 ),
-                         ";  Max=",    round(summary( dat_new_W1$PS )[[6]] ,2 ), 
-                         "; \n" ,
-                         "Treatment=0: ",
-                         "Min=" ,      round(summary( dat_new_W0$PS )[[1]] ,2 ),    
-                         ";  Q1=",     round(summary( dat_new_W0$PS )[[2]] ,2 ),
-                         ";  Median=", round(summary( dat_new_W0$PS )[[3]] ,2 ),
-                         ";  Mean=",   round(summary( dat_new_W0$PS )[[4]] ,2 ),
-                         ";  Q3=",     round(summary( dat_new_W0$PS )[[5]] ,2 ),
-                         ";  Max=",    round(summary( dat_new_W0$PS )[[6]] ,2 )
-       ),
-       caption = paste0("Sample size: ", length(PS) ) )
+       #title = paste0("Distribtution of ", title),
+       #subtitle = ,
+       caption = paste0("Sample size: ", length(PS), ";  Number of variables: ", ( ncol(dat)-2 ),
+                        " \n" ,
+                        "Treated: ",
+                        "Min=" ,      round(summary( dat_new_W1$PS )[[1]] ,2 ),    
+                        ";  Q1=",     round(summary( dat_new_W1$PS )[[2]] ,2 ),
+                        ";  Q2=",     round(summary( dat_new_W1$PS )[[3]] ,2 ),
+                        ";  Mean=",   round(summary( dat_new_W1$PS )[[4]] ,2 ),
+                        ";  Q3=",     round(summary( dat_new_W1$PS )[[5]] ,2 ),
+                        ";  Max=",    round(summary( dat_new_W1$PS )[[6]] ,2 ), 
+                        " \n" ,
+                        "Untreated: ",
+                        "Min=" ,      round(summary( dat_new_W0$PS )[[1]] ,2 ),    
+                        ";  Q1=",     round(summary( dat_new_W0$PS )[[2]] ,2 ),
+                        ";  Q2=",     round(summary( dat_new_W0$PS )[[3]] ,2 ),
+                        ";  Mean=",   round(summary( dat_new_W0$PS )[[4]] ,2 ),
+                        ";  Q3=",     round(summary( dat_new_W0$PS )[[5]] ,2 ),
+                        ";  Max=",    round(summary( dat_new_W0$PS )[[6]] ,2 )) ) +
+  theme(plot.caption = element_text(hjust = 0)) 
 
 print(PSplot)
 dev.off()
 
 return(PSplot)
 }
+
+
+#' GG_CV_Dx_PS
+#' 
+#' Function that shows diagnostic figure across CV
+#' @param result result of iCF
+#' @param K total fold # of CV
+#'  
+#' @return the PS distribution
+#' 
+#' @export
+
+GG_CV_Dx_PS <- function(result, K){
+  if (K==5){
+    Dx_fig <- cowplot::plot_grid( result$PS_distribution[[1]],
+                                  result$PS_distribution[[2]],
+                                  result$PS_distribution[[3]],
+                                  result$PS_distribution[[4]],
+                                  result$PS_distribution[[5]],
+                                  result$PS_distribution_test[[1]],
+                                  result$PS_distribution_test[[2]],
+                                  result$PS_distribution_test[[3]],
+                                  result$PS_distribution_test[[4]],
+                                  result$PS_distribution_test[[5]], 
+                                  ncol  = 5, nrow=2,
+                                  labels = c(1:(K*2)), label_size = 10)
+  } else if (K==10) {
+    
+    Dx_fig <- cowplot::plot_grid( result$PS_distribution[[1]],
+                                  result$PS_distribution[[2]],
+                                  result$PS_distribution[[3]],
+                                  result$PS_distribution[[4]],
+                                  result$PS_distribution[[5]],
+                                  result$PS_distribution[[6]],
+                                  result$PS_distribution[[7]],
+                                  result$PS_distribution[[8]],
+                                  result$PS_distribution[[9]],
+                                  result$PS_distribution[[10]],
+                                  result$PS_distribution_test[[1]],
+                                  result$PS_distribution_test[[2]],
+                                  result$PS_distribution_test[[3]],
+                                  result$PS_distribution_test[[4]],
+                                  result$PS_distribution_test[[5]],
+                                  result$PS_distribution_test[[6]],
+                                  result$PS_distribution_test[[7]],
+                                  result$PS_distribution_test[[8]],
+                                  result$PS_distribution_test[[9]],
+                                  result$PS_distribution_test[[10]], 
+                                  ncol  = 5, nrow=4,
+                                  labels = c(1:(K*2)), label_size = 10) 
+    
+  }
+  
+  return(Dx_fig)
+}
+
 
 
 #' GG_IPTW
@@ -160,28 +221,81 @@ return(PSplot)
 #' 
 #' @export
 
-GG_IPTW <- function(IPTW){
-IPTW_distri <- ggplot2::ggplot(data.frame(iptw_u= IPTW ), aes(iptw_u)) +   
-               ggplot2::geom_histogram(aes(y=#..count.. 
-                                             ..density..
-                                           ),
-                                           binwidth = 0.01,  fill='#62C6F2') +
-               ggplot2::xlab(paste("Inverse probability weight (unstabilized)", sep=": "))+ylab("Density")+
-               ggplot2::labs(title = "Distribution of Inverse Probability Weight",
-                            subtitle = paste0("Min=" ,      round(summary( IPTW )[[1]] ,1 ),    
-                                              ";  Q1=",     round(summary( IPTW )[[2]] ,1 ),
-                                              ";  Median=", round(summary( IPTW )[[3]] ,1 ),
-                                              ";  Mean=",   round(summary( IPTW )[[4]] ,1 ),
-                                              ";  Q3=",     round(summary( IPTW )[[5]] ,1 ),
-                                              ";  Max=",    round(summary( IPTW )[[6]] ,1 )),
-                            
-                            caption = paste0("Sample size: ", length(IPTW) ) )
-                
-return(IPTW_distri)
+#GG_IPTW <- function(IPTW){
+#IPTW_distri <- ggplot2::ggplot(data.frame(iptw_u= IPTW ), aes(iptw_u)) +   
+#               ggplot2::geom_histogram(aes(y=#..count.. 
+#                                             ..density..
+#                                           ),
+#                                           binwidth = 0.01,  fill='#62C6F2') +
+#               ggplot2::xlab(paste("Inverse probability weight (unstabilized)", sep=": "))+ylab("Density")+
+#               ggplot2::labs(title = "Distribution of Inverse Probability Weight",
+#                            subtitle = paste0("Min=" ,      round(summary( IPTW )[[1]] ,1 ),    
+#                                              ";  Q1=",     round(summary( IPTW )[[2]] ,1 ),
+#                                              ";  Median=", round(summary( IPTW )[[3]] ,1 ),
+#                                              ";  Mean=",   round(summary( IPTW )[[4]] ,1 ),
+#                                              ";  Q3=",     round(summary( IPTW )[[5]] ,1 ),
+#                                              ";  Max=",    round(summary( IPTW )[[6]] ,1 )),
+#                            
+#                            caption = paste0("Sample size: ", length(IPTW) ) )
+#                
+#return(IPTW_distri)
+#}
+
+
+
+#' GG_CV_Dx_PS
+#' 
+#' Function that shows diagnostic figure across CV
+#' @param result result of iCF
+#' @param K total fold # of CV
+#'  
+#' @return the PS distribution
+#' 
+#' @export
+
+GG_CV_Dx_iptw <- function(result, K){
+  if (K==5){
+    Dx_fig <- cowplot::plot_grid( result$IPTW_distribution[[1]],
+                                  result$IPTW_distribution[[2]],
+                                  result$IPTW_distribution[[3]],
+                                  result$IPTW_distribution[[4]],
+                                  result$IPTW_distribution[[5]], 
+                                  result$IPTW_distribution_test[[1]],
+                                  result$IPTW_distribution_test[[2]],
+                                  result$IPTW_distribution_test[[3]],
+                                  result$IPTW_distribution_test[[4]],
+                                  result$IPTW_distribution_test[[5]], 
+                                  ncol  = 5, nrow=2,
+                                  labels = c(1:(K*2)), label_size = 10)
+  } else if (K==10) {
+    
+    Dx_fig <- cowplot::plot_grid( result$IPTW_distribution[[1]],
+                                  result$IPTW_distribution[[2]],
+                                  result$IPTW_distribution[[3]],
+                                  result$IPTW_distribution[[4]],
+                                  result$IPTW_distribution[[5]], 
+                                  result$IPTW_distribution[[6]],
+                                  result$IPTW_distribution[[7]],
+                                  result$IPTW_distribution[[8]],
+                                  result$IPTW_distribution[[9]],
+                                  result$IPTW_distribution[[10]],
+                                  result$IPTW_distribution_test[[1]],
+                                  result$IPTW_distribution_test[[2]],
+                                  result$IPTW_distribution_test[[3]],
+                                  result$IPTW_distribution_test[[4]],
+                                  result$IPTW_distribution_test[[5]], 
+                                  result$IPTW_distribution_test[[6]],
+                                  result$IPTW_distribution_test[[7]],
+                                  result$IPTW_distribution_test[[8]],
+                                  result$IPTW_distribution_test[[9]],
+                                  result$IPTW_distribution_test[[10]], 
+                                  ncol  = 5, nrow=4,
+                                  labels = c(1:(K*2)), label_size = 10) 
+    
+  }
+  
+  return(Dx_fig)
 }
-
-
-
 
 #' GG_Y_star
 #' 
@@ -199,7 +313,7 @@ GG_Y_star <- function(dat, Y_star,No0 ){
     dat_new=cbind(dat, Y_star)
   } else {
     No0flag="Non-zero "
-    dat_new=cbind(subset(dat, Y==1), Y_star)
+    dat_new=cbind(subset(dat, Y !=0 ), Y_star)
   }
   
   
@@ -220,62 +334,140 @@ GG_Y_star <- function(dat, Y_star,No0 ){
     facet_grid(W ~ ., margins=F) +
     ggplot2::xlab(paste0(No0flag, "Transformed Outcome"))+ylab("Density")+
     ggplot2::labs(fill = "Treatment",
-                  title = paste0("Distribution of ",No0flag, "Transformed Outcome"),
-                  subtitle = paste0("Number of variables: " , (ncol(dat)-2),
-                                    "; \n" ,
-                                    "Treatment=1: ",
+                 # title = paste0("Distribution of ",No0flag, "Transformed Outcome"),
+                 # subtitle = paste0( ) ,
+                  caption =  paste0("Number of obserbations: ", length(Y_star),
+                                    " \n" ,
+                                    "Treated: ",
                                     "Min=" ,      round(summary(dat_new_W1$Y_star)[[1]] ,3 ),    
                                     ";  Q1=",     round(summary(dat_new_W1$Y_star)[[2]] ,3 ),
-                                    ";  Median=", round(summary(dat_new_W1$Y_star)[[3]] ,3 ),
+                                    ";  Q2=", round(summary(dat_new_W1$Y_star)[[3]] ,3 ),
                                     ";  Mean=",   round(summary(dat_new_W1$Y_star)[[4]] ,3 ),
                                     ";  Q3=",     round(summary(dat_new_W1$Y_star)[[5]] ,3 ),
                                     ";  Max=",    round(summary(dat_new_W1$Y_star)[[6]] ,3 ),
-                                    "; \n" ,
-                                    "Treatment=0: ",
+                                    " \n" ,
+                                    "Untreated: ",
                                     "Min=" ,      round(summary(dat_new_W0$Y_star)[[1]] ,3 ),    
                                     ";  Q1=",     round(summary(dat_new_W0$Y_star)[[2]] ,3 ),
-                                    ";  Median=", round(summary(dat_new_W0$Y_star)[[3]] ,3 ),
+                                    ";  Q2=", round(summary(dat_new_W0$Y_star)[[3]] ,3 ),
                                     ";  Mean=",   round(summary(dat_new_W0$Y_star)[[4]] ,3 ),
                                     ";  Q3=",     round(summary(dat_new_W0$Y_star)[[5]] ,3 ),
-                                    ";  Max=",    round(summary(dat_new_W0$Y_star)[[6]] ,3 )) ,
-                  caption =  paste0("Number of obserbations: ", length(Y_star))
-                      )
+                                    ";  Max=",    round(summary(dat_new_W0$Y_star)[[6]] ,3 ))
+                      ) +
+    theme(plot.caption = element_text(hjust = 0)) 
   return(Y_star_distri)
 }
 
 
-#' ROC2comp
+#' GG_CV_Dx_Ystar
 #' 
-#' Function that compares 2 ROCs, not necessary for iCF/hdiCF
-#' @param response1 true outcome 1
-#' @param response2 true outcome 2
-#' @param predict1 prediction 1
-#' @param predict2 prediction 2  
-#' @param label1 label 1
-#' @param label2 lebel 2 
-#' @param outcome outcome, e.g. Y or W
-#' @return the image object
+#' Function that shows diagnostic figure across CV
+#' @param result result of iCF
+#' @param K total fold # of CV
+#'  
+#' @return the PS distribution
 #' 
 #' @export
 
-
-ROC2comp <- function(response1, predict1, response2, predict2,label1, label2, outcome){
-dev.off()
-
-par(pty = "s") 
-roc_Y.hat_all <-pROC::roc(response = response1, predictor = predict1, plot=T, 
-                          legacy.axes=TRUE, percent=TRUE, 
-                          xlab="False Positive Percentage", ylab="True Postive Percentage", 
-                          col="#377eb8", lwd=4, print.auc=TRUE)
-
-pROC::plot.roc(response2, predict2, percent=TRUE, col="#4daf4a", lwd=4, print.auc=TRUE, add=TRUE, print.auc.y=40)
-legend("bottomright", 
-       legend=c(label1, label2), 
-       col=c("#377eb8", "#4daf4a"), 
-       lwd=4)
-title(main =  paste0("ROC of predicted ", outcome) ,  line = 3, adj = 0)
-
-ROC_compare <- recordPlot()
-return( ROC_compare )
-
+GG_CV_Dx_Ystar <- function(result, K){
+  if (K==5){
+    Dx_fig <- cowplot::plot_grid( result$Y_star_distribution[[1]],
+                                  result$Y_star_distribution[[2]],
+                                  result$Y_star_distribution[[3]],
+                                  result$Y_star_distribution[[4]],
+                                  result$Y_star_distribution[[5]],
+                                  result$Y_star_distribution_test[[1]],
+                                  result$Y_star_distribution_test[[2]],
+                                  result$Y_star_distribution_test[[3]],
+                                  result$Y_star_distribution_test[[4]],
+                                  result$Y_star_distribution_test[[5]],
+                                  ncol  = 5, nrow=2,
+                                  labels = c(1:(K*2)), label_size = 10)
+  } else if (K==10) {
+    
+    Dx_fig <- cowplot::plot_grid( result$Y_star_distribution[[1]],
+                                  result$Y_star_distribution[[2]],
+                                  result$Y_star_distribution[[3]],
+                                  result$Y_star_distribution[[4]],
+                                  result$Y_star_distribution[[5]], 
+                                  result$Y_star_distribution[[6]],
+                                  result$Y_star_distribution[[7]],
+                                  result$Y_star_distribution[[8]],
+                                  result$Y_star_distribution[[9]],
+                                  result$Y_star_distribution[[10]],
+                                  result$Y_star_distribution_test[[1]],
+                                  result$Y_star_distribution_test[[2]],
+                                  result$Y_star_distribution_test[[3]],
+                                  result$Y_star_distribution_test[[4]],
+                                  result$Y_star_distribution_test[[5]], 
+                                  result$Y_star_distribution_test[[6]],
+                                  result$Y_star_distribution_test[[7]],
+                                  result$Y_star_distribution_test[[8]],
+                                  result$Y_star_distribution_test[[9]],
+                                  result$Y_star_distribution_test[[10]],
+                                  ncol  = 5, nrow=4,
+                                  labels = c(1:(K*2)), label_size = 10) 
+    
+  }
+  
+  return(Dx_fig)
 }
+
+
+
+#' GG_CV_Dx_YstarNo0
+#' 
+#' Function that shows diagnostic figure across CV
+#' @param result result of iCF
+#' @param K total fold # of CV
+#'  
+#' @return the PS distribution
+#' 
+#' @export
+
+GG_CV_Dx_YstarNo0 <- function(result, K){
+  if (K==5){
+    Dx_fig <- cowplot::plot_grid( result$Y_star_No0_distribution[[1]],
+                                  result$Y_star_No0_distribution[[2]],
+                                  result$Y_star_No0_distribution[[3]],
+                                  result$Y_star_No0_distribution[[4]],
+                                  result$Y_star_No0_distribution[[5]],
+                                  result$Y_star_No0_distribution_test[[1]],
+                                  result$Y_star_No0_distribution_test[[2]],
+                                  result$Y_star_No0_distribution_test[[3]],
+                                  result$Y_star_No0_distribution_test[[4]],
+                                  result$Y_star_No0_distribution_test[[5]],
+                                  ncol  = 5, nrow=2,
+                                  labels = c(1:(K*2)), label_size = 10)
+  } else if (K==10) {
+    
+    Dx_fig <- cowplot::plot_grid( result$Y_star_No0_distribution[[1]],
+                                  result$Y_star_No0_distribution[[2]],
+                                  result$Y_star_No0_distribution[[3]],
+                                  result$Y_star_No0_distribution[[4]],
+                                  result$Y_star_No0_distribution[[5]], 
+                                  result$Y_star_No0_distribution[[6]],
+                                  result$Y_star_No0_distribution[[7]],
+                                  result$Y_star_No0_distribution[[8]],
+                                  result$Y_star_No0_distribution[[9]],
+                                  result$Y_star_No0_distribution[[10]],
+                                  result$Y_star_No0_distribution_test[[1]],
+                                  result$Y_star_No0_distribution_test[[2]],
+                                  result$Y_star_No0_distribution_test[[3]],
+                                  result$Y_star_No0_distribution_test[[4]],
+                                  result$Y_star_No0_distribution_test[[5]], 
+                                  result$Y_star_No0_distribution_test[[6]],
+                                  result$Y_star_No0_distribution_test[[7]],
+                                  result$Y_star_No0_distribution_test[[8]],
+                                  result$Y_star_No0_distribution_test[[9]],
+                                  result$Y_star_No0_distribution_test[[10]], 
+                              
+                                  ncol  = 5, nrow=4,
+                                  labels = c(1:(K*2)), label_size = 10) 
+    
+  }
+  
+  return(Dx_fig)
+}
+
+
