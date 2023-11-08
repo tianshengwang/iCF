@@ -4,7 +4,7 @@
 
 **Citation**
 
-**Wang T, Keil AP, Kim S, Wyss R, Htoo PT, Funk MJ, Buse JB, Kosorok MR, Stürmer T. Iterative Causal Forest: A Novel Algorithm for Subgroup Identification. _Am J Epidemiol._ [2023 (In Press)]([https://doi.org/10.1093/aje/kwad219](https://academic.oup.com/aje/advance-article/doi/10.1093/aje/kwad219/7378048?utm_source=advanceaccess&utm_campaign=aje&utm_medium=email)).**
+**Wang T, Keil AP, Kim S, Wyss R, Htoo PT, Funk MJ, Buse JB, Kosorok MR, Stürmer T. Iterative Causal Forest: A Novel Algorithm for Subgroup Identification. _Am J Epidemiol._ [https://doi.org/10.1093/aje/kwad219](https://academic.oup.com/aje/advance-article/doi/10.1093/aje/kwad219/7378048?utm_source=advanceaccess&utm_campaign=aje&utm_medium=email).**
 
 
 
