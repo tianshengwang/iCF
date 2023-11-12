@@ -444,7 +444,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
                 IPTW_distribution_test = IPTW_distribution_test,
                 Y_star_distribution_test = Y_star_distribution_test,
                 Y_star_No0_distribution_test = Y_star_No0_distribution_test,
-                ROC_Y_n_W = ROC_Y_n_W,
+                #ROC_Y_n_W = ROC_Y_n_W,
                 
                 ATE_kable = ATE_kable,
                 
