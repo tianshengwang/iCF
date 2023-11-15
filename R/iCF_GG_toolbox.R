@@ -211,37 +211,6 @@ GG_CV_Dx_PS <- function(result, K){
 
 
 
-#' GG_IPTW
-#' 
-#' Function that shows IPTW distribution
-#' @param dat dataset
-#' @param IPTW IPTW
-#'  
-#' @return the PS distribution
-#' 
-#' @export
-
-#GG_IPTW <- function(IPTW){
-#IPTW_distri <- ggplot2::ggplot(data.frame(iptw_u= IPTW ), aes(iptw_u)) +   
-#               ggplot2::geom_histogram(aes(y=#..count.. 
-#                                             ..density..
-#                                           ),
-#                                           binwidth = 0.01,  fill='#62C6F2') +
-#               ggplot2::xlab(paste("Inverse probability weight (unstabilized)", sep=": "))+ylab("Density")+
-#               ggplot2::labs(title = "Distribution of Inverse Probability Weight",
-#                            subtitle = paste0("Min=" ,      round(summary( IPTW )[[1]] ,1 ),    
-#                                              ";  Q1=",     round(summary( IPTW )[[2]] ,1 ),
-#                                              ";  Median=", round(summary( IPTW )[[3]] ,1 ),
-#                                              ";  Mean=",   round(summary( IPTW )[[4]] ,1 ),
-#                                              ";  Q3=",     round(summary( IPTW )[[5]] ,1 ),
-#                                              ";  Max=",    round(summary( IPTW )[[6]] ,1 )),
-#                            
-#                            caption = paste0("Sample size: ", length(IPTW) ) )
-#                
-#return(IPTW_distri)
-#}
-
-
 
 #' GG_CV_Dx_PS
 #' 
