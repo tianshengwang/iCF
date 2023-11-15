@@ -1,4 +1,4 @@
-
+library(ggplot2)
 #' GG_DepthDistribution
 #' 
 #' Function that merge distribution of depth for proposed denominator for minimumum leaf size for D2, D3, D4, and D5 
