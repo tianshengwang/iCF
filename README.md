@@ -325,16 +325,5 @@ iCFCV_B1000_i100_rwd <- iCFCV(dat=Train,K=5, treeNo=1000, iterationNo=100, min.s
 
 iCFCV_B1000_i100_rwd$selectedSG_ori #subgroup decision
 ```
-Save subgroup decision and subgroup-specific treatment effect (CATE) as an image
-```{}
-Table2 <- (iCFCV_B1000_i100_rwd$CATE_t2_ori %>% as.data.frame()) [,c("SubgroupID", "Definition",  "CATE_crude", "CATE_iptw")]
-T2 <- Table2[!duplicated(Table2), ]
-rownames(T2) <- NULL
-library(knitr)
-library(kableExtra)
-library(magrittr)
-kable(T2) %>% kable_styling() %>% save_kable(file = "table2_rwd.png")
-```
-<img src = images/table2_rwd.png width=400>
 
 If you have further questions or comments, please contact Dr. Tiansheng Wang: tianwang@unc.edu
