@@ -134,7 +134,7 @@ We used a simulation setup similar to the one initially described by [Setoguchi 
 #3-way interaction of W, X1, and X3 (W:X1:X3)
  Y = a0 + a1*X1 + a2*X2 + a3*X3 + a4*X4 +a5*X8 + a6*X9 + a7*X10 + g1*W + rnorm(nstudy,0,1) + 0.4*W*X3 + 0.3*W*X1 + 0.4*W*X1*X3 + 0.2*X1*X3
 ```
-Make a dataset in this format to be run by iCF: the 1st column is treatment **W**, 2nd column is outcome **Y**, and remaining columns features **X**.
+Make a dataset in this format to be run by iCF: the 1st column is outcome **Y**, 2nd column is treatment **W**, and remaining columns features **X**.
 ```{}
  Train <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
 ``` 
