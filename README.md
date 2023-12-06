@@ -44,17 +44,19 @@ There are three ways to install iCF.
 First, download all the R programs in the [R folder](https://github.com/tianshengwang/iCF/tree/iCF/R) and save them in your local directory (create a new folder named 'iCF'). Then, run the following R codes each time before executing iCF:
 ```{}
 source("/local/iCF/best_tree_MSegar.R")
+source("/local/iCF/iCF_CV.R")
 source("/local/iCF/iCF_TREE_build.R")
 source("/local/iCF/iCF_PARENT_node.R")
 source("/local/iCF/iCF_PRE_majority.R")
 source("/local/iCF/iCF_MAJORITY_VOTE.R")
 source("/local/iCF/iCF_SUBGROUP_DECISION.R")
-source("/local/iCF/iCF_SG_PIPELINE.R")
-source("/local/iCF/iCF_CV.R")
+source("/local/iCF/iCF_SUBGROUP_PIPELINE.R")
 source("/local/iCF/iCF_SUBGROUP_ANALYSIS.R")
-source("/local/iCF/iCF_grplasso.R")
-source("/local/iCF/sim_Truth_tree.R")
+source("/local/iCF/iCF_SUBGROUP_MODEL.R")
+source("/local/iCF/iCF_SUBGROUP_HD.R")
 source("/local/iCF/iCF_GG_toolbox.R")
+source("/local/iCF/sim_Truth_tree.R")
+
 ```
 Second, you can install it using devtools (this option is currently being worked on and will be available soon):
 ```{}
