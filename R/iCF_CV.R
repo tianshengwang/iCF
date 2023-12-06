@@ -11,7 +11,7 @@ library(tidyverse)
 #' @param split_val_round_posi split value rounding position
 #' @param P_threshold threshold for P value
 #' @param variable_type high-dimensional (HD) or non-HD
-#' @param hdpct if high-dimensional (HD) variable, the top percentile used to split population
+#' @param hdPctTop if high-dimensional (HD) variable, the top percentile used to split population
 #' @param HTE_P_cf.raw P-value for HTE test in raw CF
 #'  
 #' @return final subgroup decision G_iCF
@@ -21,7 +21,7 @@ library(tidyverse)
 
 iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_posi, 
                   #tune_unit, 
-                  P_threshold=0.5, variable_type, hdpct, HTE_P_cf.raw){
+                  P_threshold=0.5, variable_type, hdPctTop, HTE_P_cf.raw){
   
   s_iCF_CV=Sys.time()
   intTRUE <<- "Unknown"
@@ -126,7 +126,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
         Test_ID_cf  <- cbind(Test_cf,  as.vector(       tt_indicies[[f]]) ) %>% dplyr::rename (ID=`as.vector(tt_indicies[[f]])`)  
         #============================== raw full CF for CV training data ==============================
         #for each training set, X, Y, W ... are regenerated
-        cf_raw_key[[f]] <- CF_RAW_key(Train_cf, min.split.var, variable_type, hdpct) 
+        cf_raw_key[[f]] <- CF_RAW_key(Train_cf, min.split.var, variable_type, hdPctTop) 
         
         selected_cf.idx.L[[f]]  <- cf_raw_key[[f]]$selected_cf.idx
         
@@ -137,40 +137,33 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
      
      # ROC_Y_n_W[[f]] <- ROC2comp(Train_cf$Y,  Y.hat_train[[f]], Train_cf$W,  W.hat_train[[f]], "Y.hat", "W.hat", "Y and W")
 
-      PS_distribution[[f]] <- GG_PS(Train_cf, 
-                                    W.hat_train[[f]],
-                                    "Propensity Score", 0.006, "PS_trainCV")
+      PS_distribution[[f]] <- GG_PS(Train_cf, W.hat_train[[f]],  "Propensity Score", "PS_trainCV")
       
-      iptw_u[[f]] <-  ifelse(cf_raw_key[[f]]$W==1, 
-                             1/W.hat_train[[f]], 
-                             1/(1-W.hat_train[[f]]))
+      #unstabilized IPTW
+      
+      iptw_u[[f]] <-  ifelse(cf_raw_key[[f]]$W==1, 1/W.hat_train[[f]], 1/(1-W.hat_train[[f]]))
       
       iptw_u_summary[[f]] <- summary( iptw_u[[f]] )
-      IPTW_distribution[[f]] <-  GG_PS(Train_cf, iptw_u[[f]], "Inverse Probabilty Treatment Weight", 0.006, "iptw_trainCV")
+      IPTW_distribution[[f]] <-  GG_PS(Train_cf, iptw_u[[f]], "Inverse Probabilty Treatment Weight", "iptw_trainCV")
       
-
-      Y_star[[f]]  <- ifelse(cf_raw_key[[f]]$W==1, 
-                              cf_raw_key[[f]]$Y/W.hat_train[[f]], 
-                             -cf_raw_key[[f]]$Y/(1-W.hat_train[[f]]))
+      #transfomred outcome
+      Y_star[[f]]  <- ifelse(cf_raw_key[[f]]$W==1, cf_raw_key[[f]]$Y/W.hat_train[[f]], -cf_raw_key[[f]]$Y/(1-W.hat_train[[f]]))
       Y_star_summary[[f]]      <- summary( Y_star[[f]] )
       Y_star_distribution[[f]] <- GG_Y_star(Train_cf, Y_star[[f]], F)
       
+      #non-zero transformed outcome
       Y_star_No0[[f]]          <-  Y_star[[f]] [!Y_star[[f]]  %in% 0]
       Y_star_No0_summary[[f]]  <- summary( Y_star_No0[[f]] )
       Y_star_No0_distribution[[f]] <- GG_Y_star(Train_cf, Y_star_No0[[f]], T)
       
       
       #-------------------------------------------test set----------------------------------------------------------------
-      PS_distribution_test[[f]] <- GG_PS(Test_cf, W.hat_test[[f]], "Propensity Score", 0.006,"PS_testCV")
-      iptw_u_test[[f]] <-  ifelse(Test_cf$W==1, 
-                                  1/W.hat_test[[f]], 
-                                  1/(1-W.hat_test[[f]]))
+      PS_distribution_test[[f]] <- GG_PS(Test_cf, W.hat_test[[f]], "Propensity Score", "PS_testCV")
+      iptw_u_test[[f]] <-  ifelse(Test_cf$W==1, 1/W.hat_test[[f]], 1/(1-W.hat_test[[f]]))
       iptw_u_summary_test[[f]] <- summary( iptw_u_test[[f]] )
-      IPTW_distribution_test[[f]] <-  GG_PS(Test_cf, iptw_u_test[[f]],  "Inverse Probabilty Treatment Weight", 0.006, "iptw_testCV")
+      IPTW_distribution_test[[f]] <-  GG_PS(Test_cf, iptw_u_test[[f]],  "Inverse Probabilty Treatment Weight", "iptw_testCV")
       
-      Y_star_test[[f]]  <- ifelse(Test_cf$W==1, 
-                                  Test_cf$Y/W.hat_test[[f]], 
-                                 -Test_cf$Y/(1-W.hat_test[[f]]))
+      Y_star_test[[f]]  <- ifelse(Test_cf$W==1, Test_cf$Y/W.hat_test[[f]], -Test_cf$Y/(1-W.hat_test[[f]]))
       Y_star_summary_test[[f]] <- summary( Y_star_test[[f]] )
       Y_star_distribution_test[[f]] <- GG_Y_star(Test_cf, Y_star_test[[f]], F)
       
@@ -297,9 +290,9 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       stability_D4_vote <<- round(mean(unlist(stability_D4_T_r [c( cv_sg_majority_D4$selected_CV_idx) ] )), 3)
       stability_D5_vote <<- round(mean(unlist(stability_D5_T_r [c( cv_sg_majority_D5$selected_CV_idx) ] )), 3)
       
-      stability_D2345_vote = cbind(stability_D2_vote, stability_D3_vote, stability_D4_vote, stability_D5_vote) %>% knitr::kable()
+      stability_D2345_vote = cbind(stability_D2_vote, stability_D3_vote, stability_D4_vote, stability_D5_vote) %>% as.data.frame() #%>% knitr::kable()
       
-      stability_D2345_CV = cbind(stability_D2_CV, stability_D3_CV, stability_D4_CV, stability_D5_CV) %>% knitr::kable()
+      stability_D2345_CV = cbind(stability_D2_CV, stability_D3_CV, stability_D4_CV, stability_D5_CV) %>% as.data.frame() #%>% knitr::kable()
       
       stability_vote_across_CV = cbind(stability_D2_T_r, stability_D3_T_r, stability_D4_T_r, stability_D5_T_r) %>% as.data.frame() 
 
@@ -323,7 +316,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
 
 
       ATE_all <- CATE_SG(dat, "NA")
-      ATE_kable <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") 
+      ATE_table <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") 
       #--------------------------------------------------------------------------------------------------------------------------------------------------
       #Original, without any stability weight
       PICK_CV_ori <- PICK_CV(HTE_P_cf.raw, mse_all_folds.m.tran, 
@@ -332,7 +325,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
                              stability_D2_T_r, stability_D3_T_r,  stability_D4_T_r,  stability_D5_T_r,
                               P_threshold, K )
       CATE_ori <- CATE_SG(dat, PICK_CV_ori$selectedSG$majority)
-      CATE_ori_kable <-  CATE_ori %>% mutate(Wt="NA") 
+      CATE_ori_table <-  CATE_ori %>% mutate(Wt="NA") 
       #--------------------------------------------------------------------------------------------------------------------------------------------------
       #Inverse CV stability weight
       PICK_CV_icvsw <- PICK_CV(HTE_P_cf.raw, mse_all_folds.m.tran, 
@@ -346,7 +339,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       } else {
       CATE_icvsw <- CATE_SG(dat, PICK_CV_icvsw$selectedSG$majority)
       }
-      CATE_icvsw_kable <-  CATE_icvsw %>% dplyr::mutate(Wt="icvsw")
+      CATE_icvsw_table <-  CATE_icvsw %>% dplyr::mutate(Wt="icvsw")
  
     
   } else if (round(HTE_P_cf.raw,1) > P_threshold){
@@ -361,7 +354,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
     Y_star_distribution_test <- "NA"
     Y_star_No0_distribution_test <- "NA"
     ATE_all <- CATE_SG(dat, "NA")
-    ATE_kable <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") %>% knitr::kable()
+    ATE_table <- ATE_all %>% dplyr::mutate(SubgroupID="NA", Definition="Overall Population") #%>% knitr::kable()
     
     vote_D2_subgroup.CVmajority = "NA"
     vote_D3_subgroup.CVmajority = "NA"
@@ -376,11 +369,11 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
     
     selectedSG_ori             = "NA"
     selectedSG_stability_ori   = "NA"
-    CATE_t2_ori = CATE_ori_kable  = "NA"
+    CATE_t2_ori = CATE_ori_table  = "NA"
     
     selectedSG_icvsw             = "NA"
     selectedSG_stability_icvsw    = "NA"
-    CATE_t2_icvsw = CATE_icvsw_kable  = "NA"
+    CATE_t2_icvsw = CATE_icvsw_table  = "NA"
     
     vote_D2_SG.L  = "NA"
     vote_D3_SG.L  = "NA"
@@ -403,9 +396,8 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
               Y_star_distribution_test = Y_star_distribution_test,
               Y_star_No0_distribution_test = Y_star_No0_distribution_test,
               #ROC_Y_n_W =  ROC_Y_n_W,
-              
-              ATE_kable = ATE_kable,
-              
+              ATE_table = ATE_table,
+
               vote_D2_subgroup.CVmajority = vote_D2_subgroup.L.majority,
               vote_D3_subgroup.CVmajority = vote_D3_subgroup.L.majority,
               vote_D4_subgroup.CVmajority = vote_D4_subgroup.L.majority,
@@ -419,11 +411,11 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
               
               selectedSG_ori             = PICK_CV_ori$selectedSG,
               selectedSG_stability_ori   = PICK_CV_ori$selectedSG_wt, 
-              CATE_t2_ori = CATE_ori_kable ,
+              CATE_t2_ori = CATE_ori_table ,
               
               selectedSG_icvsw             = PICK_CV_icvsw$selectedSG ,
               selectedSG_stability_icvsw   = PICK_CV_icvsw$selectedSG_wt, 
-              CATE_t2_icvsw = CATE_icvsw_kable ,
+              CATE_t2_icvsw = CATE_icvsw_table ,
 
               vote_D2_SG.L = vote_D2_subgroup.L %>% knitr::kable(),
               vote_D3_SG.L = vote_D3_subgroup.L %>% knitr::kable(),
@@ -446,8 +438,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
                 Y_star_No0_distribution_test = Y_star_No0_distribution_test,
                 #ROC_Y_n_W = ROC_Y_n_W,
                 
-                ATE_kable = ATE_kable,
-                
+                ATE_table = ATE_table,
                 vote_D2_subgroup.CVmajority = vote_D2_subgroup.L.majority,
                 vote_D3_subgroup.CVmajority = vote_D3_subgroup.L.majority,
                 vote_D4_subgroup.CVmajority = vote_D4_subgroup.L.majority,
@@ -461,12 +452,11 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
                 
                 selectedSG_ori             = PICK_CV_ori$selectedSG,
                 selectedSG_stability_ori   = PICK_CV_ori$selectedSG_wt, 
-                CATE_t2_ori = CATE_ori_kable ,
+                CATE_t2_ori = CATE_ori_table ,
                 
-                #no need to apply icvsw September 2023
-                #selectedSG_icvsw             = PICK_CV_icvsw$selectedSG ,
-                #selectedSG_stability_icvsw   = PICK_CV_icvsw$selectedSG_wt, 
-                #CATE_t2_icvsw = CATE_icvsw_kable ,
+                selectedSG_icvsw             = PICK_CV_icvsw$selectedSG ,
+                selectedSG_stability_icvsw   = PICK_CV_icvsw$selectedSG_wt, 
+                CATE_t2_icvsw = CATE_icvsw_table ,
                 
                 vote_D2_SG.L = vote_D2_subgroup.L %>% knitr::kable(),
                 vote_D3_SG.L = vote_D3_subgroup.L %>% knitr::kable(),

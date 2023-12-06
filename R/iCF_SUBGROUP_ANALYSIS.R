@@ -18,6 +18,70 @@ prop.func <- function(x, trt)
   pi.x
 }
 
+#' PS_trim
+#' 
+#' Function that trim PS 
+#' @param dat dataset 
+#' @param W_hat predicted PS
+#' @param trimmethod trimming method
+#' @param trimPct percentile for asymmetrical trimming
+#'  
+#' @return the prediced propensity score
+#' 
+#' @export
+
+PS_trim <- function(dat, W_hat, trimmethod, trimPct){
+  
+  Train_ID_W_notrim <- dat  %>%  
+    dplyr::mutate(W.hat=W_hat) %>% 
+    dplyr::select(1, W.hat, W) 
+  
+  ps_summary <- Train_ID_W_notrim %>%
+    group_by(W) %>%
+    summarise(p0   = min(W.hat, na.rm = TRUE),
+              p0.1 = quantile(W.hat, 0.001, na.rm = TRUE),
+              p1   = quantile(W.hat, 0.01, na.rm = TRUE),
+              p5   = quantile(W.hat, 0.05, na.rm = TRUE),
+              p10  = quantile(W.hat, 0.1, na.rm = TRUE),
+              p15  = quantile(W.hat, 0.15, na.rm = TRUE),
+              p20  = quantile(W.hat, 0.2, na.rm = TRUE),
+              p80  = quantile(W.hat, 0.8, na.rm = TRUE),
+              p85  = quantile(W.hat, 0.85, na.rm = TRUE),
+              p90  = quantile(W.hat, 0.9, na.rm = TRUE),
+              p95  = quantile(W.hat, 0.95, na.rm = TRUE),
+              p99  = quantile(W.hat, 0.99, na.rm = TRUE),
+              p99.9 = quantile(W.hat, 0.999, na.rm = TRUE),
+              p100 = max(W.hat, na.rm = TRUE)
+    )
+  
+  # Filter for the row where drug1 = 1
+  treated_summary   <- ps_summary %>% filter(W == 1)
+  untreated_summary <- ps_summary %>% filter(W == 0)
+  
+  #Asymmetrical TRIMMING
+  if (trimmethod=="commonrange"){
+    Train_ID_W <- Train_ID_W_notrim %>% 
+      dplyr::filter( max( treated_summary[[paste0("p",0)]], untreated_summary[[paste0("p",0)]]  ) <= W.hat, 
+                     W.hat <= min(treated_summary[[paste0("p",100)]], untreated_summary[[paste0("p",100)]]) )
+    
+  } else if (trimmethod=="asymmetrical") {
+    Train_ID_W <- Train_ID_W_notrim %>% 
+      dplyr::filter(treated_summary[[paste0("p",trimPct)]] <= W.hat, 
+                    W.hat <= untreated_summary[[paste0("p",(100-trimPct) )]])
+  }
+  nrow(Train_ID_W)#new sample size after trimming
+  #------------------------ 
+  #Trimmed NEW dataset
+  #------------------------ 
+  Train_ID_all_trim <- dplyr::inner_join(dat, dplyr::select(Train_ID_W, c(1)), by = colnames(Train_ID_W_notrim)[1] ) #
+  nrow(dat)
+  nrow(Train_ID_all_trim)
+  
+  Train_out <- Train_ID_all_trim %>% select(-c(1))
+  
+  return(Train_out)
+}
+
 
 #' GET_SUBGROUP_ID
 #' 
@@ -120,15 +184,6 @@ ANA_SUBGROUP <- function(subgroup){
   subgroup$smrw <- ifelse(subgroup$W==1, 1, (subgroup$ps)/(1-subgroup$ps))
   ####################################################################################
 
-  #' DLT_Y
-  #' 
-  #' Function that calcualts observed treatment effect size, leave this function HERE!!!
-  #' @param subdataset the database (subgroup) in a list of stratified population accroding to subgroup decision
-  #' @param Wt weight 
-  #' 
-  #' @return The ATE (IPTW), ATT (SMR), and crude treatment effect (i.e., Delta Y) 
-  #' 
-  #' @export
   
   DLT_Y <- function(subdataset, Wt){
     

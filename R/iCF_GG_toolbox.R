@@ -38,16 +38,46 @@ GG_DepthDistribution <- function(D2_distribtion,D3_distribtion,D4_distribtion, D
 #' 
 #' @export
 
-PlotVI <- function(varimp_CF,title){
+PlotVI <- function(varimp_CF,title, var_label){
  # VI_label <- colnames(X)
-  plot(varimp_CF, main=paste0("Variable Importance for ", title),
-       xlab="Index", ylab="Variable importance value",
-  )
-  text(1:ncol(X), 
-       varimp_CF,
-       labels=#colnames(X)
-         colnames(X)
-  )
+  #plot(varimp_CF, main=paste0("", title), xlab="Index", ylab="Variable importance value")
+  #text(1:ncol(X), varimp_CF,labels=colnames(X))
+  
+  varimp_cf_df <- as.data.frame( cbind( as.vector(varimp_cf), as.vector( var_label) ) ) %>% 
+    dplyr::rename(impValue=V1, vars_f=V2) %>%
+    dplyr::mutate(impValue=as.character(impValue),
+                  vars_f=as.character(vars_f)) %>%
+    dplyr::mutate(impValue=as.numeric(impValue),
+                  codetype=substr(vars_f, 1, 6)) %>%
+    dplyr::arrange(desc(impValue)) %>%
+    rownames_to_column(var = "RowName")
+  
+  
+  VarImp <- ggplot2::ggplot(varimp_cf_df, aes(x=vars_f, y=impValue#,  color = codetype
+                                              )) +
+    geom_point(shape=1) + 
+    geom_text(label=varimp_cf_df$vars_f)+
+    ggplot2::labs(
+      title = title,
+      x = 'Index',
+      y= "Variable importance Value"
+    ) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.line = element_line(colour = "black"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          axis.title.x  = element_text(color = "black", size=14, face="plain",  hjust=0.5),
+          axis.title.y  = element_text(color = "black", size=14, face="plain",  hjust=0.5),
+          plot.caption  = element_text(color = "black", size=12, face="plain"),
+          #axis.text.x   = element_text(color = "black", size=11, face="plain", angle = 0),
+          axis.text.y   = element_text(color = "black", size=11, face="plain", angle = 0),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank()
+          )
+  return(VarImp)
+  
 }
 
 #' GG_VI
@@ -60,7 +90,6 @@ PlotVI <- function(varimp_CF,title){
 #' @return the variable importance plot
 #' 
 #' @export
-
 
 GG_VI <- function(varimp_cf, title, var_label){
   #VI_label <- colnames(X)
@@ -80,7 +109,8 @@ GG_VI <- function(varimp_cf, title, var_label){
     ggplot2::labs(
       title = title,
       x = 'Importance Value',
-      y= "Variables") +
+      y= "Variables"
+     ) +
     ggplot2::theme(plot.title    = element_text(color = "black", size=18, face="bold", #hjust = 0.5, 
                                        vjust=5, margin =ggplot2:: margin(0.5, 0, 0, 0, "cm")),
           plot.subtitle = element_text(color = "black", size=16, face="bold" ),
@@ -440,3 +470,83 @@ GG_CV_Dx_YstarNo0 <- function(result, K){
 }
 
 
+
+#' GG_CV_stab_vote
+#' 
+#' Function that shows stability figure of voting across CV
+#' @param iCFoutput iCF output
+#'  
+#' @return the figure
+#' 
+#' @export
+
+GG_CV_stab_vote <- function(iCFoutput){
+StabilityVoteCV <- iCFoutput$stability_vote_across_CV
+
+StabilityVoteCV2 <- StabilityVoteCV %>%
+  dplyr::mutate(CVfold= rownames(StabilityVoteCV))%>%
+  #dplyr::select(-p.adjust) %>% 
+  `rownames<-`( NULL )
+
+long <- melt(setDT(StabilityVoteCV2 ), id.vars = c("CVfold"), variable.name = "D") %>% 
+  as.data.frame()
+long$value = unlist(long$value, use.names=FALSE)
+
+
+stab_fig <- ggplot(long , ggplot2::aes(CVfold, D)) +
+  geom_point(colour = "steelblue1", aes(size = value))+
+  ylab("Depth") + xlab("Cluster") +
+  guides(size = guide_legend(title = "Stability")) + 
+  scale_x_discrete(labels =c("CV fold 1", "CV fold 2", "CV fold 3", "CV fold 4", "CV fold 5"),
+                   c(), 
+                   limits=c()) +
+  scale_y_discrete(labels =c("D5", "D4", "D3", "D2"),
+                   limits=rev) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  theme(legend.position = "bottom"  ) +
+  scale_size(range = c(2,15)) +
+  ggplot2::theme(plot.title    = element_text(color = "black", size=18, face="bold", #hjust = 0.5, 
+                                              vjust=5, margin =ggplot2:: margin(0.5, 0, 0, 0, "cm")),
+                 plot.subtitle = element_text(color = "black", size=16, face="bold" ),
+                 axis.title.x  = element_text(color = "black", size=14, face="plain",  hjust=0.5),
+                 axis.title.y  = element_text(color = "black", size=14, face="plain",  hjust=0.5),
+                 plot.caption  = element_text(color = "black", size=12, face="plain"),
+                 axis.text.x   = element_text(color = "black", size=11, face="plain", angle = 0),
+                 axis.text.y   = element_text(color = "black", size=11, face="plain", angle = 0)) 
+
+  
+return(stab_fig)
+}
+
+#' GG_Xs
+#' 
+#' Function that shows selected features Sx
+#' @param pcttop top% from all variables
+#'  
+#' @return the figure
+#' 
+#' @export
+#' 
+GG_Xs <- function(pcttop){ 
+  
+  if (pcttop < 1) {
+    VI_heat_topN <- GG_VI(varimp_cf[which(varimp_cf > quantile(varimp_cf, pcttop) )], 
+                          paste0( 'Top ', (1-pcttop)*100,"% (",
+                                  paste0(
+                                    length(which(varimp_cf >= quantile(varimp_cf, pcttop) )),
+                                    ') HD variables')
+                          ),
+                          colnames( X[which(varimp_cf > quantile(varimp_cf, pcttop) )]) )
+    
+  } else if (pcttop>1) {
+    VI_heat_topN <- GG_VI(varimp_cf[which(varimp_cf > min(  (sort(varimp_cf, decreasing = TRUE))[1:pcttop]  )  )], 
+                          paste0( 'Top ', 
+                                  paste0(
+                                    length(which( varimp_cf >= min(  (sort(varimp_cf, decreasing = TRUE))[1:pcttop]  ) )),
+                                    ' HD variables')
+                          ),
+                          colnames( X[which( varimp_cf >= min(  (sort(varimp_cf, decreasing = TRUE))[1:pcttop]  ) )])
+    )
+  }
+  return(VI_heat_topN)  
+}
