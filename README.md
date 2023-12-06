@@ -146,7 +146,7 @@ Make a dataset in this format to be run by iCF: the 1st column is treatment **W*
  X <- Train[,vars_forest]
  Y <- as.vector( as.numeric( Train[,"Y"] ) )
  W <- as.vector( as.numeric( Train[,"W"] ) )
- cf_raw_key.tr <- CF_RAW_key(Train, 1, "non-hd", hdpct=0.90) 
+ cf_raw_key.tr <- CF_RAW_key(Train, 1, "non-hd", hdPctTop=0.90) 
  Y.hat  <<- cf_raw_key.tr$Y.hat                 
  W.hat  <<- cf_raw_key.tr$W.hat                 
  HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw    
@@ -210,7 +210,7 @@ leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denomi
 
 iCFCV_B1000_i200_sim <- iCFCV(dat=Train, K=5, treeNo=200, iterationNo=10, min.split.var=4,
                               split_val_round_posi=0, P_threshold=0.5, variable_type = "non-HD", 
-                              hdpct= 0.95, HTE_P_cf.raw = HTE_P_cf.raw) 
+                              hdPctTop= 0.95, HTE_P_cf.raw = HTE_P_cf.raw) 
 
 iCFCV_B1000_i200_sim$selectedSG_ori #subgroup decision
 ```
@@ -267,7 +267,7 @@ X <<- Train[,vars_forest]
 Y <<- as.vector( as.numeric( Train[,"Y"] ) )
 W <<- as.vector( as.numeric( Train[,"W"] ) )
 
-cf_raw_key.tr <- CF_RAW_key(Train, min.split.var=4, variable_type="non-hd", hdpct=0.95)    
+cf_raw_key.tr <- CF_RAW_key(Train, min.split.var=4, variable_type="non-hd", hdPctTop=0.95)    
 Y.hat  <<- cf_raw_key.tr$Y.hat
 W.hat  <<- cf_raw_key.tr$W.hat
 HTE_P_cf.raw <<- cf_raw_key.tr$HTE_P_cf.raw
@@ -321,7 +321,7 @@ leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denomi
 
 iCFCV_B1000_i100_rwd <- iCFCV(dat=Train,K=5, treeNo=1000, iterationNo=100, min.split.var=4,
                               split_val_round_posi=0, P_threshold=0.5, variable_type = "non-HD", 
-                              hdpct= 0.95, HTE_P_cf.raw = HTE_P_cf.raw)
+                              hdPctTop= 0.95, HTE_P_cf.raw = HTE_P_cf.raw)
 
 iCFCV_B1000_i100_rwd$selectedSG_ori #subgroup decision
 ```
