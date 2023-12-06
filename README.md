@@ -136,7 +136,7 @@ We used a simulation setup similar to the one initially described by [Setoguchi 
 ```
 Make a dataset in this format to be run by iCF: the 1st column is outcome **Y**, 2nd column is treatment **W**, and remaining columns features **X**.
 ```{}
- Train <<- as.data.frame(cbind(W, Y, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
+ Train <<- as.data.frame(cbind(Y, W, X1, X2, X3 ,X4, X5, X6, X7, X8, X9, X10)) 
 ``` 
 **4. Run iCF on simulated data**
 
