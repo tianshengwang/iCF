@@ -300,7 +300,8 @@ GG_CV_Dx_iptw <- function(result, K){
 #' 
 #' Function that shows transformed outcome distribution
 #' @param dat dataset
-#' @param IPTW IPTW
+#' @param Y_star Y_star value
+#' @param No0 if non-zero
 #'  
 #' @return the PS distribution
 #' 
