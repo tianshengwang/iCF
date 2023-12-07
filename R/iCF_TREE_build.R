@@ -319,8 +319,8 @@ CF_RAW_key <- function(Train_cf, min.split.var, variable_type, hdPctTop){
   #step 1. get W.hat, Y.hat based on X
   #------------------------------------------------------------------------
   X <- Train_cf[,vars_forest]
-  Y <- as.vector( as.numeric( Train_cf[,1] ) )
-  W <- as.vector( as.numeric( Train_cf[,2] ) )  
+  Y <- as.vector( as.numeric( Train_cf[,"Y"] ) )
+  W <- as.vector( as.numeric( Train_cf[,"W"] ) )  
 
   W.forest <- grf::regression_forest(X, W)
   W.hat    <- predict(W.forest)$predictions
