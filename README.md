@@ -1,6 +1,6 @@
 # Iterative Causal Forest (iCF): A Novel Algorithm for Subgroup Identification 
 
-© 2019 Tiansheng Wang. This work is openly licensed via [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)
+© 2024 Tiansheng Wang. This work is openly licensed via [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)
 
 **Citation**
 
