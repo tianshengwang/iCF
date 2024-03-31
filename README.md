@@ -214,24 +214,11 @@ iCFCV_B1000_i200_sim <- iCFCV(dat=Train, K=5, treeNo=200, iterationNo=10, min.sp
                               split_val_round_posi=0, P_threshold=0.5, variable_type = "non-HD", 
                               hdPctTop= 0.95, HTE_P_cf.raw = HTE_P_cf.raw) 
 
-iCFCV_B1000_i200_sim$selectedSG_ori #subgroup decision
+#view subgroup decision
+iCFCV_B1000_i200_sim$selectedSG_ori
+#view CATE
+iCFCV_B1000_i200_sim$CATE_t2_ori
 ```
-subgroup decision and subgroup-specific treatment effect (CATE)
-```{}
-Table2 <- (iCFCV_B1000_i200_sim$CATE_t2_ori %>% as.data.frame()) [,c("SubgroupID", "Definition",  "CATE_crude", "CATE_iptw")]
-T2 <- Table2[!duplicated(Table2), ]
-rownames(T2) <- NULL
-T2
-```
-Save T2 as an image
-```{}
-library(kableExtra)
-library(magrittr)
-webshot::install_phantomjs()
-kable(T2) %>% kable_styling() %>% save_kable(file = "table2_sim.png")
-```
-<img src = images/table2_sim.png width=1000>
-
 **5. Run iCF on real-world data**
 
 We compared the **two-year risk difference** of hospitalized heart failure (HHF) of initiating any sodium-glucose cotransporter-2 inhibitors (SGLT2i) versus glucagon-like peptide-1 receptor agonists (GLP1RA) using a 20% random sample of all fee-for-service U.S. Medicare beneficiaries who had parts A (inpatient), B (outpatient physician services), and D (dispensed prescription drugs) coverage for at least one month from January 2012 to December 2017. The details of the cohort were described previously by [Htoo et al.](https://www.ahajournals.org/doi/full/10.1161/JAHA.121.022376) and are available in the mehtod paper (Wang et al.) 
@@ -325,7 +312,8 @@ iCFCV_B1000_i100_rwd <- iCFCV(dat=Train,K=5, treeNo=1000, iterationNo=100, min.s
                               split_val_round_posi=0, P_threshold=0.5, variable_type = "non-HD", 
                               hdPctTop= 0.95, HTE_P_cf.raw = HTE_P_cf.raw)
 
-iCFCV_B1000_i100_rwd$selectedSG_ori #subgroup decision
+#view subgroup decision
+iCFCV_B1000_i100_rwd$selectedSG_ori 
 ```
 
 If you have further questions or comments, please contact Dr. Tiansheng Wang: tianwang@unc.edu
