@@ -34,7 +34,7 @@ PS_trim <- function(dat, W_hat, trimmethod, trimPct){
   
   Train_ID_W_notrim <- dat  %>%  
     dplyr::mutate(W.hat=W_hat) %>% 
-    dplyr::select(1, W.hat, W) 
+    dplyr::select(1, IndexDate, W.hat, W) 
   
   ps_summary <- Train_ID_W_notrim %>%
     group_by(W) %>%
@@ -58,11 +58,11 @@ PS_trim <- function(dat, W_hat, trimmethod, trimPct){
   treated_summary   <- ps_summary %>% filter(W == 1)
   untreated_summary <- ps_summary %>% filter(W == 0)
   
-  #Asymmetrical TRIMMING
+  #TRIMMING
   if (trimmethod=="commonrange"){
     Train_ID_W <- Train_ID_W_notrim %>% 
-      dplyr::filter( max( treated_summary[[paste0("p",0)]], untreated_summary[[paste0("p",0)]]  ) <= W.hat, 
-                     W.hat <= min(treated_summary[[paste0("p",100)]], untreated_summary[[paste0("p",100)]]) )
+      dplyr::filter(treated_summary[[paste0("p",0)]] <= W.hat, 
+                     W.hat <= untreated_summary[[paste0("p",100)]]  )
     
   } else if (trimmethod=="asymmetrical") {
     Train_ID_W <- Train_ID_W_notrim %>% 
@@ -73,13 +73,22 @@ PS_trim <- function(dat, W_hat, trimmethod, trimPct){
   #------------------------ 
   #Trimmed NEW dataset
   #------------------------ 
-  Train_ID_all_trim <- dplyr::inner_join(dat, dplyr::select(Train_ID_W, c(1)), by = colnames(Train_ID_W_notrim)[1] ) #
-  nrow(dat)
-  nrow(Train_ID_all_trim)
+  dat_4innerj=cbind(dat, W.hat)
+  Train_ID_all_trim <- dplyr::inner_join(dat_4innerj, dplyr::select(Train_ID_W, c(1,3) ), by = c(colnames(dat)[1], "W.hat")  ) #
   
-  Train_out <- Train_ID_all_trim %>% select(-c(1))
+  #link wiht ID and IndexDate doesn't work (result in differnt N between Train_ID_W and Train_ID_all_trim) will figure out why
+  #Train_ID_all_trim <- dplyr::inner_join(dat, dplyr::select(Train_ID_W, c(1,2) ), by = c(colnames(dat)[1], colnames(dat)[2])  ) #
   
-  return(Train_out)
+  
+  nrow(dat) #input data
+  nrow(unique(dat[1]))
+  nrow(Train_ID_all_trim) #7863 only by ID (wrong), 7775 by both ID and W.hat 2/4/2024 Tian corrected this error!
+  nrow(Train_ID_W) #trimmed cohort
+  
+  Train_out <- Train_ID_all_trim %>% dplyr::select(-c(1, 2, ncol(Train_ID_all_trim)))
+  ID_postTrim <- Train_ID_all_trim %>% dplyr::select(1,2)
+  
+  return(list(Train_out, ID_postTrim) )
 }
 
 

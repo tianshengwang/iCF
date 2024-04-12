@@ -285,10 +285,10 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
     
     #the stability of final SG in the CV (if plurity vote applied in CV due to different SG, then this is for the voted SG in CV )
     #e.g. if 3 of 5 CV D2 SG are the same, then the stability is the mean of the 3 stability scores of the 3 D2 SG
-      stability_D2_vote <<- round(mean(unlist(stability_D2_T_r [c( cv_sg_majority_D2$selected_CV_idx) ] )), 3)
-      stability_D3_vote <<- round(mean(unlist(stability_D3_T_r [c( cv_sg_majority_D3$selected_CV_idx) ] )), 3)
-      stability_D4_vote <<- round(mean(unlist(stability_D4_T_r [c( cv_sg_majority_D4$selected_CV_idx) ] )), 3)
-      stability_D5_vote <<- round(mean(unlist(stability_D5_T_r [c( cv_sg_majority_D5$selected_CV_idx) ] )), 3)
+      stability_D2_vote <<- round(mean(c(unlist(stability_D2_T_r [c( cv_sg_majority_D2$selected_CV_idx) ] ))), 3)
+      stability_D3_vote <<- round(mean(c(unlist(stability_D3_T_r [c( cv_sg_majority_D3$selected_CV_idx) ] ))), 3)
+      stability_D4_vote <<- round(mean(c(unlist(stability_D4_T_r [c( cv_sg_majority_D4$selected_CV_idx) ] ))), 3)
+      stability_D5_vote <<- round(mean(c(unlist(stability_D5_T_r [c( cv_sg_majority_D5$selected_CV_idx) ] ))), 3)
       
       stability_D2345_vote = cbind(stability_D2_vote, stability_D3_vote, stability_D4_vote, stability_D5_vote) %>% as.data.frame() #%>% knitr::kable()
       

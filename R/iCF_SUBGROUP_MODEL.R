@@ -28,7 +28,8 @@ DATA4grpmodel <- function(V_D5_subgroup, V_D4_subgroup, V_D3_subgroup, V_D2_subg
                     G3        = Dat_ID_SG_D3$SubgroupID,
                     G3_define = as.factor(Dat_ID_SG_D3$Definition),
                     G2        = Dat_ID_SG_D2$SubgroupID,
-                    G2_define = as.factor(Dat_ID_SG_D2$Definition)) 
+                    G2_define = as.factor(Dat_ID_SG_D2$Definition)
+                    ) 
    
     formula_g2  <-  as.formula(  paste0("Y ~ W + G2 + W:G2 + ",                          paste0(colnames(X), collapse = " + ") )   )
     formula_g3  <-  as.formula(  paste0("Y ~ W + G3 + W:G3 + ",                          paste0(colnames(X), collapse = " + ") )   )
