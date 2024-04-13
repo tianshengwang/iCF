@@ -248,6 +248,22 @@ Train <-  hfp_2yr_all_sgltvglp %>%
                         mutate(sex=as.numeric(sex)) %>%
           dplyr::select_if(~ !any(is.na(.)))
 ```
+```{}
+# Note missing data will result in errors when running iCF/hdiCF like this:
+#-------------------------------------------------------
+# Error: Problem with `mutate()` column `G4`.
+# ℹ `G4 = Dat_ID_SG_D4$SubgroupID`.
+# ℹ `G4` must be size 11886 or 1, not 11888.
+#-------------------------------------------------------
+# Thus, first identify variables with missing with the following codes:
+list_vars_with_missing_data <- function(df) {
+  vars_with_missing <- sapply(df, function(x) anyNA(x))
+  names(df)[vars_with_missing]
+}
+vars_with_missing <- list_vars_with_missing_data(Train)
+print(vars_with_missing)
+```
+
 ***Step 1. Run raw causal forest to predict outcome (Y.hat), propensity score (W.hat), and select variables***
 
 ```{}
