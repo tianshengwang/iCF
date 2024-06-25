@@ -90,6 +90,7 @@ SG_PROBABILITY <- function( list1){
 }
 
 
+
 #' MAJORITY_VOTE
 #' 
 #' This function performs majority vote among best trees from iterative CF 
@@ -132,12 +133,6 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   N_occur_majority <- MAJORITY_COUNT(list1_u, list1)
   #get majority tree structure
   majority.tree <- list1_u[[which.max(N_occur_majority)]]
-  #get majority tree structure, same as above
-  majority.tree.1st <- list1_u[[  match(Rfast::nth(N_occur_majority, 1, descending = T), N_occur_majority  )]]
-  #get 2nd popular tree structure 
-  majority.tree.2nd <- list1_u[[   match(Rfast::nth(N_occur_majority, 2, descending = T), N_occur_majority  )]]
-  #get 3rd popular tree structure
-  majority.tree.3rd <- list1_u[[   match(Rfast::nth(N_occur_majority, 3, descending = T), N_occur_majority  )]]  
   #make truth a list (tree_true or tree_true_r)
   truth_list      <- list(truth)
   #get number of occurrence of truth in list1 (the prepared list of trees, tree relaxed, or subgroups)
@@ -298,8 +293,8 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   # devide dataframe into several dataframe by row and cobmine in a LIST
   #_______________________________________________
   stability     <- max(N_occur_majority)/sum(N_occur_majority)
-  stability.2nd <- Rfast::nth(N_occur_majority, 2, descending = T)/sum(N_occur_majority)
-  stability.3rd <- Rfast::nth(N_occur_majority, 3, descending = T)/sum(N_occur_majority)
+  #stability.2nd <- Rfast::nth(N_occur_majority, 2, descending = T)/sum(N_occur_majority)
+  #stability.3rd <- Rfast::nth(N_occur_majority, 3, descending = T)/sum(N_occur_majority)
   accuracy      <- N_occur_truth     /sum(N_occur_majority)
   accuracy_N1   <- N_occur_truth_N1  /sum(N_occur_majority)
   accuracy_N123 <- N_occur_truth_N123/sum(N_occur_majority)
@@ -308,16 +303,14 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   majority.list <- list(n_occurence          =N_occur_majority, 
                         max_occurence        =max_occurence, 
                         stability            =stability,  #=max/total
-                        stability.2nd        =stability.2nd,  #=2nd max/total
-                        stability.3rd        =stability.3rd,  #=3rd max/total
+                        #stability.2nd        =stability.2nd,  #=2nd max/total
+                        #stability.3rd        =stability.3rd,  #=3rd max/total
                         accuracy             =accuracy,  #=accurate/total
                         accuracy_N1          =accuracy_N1,  #=accurate/total
                         accuracy_N123        =accuracy_N123,  #=accurate/total
                         majority_EQ_true     =majority_EQ_true, 
                         majority_EQ_true_full=majority_EQ_true_full, 
                         majority             =majority.tree, 
-                        majority.2nd         =majority.tree.2nd, 
-                        majority.3rd         =majority.tree.3rd, 
                         majority.syn         =as.data.frame(majority.syn0),
                         truth                =truth,
                         avg_leaf             =avg_leaf, 
