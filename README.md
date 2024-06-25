@@ -36,6 +36,7 @@ library(Rfast)
 library(ggplot2)
 library(ggridges)
 library(glmnet)
+library(DiagrammeR)
 ```
 **2. Installation**
 
