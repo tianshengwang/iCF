@@ -217,7 +217,7 @@ iCFCV_B1000_i200_sim <- iCFCV(dat=Train, K=5, treeNo=200, iterationNo=10, min.sp
 #view subgroup decision
 iCFCV_B1000_i200_sim$selectedSG_ori
 #view CATE
-iCFCV_B1000_i200_sim$CATE_t2_ori
+iCFCV_B1000_i200_sim$CATE_t2_ori %>% select(SubgroupID, Definition, CATE_iptw) %>% distinct()
 ```
 **5. Run iCF on real-world data**
 
