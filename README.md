@@ -180,7 +180,7 @@ D2_MLS$depth_gg
 ```
 <img src = images/D2_MLS_tune.png width=400>
 
-Notably, if you got this message "_Error: Can't subset columns that don't exist. x Column `parent_sign` doesn't exist._", it suggests the denominator used for developing is too small, leading to a too large MLS for D2 forest so that the tree does not even split (the node does not have a parent node). In this scenario, increasing the denominator will solve the problem.
+Notably, if you got this message ***"_Error: Can't subset columns that don't exist. x Column `parent_sign` doesn't exist._"***, it suggests the denominator used for developing is too small, leading to a too large MLS for D2 forest so that the tree does not even split (the node does not have a parent node). In this scenario, increasing the denominator will solve the problem.
 
 
 ```{}
