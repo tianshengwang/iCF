@@ -159,7 +159,7 @@ Make a dataset in this format to be run by iCF: the 1st column is outcome **Y**,
  ```
  <img src = images/GG_VI_fig.png width=400>
  
- ***Step 2: Tune the minimum leaf size (MLS) for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
+ ***Step 2: Tune the minimum-leaf-size (MLS) for D2, D3, D4, and D5 to ensure that the majority of the best trees from causal forests grown with these MLS have depths of 2, 3, 4, and 5, respectively.***
  ```{}
 #Specify the decimal position for continuous variables in the subgroup definition.
 split_val_round_posi=0
@@ -168,7 +168,7 @@ vars_catover2 <<- find_level_over2(X)
 ```
 
 ```{}
-#Be cautious: a diminutive denominator can result in an excessively large min.node.size (calculated as sample size divided by the denominator).
+#Be cautious: a very small denominator can result in an excessively large min.node.size (calculated as sample size divided by the denominator).
 #This may prevent iCF from splitting and subsequently trigger an error. For illustration, consider using a denominator of 10：
 D2_MLS=MinLeafSizeTune(Train, denominator=10, treeNo = 200, iterationNo=25, split_val_round_posi=0, "D2", "steelblue1")
 ```
