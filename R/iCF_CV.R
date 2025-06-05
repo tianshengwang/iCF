@@ -146,7 +146,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       iptw_u_summary[[f]] <- summary( iptw_u[[f]] )
       IPTW_distribution[[f]] <-  GG_PS(Train_cf, iptw_u[[f]], "Inverse Probabilty Treatment Weight", "iptw_trainCV")
       
-      #transfomred outcome
+      #transformed outcome
       Y_star[[f]]  <- ifelse(cf_raw_key[[f]]$W==1, cf_raw_key[[f]]$Y/W.hat_train[[f]], -cf_raw_key[[f]]$Y/(1-W.hat_train[[f]]))
       Y_star_summary[[f]]      <- summary( Y_star[[f]] )
       Y_star_distribution[[f]] <- GG_Y_star(Train_cf, Y_star[[f]], F)
