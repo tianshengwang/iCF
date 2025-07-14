@@ -314,6 +314,7 @@ regression_forest_4PS <- function(dat){
  
 
 CF_RAW_key <- function(Train_cf, min.split.var, variable_type, hdPctTop){
+  set.seed(1234)
   s_rawCF =  Sys.time()
   #------------------------------------------------------------------------
   #step 1. get W.hat, Y.hat based on X
