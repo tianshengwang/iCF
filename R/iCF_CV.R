@@ -228,10 +228,7 @@ iCFCV <- function(dat, K, treeNo, iterationNo, min.split.var, split_val_round_po
       
       
       #========================================
-        Ncol_g2345= ncol(test_data.tran[[f]] %>% dplyr::select((contains( c("G5", "G4", "G3", "G2") ) ) ) %>%
-                                                dplyr::select(starts_with("G")) %>% #when hdiCF, some variable (code) names include "G5-2", e.g. dx3_outpt_G47
-                                                dplyr::select(ends_with(c("5", "4", "3", "2") ))
-                                               )
+        Ncol_g2345= ncol(test_data.tran[[f]] %>% dplyr::select(dplyr::any_of(c("G2", "G3", "G4", "G5"))) )
         
   #GET PREDICTED VALUES FROM DIFFERENT MODELS      
           
