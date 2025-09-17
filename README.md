@@ -1,7 +1,5 @@
 # Iterative Causal Forest (iCF): A Novel Algorithm for Subgroup Identification 
 
-© 2024 Tiansheng Wang. This work is openly licensed via [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)
-
 **Citation**
 
 **Wang T, Keil AP, Kim S, Wyss R, Htoo PT, Funk MJ, Buse JB, Kosorok MR, Stürmer T. Iterative Causal Forest: A Novel Algorithm for Subgroup Identification. _Am J Epidemiol._ 2024 May 7;193(5):764-776 https://doi.org/10.1093/aje/kwad219.**
@@ -334,4 +332,4 @@ iCFCV_B1000_i100_rwd$selectedSG_ori
 **Empirical Studies Implementing iCF:**
 Wang T, Keil AP, Buse JB, Keet C, Kim S, Wyss R, Pate V, Jonsson-Funk M, Pratley RE, Kvist K, Kosorok MR, Stürmer T. Glucagon-like Peptide 1 Receptor Agonists and Asthma Exacerbations: Which Patients Benefit Most? Ann Am Thorac Soc. 2024 Jul 16. [doi: 10.1513/AnnalsATS.202309-836OC](https://pubmed.ncbi.nlm.nih.gov/39012183/)
 
-If you have further questions or comments, please contact Dr. Tiansheng Wang: tianwang@unc.edu
+If you have further questions or comments, please contact Dr. Tiansheng Wang: tianwang@uh.edu
