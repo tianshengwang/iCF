@@ -16,9 +16,17 @@ The iCF algorithm (based on [causal forest](https://grf-labs.github.io/grf/artic
 
 **1. R packages recommended**
 ```{r packages, include=FALSE}
-invisible(lapply(c( "MASS","grf","tidyverse","rlang","rlist","plyr","caret","caTools", "randomForest","data.table",
-                    "grid","broom","rstatix","knitr","ggplot2", "ggridges","glmnet","DiagrammeR","pROC"),
-                    library, character.only = TRUE))
+# List of packages to install
+packages_to_install <- c("MASS", "grf", "tidyverse", "rlang", "rlist", "plyr", "caret", "caTools", "listdtr", "randomForest", "ggplot2",
+                         "ggridges", "data.table", "grid", "cobalt", "broom", "optmatch", "rstatix", "ggpubr", "DMwR", "knitr", "DiagrammeR")
+
+#install.packages(packages_to_install)
+
+# Load the packages into the R session
+lapply(packages_to_install, library, character.only = TRUE)
+
+# Additional command to set a specific theme in ggplot2
+theme_set(theme_ridges())
 ```
 **2. Installation**
 
