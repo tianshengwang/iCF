@@ -201,7 +201,7 @@ D5_MLS$depth_gg
 leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denominator, D2=D2_MLS$denominator)
 
 iCFCV_B1000_i200_sim <- iCFCV(dat=Train, K=5, treeNo=200, iterationNo=10, min.split.var=4,
-                              split_val_round_posi=0, P_threshold=0.5, variable_type = "non-HD", 
+                              split_val_round_posi=0, P_threshold=1, variable_type = "non-HD", 
                               hdPctTop= 0.95, HTE_P_cf.raw = HTE_P_cf.raw) 
 
 #view subgroup decision
@@ -316,7 +316,7 @@ D5_MLS$depth_gg
 leafsize <<- list(D5=D5_MLS$denominator, D4=D4_MLS$denominator, D3=D3_MLS$denominator, D2=D2_MLS$denominator)
 
 iCFCV_B1000_i100_rwd <- iCFCV(dat=Train,K=5, treeNo=1000, iterationNo=100, min.split.var=4,
-                              split_val_round_posi=0, P_threshold=0.5, variable_type = "non-HD", 
+                              split_val_round_posi=0, P_threshold=1, variable_type = "non-HD", 
                               hdPctTop= 0.95, HTE_P_cf.raw = HTE_P_cf.raw)
 
 #view subgroup decision
