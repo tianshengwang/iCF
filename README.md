@@ -326,6 +326,6 @@ iCFCV_B1000_i100_rwd$selectedSG_ori
 
 Wang T, Keil AP, Buse JB, Keet C, Kim S, Wyss R, Pate V, Jonsson-Funk M, Pratley RE, Kvist K, Kosorok MR, Stürmer T. Glucagon-like Peptide 1 Receptor Agonists and Asthma Exacerbations: Which Patients Benefit Most? Ann Am Thorac Soc. 2024 Jul 16. [DOI: 10.1513/AnnalsATS.202309-836OC](https://pubmed.ncbi.nlm.nih.gov/39012183/)
 
-Lai Y, Her QL, Zhang Y, Xu H, Kucharska-Newton AM, Ji D, Wu G, Garden Stürmer T, Wang T*, Xu Y*. The heterogeneous treatment effects of statins on dementia: a target trial emulation with causal machine learning using integrated genetic and real-world data. Alzheimer's & Dementia. 2026 Feb 27. [DOI: 10.1002/alz.71178](https://alz-journals.onlinelibrary.wiley.com/doi/epdf/10.1002/alz.71178)
+Lai Y, Her QL, Zhang Y, Xu H, Kucharska-Newton AM, Ji D, Wu G, Garden Stürmer T, Wang T*, Xu Y*. The heterogeneous treatment effects of statins on dementia: a target trial emulation with causal machine learning using integrated genetic and real-world data. Alzheimer's & Dementia. 2026;22:e71178. [DOI: 10.1002/alz.71178](https://alz-journals.onlinelibrary.wiley.com/doi/epdf/10.1002/alz.71178)
 
 If you have further questions or comments, please contact Dr. Tiansheng Wang: tianwang@uh.edu
