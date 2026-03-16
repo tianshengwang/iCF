@@ -322,7 +322,7 @@ iCFCV_B1000_i100_rwd <- iCFCV(dat=Train,K=5, treeNo=1000, iterationNo=100, min.s
 #view subgroup decision
 iCFCV_B1000_i100_rwd$selectedSG_ori 
 ```
-**Empirical Studies Implementing iCF:**
+**Empirical Studies Implementing iCF in real-world data:**
 
 Wang T, Keil AP, Buse JB, Keet C, Kim S, Wyss R, Pate V, Jonsson-Funk M, Pratley RE, Kvist K, Kosorok MR, Stürmer T. Glucagon-like Peptide 1 Receptor Agonists and Asthma Exacerbations: Which Patients Benefit Most? Ann Am Thorac Soc. 2024 Jul 16. [DOI: 10.1513/AnnalsATS.202309-836OC](https://pubmed.ncbi.nlm.nih.gov/39012183/)
 
