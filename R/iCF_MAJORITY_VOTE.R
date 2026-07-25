@@ -120,7 +120,7 @@ MAJORITY_VOTE <- function(list0, #original list of trees
   #STEP1: compared to the prepared list, i.e., list1, to get majority
   #----------------------------------------------------------------------------		  
   
-  #first things first: get ncol to automatically distinguish among tree(nclol=6), tree_r(ncol=5, i.e., without "spliting value"), or subgroup (ncol=2) input
+  #first things first: get ncol to automatically distinguish among tree(nclol=6), tree_r(ncol=5, "r" stands for "relax", which means without "spliting value"), or subgroup (ncol=2) input
   ncol_list1 <- lapply(list1, function(df) ncol(df))
   #round the mean value of columns
   mean_ncol_list1 <- round( mean(unlist(ncol_list1)) )
